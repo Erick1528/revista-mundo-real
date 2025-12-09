@@ -1,0 +1,91 @@
+<footer class="border-t border-gray-lighter">
+
+    <div class="max-w-[1200px] w-full mx-auto px-4 py-12">
+        <div class=" grid md:grid-cols-4 gap-8 mb-8">
+
+            <div class=" max-w-[268px] w-auto">
+                <h2 class=" text-primary font-serif text-2xl mb-4">Revista Mundo Real</h2>
+                <p class=" text-sm font-opensans text-gray-light">Explorando el mundo real a través de historias
+                    auténticas y
+                    perspectivas únicas.</p>
+            </div>
+
+            <div class="">
+                <h3 class=" font-montserrat text-sm text-primary uppercase mb-4 font-semibold">Secciones</h3>
+                <ul class=" text-sm text-gray-light font-montserrat flex flex-col gap-y-2">
+
+                    <li>
+                        <a href="#" class="hover:text-primary">Destinos</a>
+                    </li>
+
+                    <li>
+                        <a href="#" class="hover:text-primary">Historias que Inspiran</a>
+                    </li>
+
+                    <li>
+                        <a href="#" class="hover:text-primary">Eventos Sociales</a>
+                    </li>
+
+                    <li>
+                        <a href="#" class="hover:text-primary">Salud y Bienestar</a>
+                    </li>
+
+                    <li>
+                        <a href="#" class="hover:text-primary">Gastronomía</a>
+                    </li>
+
+                    <li>
+                        <a href="#" class="hover:text-primary">Cultura Viva</a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="">
+                <h3 class=" font-montserrat text-sm text-primary uppercase mb-4 font-semibold">Información</h3>
+                <ul class=" text-sm text-gray-light font-montserrat flex flex-col gap-y-2">
+
+                    <li>
+                        <a href="#" class="hover:text-primary">Sobre Nosotros</a>
+                    </li>
+
+                    <li>
+                        <a href="#" class="hover:text-primary">Contacto</a>
+                    </li>
+
+                    <li>
+                        <a href="#" class="hover:text-primary">Publicidad</a>
+                    </li>
+
+                    <li>
+                        <a href="#" class="hover:text-primary">Política de Privacidad</a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="">
+                <h3 class=" font-montserrat text-sm text-primary uppercase mb-4 font-semibold">Síguenos</h3>
+                <div class=" flex gap-3">
+
+                    <a href="#" class=" border border-primary h-9 w-9">
+                        <img src="" alt="">
+                    </a>
+                    
+                    <a href="#" class=" border border-primary h-9 w-9">
+                        <img src="" alt="">
+                    </a>
+
+                    <a href="#" class=" border border-primary h-9 w-9">
+                        <img src="" alt="">
+                    </a>
+
+                </div>
+            </div>
+        </div>
+
+        {{-- Divisor --}}
+        <div class=" bg-gray-lighter w-full h-px"></div>
+
+        <p class=" pt-8 text-center text-sm font-montserrat text-gray-light">&copy; 2025 Revista Mundo Real. Todos los derechos reservados.</p>
+    </div>
+
+</footer>
