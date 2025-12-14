@@ -1,4 +1,4 @@
-<div class="max-w-[1200px] mx-auto mt-16 pt-0 pb-12 px-4">
+<div class="max-w-[1200px] mx-auto my-16 pt-0 px-4">
 
     <div class=" flex flex-col sm:grid sm:grid-cols-3 gap-8">
 
