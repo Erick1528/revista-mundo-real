@@ -1,4 +1,4 @@
-<div class=" max-w-[1200px] mx-auto py-12 px-4">
+<div class=" max-w-[1200px] mx-auto pt-12 pb-0 px-4">
 
     {{-- sm:grid-cols-1 sm:grid-rows-2 md:grid-rows-1 -> esto era inecesario --}}
     <div class=" h-fit flex flex-col md:grid  md:grid-cols-2 gap-8">
@@ -7,7 +7,7 @@
         <a href="#" class=" group cursor-pointer h-fit">
             <div class="w-full mb-4 overflow-hidden">
                 <img src="{{ asset('build/assets/C11.jpeg') }}" alt=""
-                    class="w-full h-auto md:max-h-[396px] md:h-full object-cover group-hover:scale-105 transition-all duration-200">
+                    class="w-full h-auto max-h-[456px] md:max-h-[396px] md:h-full object-cover group-hover:scale-105 transition-all duration-200">
             </div>
 
             <div class=" space-y-3">
@@ -30,7 +30,7 @@
 
                 <div class="w-32 h-32 overflow-hidden shrink-0">
                     <img src="{{ asset('build/assets/costabrava.webp') }}" alt=""
-                        class="w-full h-full object-cover group-hover:scale-105 transition-all duration-200">
+                        class="w-full h-full object-cover group-hover:scale-105 transition-all duration-200 aspect-square">
                 </div>
 
                 <div class=" space-y-2">
@@ -48,7 +48,7 @@
 
                 <div class="w-32 h-32 overflow-hidden shrink-0">
                     <img src="{{ asset('build/assets/newyork.webp') }}" alt=""
-                        class="w-full h-full object-cover group-hover:scale-105 transition-all duration-200">
+                        class="w-full h-full object-cover group-hover:scale-105 transition-all duration-200 aspect-square">
                 </div>
 
                 <div class=" space-y-2">
@@ -65,7 +65,7 @@
 
                 <div class="w-32 h-32 overflow-hidden shrink-0">
                     <img src="{{ asset('build/assets/yoga.webp') }}" alt=""
-                        class="w-full h-full object-cover group-hover:scale-105 transition-all duration-200">
+                        class="w-full h-full object-cover group-hover:scale-105 transition-all duration-200 aspect-square">
                 </div>
 
                 <div class=" space-y-2">
