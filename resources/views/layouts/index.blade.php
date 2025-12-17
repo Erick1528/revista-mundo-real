@@ -33,7 +33,7 @@
     <header>
         {{-- Componente de header y navegación --}}
         <livewire:nav-bar />
-        <livewire:hero />
+        @yield('hero')
     </header>
 
     <main class="bg-sage">
