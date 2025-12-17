@@ -1,4 +1,4 @@
-<nav class=" lg:px-8 lg:py-0 px-10">
+<nav class=" lg:px-8 lg:py-0 px-10 border-b border-gray-lighter">
 
     <div class="flex justify-between items-center max-w-[1200px] mx-auto h-[68px]">
         <button wire:click="toggleMenuState"
