@@ -2,8 +2,12 @@
 
 @section('title', 'Inicio')
 
+@section('hero')
+    <livewire:hero />
+@endsection
+
 @section('content')
-    
+
     {{-- Componente con los 4 primeros artículos --}}
     <livewire:main-articles />
 
