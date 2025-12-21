@@ -7,6 +7,8 @@ use Livewire\Component;
 class NavBar extends Component
 {
 
+    protected $listeners = ['openLoginModal' => 'toggleMenuState'];
+
     public $toggleMenu = false;
 
     public function toggleMenuState()

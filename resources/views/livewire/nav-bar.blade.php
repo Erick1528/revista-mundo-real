@@ -51,7 +51,8 @@
         {{-- Header del menu --}}
         <div class="flex justify-between items-center px-8 max-h-[68px] h-full border-b border-gray-lighter">
             <h2 class="text-lg font-montserrat text-primary">Menú</h2>
-            <button wire:click="toggleMenuState" class="text-black transition-all h-9 w-9 duration-200 hover:bg-red-light hover:text-white">
+            <button wire:click="toggleMenuState"
+                class="text-black transition-all h-9 w-9 duration-200 hover:bg-red-light hover:text-white">
                 <x-close-svg height="36px" width="36px" />
             </button>
         </div>
@@ -84,6 +85,10 @@
 
                 <li class="py-2 border-b border-gray-100">
                     <a href="#" class="hover:text-dark-sage transition-colors duration-200 block">Cultura Viva</a>
+                </li>
+
+                <li class="py-2 border-b border-gray-100">
+                    <button wire:click="$dispatch('openLoginModal')" class="hover:text-dark-sage transition-colors duration-200 block text-left w-full">Iniciar Sesión</button>
                 </li>
             </ul>
         </div>
