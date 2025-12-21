@@ -45,6 +45,9 @@
     {{-- Componente de footer --}}
     <livewire:footer />
 
+    {{-- Modal de Login --}}
+    <livewire:login />
+
     {{-- Scripts --}}
     @livewireScripts
     @stack('scripts')
