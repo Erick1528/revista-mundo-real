@@ -17,13 +17,30 @@
 
                 {{-- Formulario --}}
                 <form class="space-y-6">
+                    {{-- Mensaje de error general --}}
+                    @if (session()->has('error'))
+                        <div
+                            class="bg-red-light bg-opacity-20 border border-red-light uppercase text-white text-center font-medium px-4 py-3 text-xs font-montserrat">
+                            {{ session('error') }}
+                        </div>
+                    @endif
+                    {{-- Mensaje de éxito --}}
+                    @if (session()->has('success'))
+                        <div
+                            class="bg-green-light bg-opacity-20 border border-green-light uppercase text-white text-center font-medium px-4 py-3 text-xs font-montserrat">
+                            {{ session('success') }}
+                        </div>
+                    @endif
                     {{-- Campo de email --}}
                     <div class="space-y-2">
                         <label for="email" class="block text-sm font-montserrat font-medium text-primary">
                             Correo electrónico
                         </label>
                         <input type="email" id="email" placeholder="tu@correo.com" wire:model="email"
-                            class="w-full px-4 py-3 border border-gray-300 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-dark-sage focus:border-transparent font-opensans text-sm">
+                            class="w-full px-4 py-3 border border-gray-300 bg-gray-50 focus:outline-none focus:border-dark-sage focus:shadow-[0_0_0_2px_rgba(183,182,153,0.5)] font-opensans text-sm @error('email') border-red-light @enderror">
+                        @error('email')
+                            <p class="text-red-light text-xs font-opensans">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     {{-- Campo de contraseña --}}
@@ -32,7 +49,10 @@
                             Contraseña
                         </label>
                         <input type="password" id="password" placeholder="••••••••" wire:model="password"
-                            class="w-full px-4 py-3 border border-gray-300 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-dark-sage focus:border-transparent font-opensans text-sm">
+                            class="w-full px-4 py-3 border border-gray-300 bg-gray-50 focus:outline-none focus:border-dark-sage focus:shadow-[0_0_0_2px_rgba(183,182,153,0.5)] font-opensans text-sm @error('password') border-red-light @enderror">
+                        @error('password')
+                            <p class="text-red-light text-xs font-opensans">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     {{-- Enlace olvidaste contraseña --}}
@@ -42,6 +62,7 @@
                             ¿Olvidaste tu contraseña?
                         </a>
                     </div>
+
 
                     {{-- Botón de envío --}}
                     <button wire:click.prevent="login" type="submit"
