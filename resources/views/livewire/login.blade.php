@@ -48,7 +48,7 @@
                         <label for="password" class="block text-sm font-montserrat font-medium text-primary">
                             Contraseña
                         </label>
-                        <input type="password" id="password" placeholder="••••••••" wire:model="password"
+                        <input type="password" id="password" placeholder="Ingresa tu contraseña" wire:model="password"
                             class="w-full px-4 py-3 border border-gray-300 bg-gray-50 focus:outline-none focus:border-dark-sage focus:shadow-[0_0_0_2px_rgba(183,182,153,0.5)] font-opensans text-sm @error('password') border-red-light @enderror">
                         @error('password')
                             <p class="text-red-light text-xs font-opensans">{{ $message }}</p>
