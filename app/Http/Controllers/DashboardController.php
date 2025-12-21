@@ -9,6 +9,7 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        // Reotornar a vista de dashboard (aún no creada)
         dd('Bienvenido al dashboard, ' . Auth::user()->name . '!');
     }
 }
