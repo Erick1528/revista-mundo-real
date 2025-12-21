@@ -88,7 +88,7 @@
                 </li>
 
                 <li class="py-2 border-b border-gray-100">
-                    <button wire:click="$dispatch('openLoginModal')" class="hover:text-dark-sage transition-colors text-left duration-200 block text-left w-full">Iniciar Sesión</button>
+                    <button wire:click="$dispatch('openLoginModal')" class="hover:text-dark-sage transition-colors duration-200 block text-left w-full">Iniciar Sesión</button>
                 </li>
             </ul>
         </div>
