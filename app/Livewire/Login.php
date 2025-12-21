@@ -37,6 +37,7 @@ class Login extends Component
         $rateLimiterKey = $this->email . '|' . request()->ip();
         if (RateLimiter::tooManyAttempts($rateLimiterKey, 5)) {
             session()->flash('error', 'Demasiados intentos fallidos. Inténtalo de nuevo más tarde.');
+            $this->password = ''; // Solo limpiar contraseña
             return;
         }
 
