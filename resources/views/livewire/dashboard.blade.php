@@ -4,7 +4,7 @@
 
     <div class=" flex flex-col md:grid md:grid-cols-3 gap-6">
 
-        <div
+        <a href="{{ route('articles.create') }}"
             class=" border border-dark-sage p-8 text-dark-sage md:max-w-[304px] w-full hover:bg-dark-sage/9 transition-all duration-200 cursor-pointer">
             <svg xmlns="http://www.w3.org/2000/svg" height="32px" width="32px" viewBox="0 0 24 24" stroke="#b7b699"
                 stroke-width="2" fill="none">
@@ -13,7 +13,7 @@
             </svg>
             <h4 class=" mt-4 mb-2 font-serif text-xl text-primary">Nuevo Artículo</h4>
             <p class=" text-gray-light text-sm">Crear una nueva publicación para la revista</p>
-        </div>
+        </a>
 
         <div
             class=" border border-dark-sage p-8 text-dark-sage md:max-w-[304px] w-full hover:bg-dark-sage/9 transition-all duration-200 cursor-pointer">
