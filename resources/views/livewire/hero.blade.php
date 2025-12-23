@@ -1,17 +1,35 @@
-<div
-    class=" py-8 @if (request()->is('dashboard')) max-w-[1200px] mx-auto px-5 sm:px-10 md:px-[120px] relative after:absolute after:bottom-0 after:left-0 after:right-0 after:w-screen after:h-px after:bg-gray-lighter after:ml-[calc(-50vw+50%)] @else border-b border-gray-lighter @endif ">
-    @if (request()->is('dashboard'))
-        <h1 class=" text-4xl sm:text-5xl font-serif text-left text-primary text-balance font-normal">Panel de
-            Administración</h1>
-        <p class=" text-[12px] sm:text-sm font-montserrat text-left mt-3 text-gray-light uppercase">
-            Bienvenido al panel editorial de Revista Mundo Real</p>
-    @else
-        <h1
-            class=" text-6xl sm:text-7xl font-serif text-center text-primary px-6 sm:px-10 lg:px-4 text-balance font-normal">
-            Revista Mundo Real</h1>
-        <p
-            class=" text-[12px] sm:text-sm font-montserrat text-center mt-3 text-gray-light uppercase px-4 sm:px-6 md:p-0">
-            Conectando Culturas · Inspirando Viajes · Celebrando Tradiciones</p>
-    @endif
+<div class="overflow-x-hidden">
+    <div
+        class=" py-8 @if (!request()->is('/')) max-w-[1200px] mx-auto px-5 sm:px-10 md:px-[120px] relative after:absolute after:bottom-0 after:left-[50%] after:-translate-x-[50%] after:w-screen after:h-px after:bg-gray-lighter @else border-b border-gray-lighter @endif ">
+        @if (request()->is('dashboard'))
+            <h1 class=" text-4xl sm:text-5xl font-serif text-left text-primary text-balance font-normal">Panel de
+                Administración</h1>
+            <p class=" text-[12px] sm:text-sm font-montserrat text-left mt-3 text-gray-light uppercase">
+                Bienvenido al panel editorial de Revista Mundo Real</p>
+        @elseif (request()->is('articles/create'))
+            <a href="javascript:history.back()"
+                class="inline-flex items-center gap-2 text-primary hover:text-dark-sage transition-colors mb-8">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                <p class=" text-sm font-montserrat">Volver al Dashboard</p>
+            </a>
 
+            <h1 class=" text-4xl sm:text-5xl font-serif text-left text-primary text-balance font-normal">Crear Nuevo
+                Artículo
+            </h1>
+            <p class=" text-[12px] sm:text-sm font-montserrat text-left mt-3 text-gray-light uppercase">Completa la
+                información para publicar un nuevo artículo</p>
+        @else
+            <h1
+                class=" text-6xl sm:text-7xl font-serif text-center text-primary px-6 sm:px-10 lg:px-4 text-balance font-normal">
+                Revista Mundo Real</h1>
+            <p
+                class=" text-[12px] sm:text-sm font-montserrat text-center mt-3 text-gray-light uppercase px-4 sm:px-6 md:p-0">
+                Conectando Culturas · Inspirando Viajes · Celebrando Tradiciones</p>
+        @endif
+
+    </div>
 </div>
