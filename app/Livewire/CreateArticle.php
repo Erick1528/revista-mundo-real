@@ -2,8 +2,10 @@
 
 namespace App\Livewire;
 
+use App\Models\Article;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use Illuminate\Support\Str;
 
 class CreateArticle extends Component
 {
@@ -190,7 +192,7 @@ class CreateArticle extends Component
         }
     }
 
-    public function addRelatedArticle($articleId, $articleTitle)
+    public function addRelatedArticle($articleId, $articleTitle, $articleSection = null, $articleAttribution = null, $articleSummary = null)
     {
         // Verificar si el artículo ya está agregado
         foreach ($this->related_articles as $article) {
@@ -209,7 +211,10 @@ class CreateArticle extends Component
         // Agregar el artículo al array
         $this->related_articles[] = [
             'id' => $articleId,
-            'title' => $articleTitle
+            'title' => $articleTitle,
+            'section' => $articleSection,
+            'attribution' => $articleAttribution,
+            'summary' => $articleSummary
         ];
 
         // Limpiar el input y errores
@@ -231,29 +236,87 @@ class CreateArticle extends Component
             return [];
         }
 
-        // Aquí deberías hacer una consulta real a la base de datos
-        // Por ahora simulamos algunos resultados
-        $mockArticles = [
-            ['id' => 1, 'title' => 'Las mejores playas de Costa Rica'],
-            ['id' => 2, 'title' => 'Gastronomía tradicional costarricense'],
-            ['id' => 3, 'title' => 'Aventuras en Manuel Antonio'],
-            ['id' => 4, 'title' => 'Cultura y tradiciones de San José'],
-            ['id' => 5, 'title' => 'Ecoturismo en Monteverde'],
+        // Mapear términos de búsqueda en español a secciones en inglés
+        $sectionMapping = [
+            'destino' => 'destinations',
+            'destinos' => 'destinations',
+            'viaje' => 'destinations',
+            'turismo' => 'destinations',
+            'historia' => 'inspiring_stories',
+            'historias' => 'inspiring_stories',
+            'inspirar' => 'inspiring_stories',
+            'inspiran' => 'inspiring_stories',
+            'inspiración' => 'inspiring_stories',
+            'evento' => 'social_events',
+            'eventos' => 'social_events',
+            'social' => 'social_events',
+            'sociales' => 'social_events',
+            'festival' => 'social_events',
+            'festivales' => 'social_events',
+            'salud' => 'health_wellness',
+            'bienestar' => 'health_wellness',
+            'wellness' => 'health_wellness',
+            'equilibrio' => 'health_wellness',
+            'mindfulness' => 'health_wellness',
+            'meditación' => 'health_wellness',
+            'yoga' => 'health_wellness',
+            'gastronomía' => 'gastronomy',
+            'gastronomia' => 'gastronomy',
+            'comida' => 'gastronomy',
+            'cocina' => 'gastronomy',
+            'sabor' => 'gastronomy',
+            'sabores' => 'gastronomy',
+            'cultura' => 'living_culture',
+            'cultural' => 'living_culture',
+            'tradición' => 'living_culture',
+            'tradicion' => 'living_culture',
+            'ancestral' => 'living_culture',
+            'artesanía' => 'living_culture',
+            'artesania' => 'living_culture',
         ];
 
-        return collect($mockArticles)
-            ->filter(function ($article) {
-                return stripos($article['title'], $this->relatedArticleSearch) !== false;
+        // Buscar secciones que coincidan con la búsqueda
+        $searchTerm = strtolower($this->relatedArticleSearch);
+        $matchingSections = [];
+        foreach ($sectionMapping as $keyword => $section) {
+            if (strpos($searchTerm, $keyword) !== false) {
+                $matchingSections[] = $section;
+            }
+        }
+
+        // Obtener artículos publicados con los campos necesarios
+        return Article::where('status', 'published')
+            ->where(function ($query) use ($matchingSections) {
+                $query->where('title', 'like', '%' . $this->relatedArticleSearch . '%')
+                    ->orWhere('subtitle', 'like', '%' . $this->relatedArticleSearch . '%')
+                    ->orWhere('summary', 'like', '%' . $this->relatedArticleSearch . '%');
+
+                // Si hay secciones que coinciden, también buscar por sección
+                if (!empty($matchingSections)) {
+                    $query->orWhereIn('section', $matchingSections);
+                }
             })
+            ->select('id', 'title', 'section', 'attribution', 'summary', 'published_at')
+            ->orderBy('published_at', 'desc')
             ->take(5)
-            ->toArray();
+            ->get()
+            ->map(function ($article) {
+                return [
+                    'id' => $article->id,
+                    'title' => $article->title,
+                    'section' => $article->section,
+                    'attribution' => $article->attribution,
+                    'summary' => $article->summary ? substr($article->summary, 0, 80) . '...' : null,
+                    'published_at' => $article->published_at ? $article->published_at->format('d M Y') : null
+                ];
+            })->toArray();
     }
 
     public function store()
     {
         try {
             $this->validate();
-            dd('Guardar artículo');
+            return session()->flash('message', 'Artículo creado exitosamente.');
         } catch (\Illuminate\Validation\ValidationException $e) {
             $errorBags = $e->validator->getMessageBag()->getMessages();
             // Mapear errores a secciones

@@ -192,9 +192,9 @@
                     </label>
                     <input type="text" id="tags" wire:model="tagInput" wire:keydown.enter.prevent="addTag"
                         placeholder="Escribe un tag y presiona Enter"
-                        class="w-full px-4 py-3 border @error('tagInput') border-red-500 @else border-gray-300 @enderror bg-gray-50 focus:outline-none focus:border-dark-sage focus:shadow-[0_0_0_2px_rgba(183,182,153,0.5)] font-opensans text-sm">
+                        class="w-full px-4 py-3 border @error('tags') border-red-500 @else border-gray-300 @enderror bg-gray-50 focus:outline-none focus:border-dark-sage focus:shadow-[0_0_0_2px_rgba(183,182,153,0.5)] font-opensans text-sm">
 
-                    @error('tagInput')
+                    @error('tags')
                         <p class="text-red-500 text-xs font-opensans">{{ $message }}</p>
                     @enderror
 
@@ -239,12 +239,55 @@
                         <!-- Sugerencias -->
                         @if (count($this->searchSuggestions) > 0)
                             <div
-                                class="absolute z-10 w-full mt-1 bg-white border border-gray-200 max-h-48 overflow-y-auto shadow-lg">
+                                class="absolute z-10 w-full mt-1 bg-white border border-gray-200 max-h-64 overflow-y-auto shadow-lg">
                                 @foreach ($this->searchSuggestions as $suggestion)
                                     <button type="button"
-                                        wire:click="addRelatedArticle({{ $suggestion['id'] }}, '{{ $suggestion['title'] }}')"
-                                        class="w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0 font-opensans text-sm">
-                                        {{ $suggestion['title'] }}
+                                        wire:click="addRelatedArticle({{ $suggestion['id'] }}, '{{ addslashes($suggestion['title']) }}', '{{ $suggestion['section'] }}', '{{ addslashes($suggestion['attribution']) }}', '{{ addslashes($suggestion['summary']) }}')"
+                                        class="w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0 transition-colors">
+                                        <div class="space-y-1">
+                                            <div class="font-opensans text-sm text-primary font-medium">
+                                                {{ $suggestion['title'] }}
+                                            </div>
+                                            <div class="flex items-center gap-2 text-xs text-gray-500">
+                                                @if($suggestion['section'])
+                                                    <span class="px-2 py-1 bg-sage text-primary text-xs font-medium">
+                                                        @switch($suggestion['section'])
+                                                            @case('destinations')
+                                                                Destinos
+                                                                @break
+                                                            @case('inspiring_stories')
+                                                                Historias que Inspiran
+                                                                @break
+                                                            @case('social_events')
+                                                                Eventos Sociales
+                                                                @break
+                                                            @case('health_wellness')
+                                                                Salud y Bienestar
+                                                                @break
+                                                            @case('gastronomy')
+                                                                Gastronomía
+                                                                @break
+                                                            @case('living_culture')
+                                                                Cultura Viva
+                                                                @break
+                                                            @default
+                                                                {{ $suggestion['section'] }}
+                                                        @endswitch
+                                                    </span>
+                                                @endif
+                                                @if($suggestion['attribution'])
+                                                    <span>Por {{ $suggestion['attribution'] }}</span>
+                                                @endif
+                                                @if($suggestion['published_at'])
+                                                    <span>• {{ $suggestion['published_at'] }}</span>
+                                                @endif
+                                            </div>
+                                            @if($suggestion['summary'])
+                                                <div class="text-xs text-gray-600 line-clamp-2">
+                                                    {{ $suggestion['summary'] }}
+                                                </div>
+                                            @endif
+                                        </div>
                                     </button>
                                 @endforeach
                             </div>
@@ -253,12 +296,52 @@
 
                     <!-- Artículos seleccionados -->
                     @if (count($related_articles) > 0)
-                        <div class="space-y-2 mt-3">
+                        <div class="space-y-3 mt-3">
                             @foreach ($related_articles as $index => $article)
-                                <div class="flex items-center justify-between p-3 bg-gray-50 border border-gray-200">
-                                    <span class="font-opensans text-sm text-primary">{{ $article['title'] }}</span>
+                                <div class="flex items-start justify-between p-4 bg-gray-50 border border-gray-200">
+                                    <div class="flex-1 space-y-2">
+                                        <div class="font-opensans text-sm text-primary font-medium">
+                                            {{ $article['title'] }}
+                                        </div>
+                                        <div class="flex items-center gap-2 text-xs text-gray-500">
+                                            @if(isset($article['section']) && $article['section'])
+                                                <span class="px-2 py-1 bg-white border border-gray-300 text-primary text-xs font-medium">
+                                                    @switch($article['section'])
+                                                        @case('destinations')
+                                                            Destinos
+                                                            @break
+                                                        @case('inspiring_stories')
+                                                            Historias que Inspiran
+                                                            @break
+                                                        @case('social_events')
+                                                            Eventos Sociales
+                                                            @break
+                                                        @case('health_wellness')
+                                                            Salud y Bienestar
+                                                            @break
+                                                        @case('gastronomy')
+                                                            Gastronomía
+                                                            @break
+                                                        @case('living_culture')
+                                                            Cultura Viva
+                                                            @break
+                                                        @default
+                                                            {{ $article['section'] }}
+                                                    @endswitch
+                                                </span>
+                                            @endif
+                                            @if(isset($article['attribution']) && $article['attribution'])
+                                                <span>Por {{ $article['attribution'] }}</span>
+                                            @endif
+                                        </div>
+                                        @if(isset($article['summary']) && $article['summary'])
+                                            <div class="text-xs text-gray-600">
+                                                {{ $article['summary'] }}
+                                            </div>
+                                        @endif
+                                    </div>
                                     <button type="button" wire:click="removeRelatedArticle({{ $index }})"
-                                        class="text-gray-400 hover:text-red-500 transition-colors">
+                                        class="ml-3 text-gray-400 hover:text-red-500 transition-colors flex-shrink-0">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -388,7 +471,7 @@
         </div>
 
         <div class="flex flex-col sm:flex-row gap-4 pt-4">
-            <button wire:click.prevent="store"
+            <button  wire:click.prevent="store"
                 class=" flex-1 h-12 bg-primary text-white text-base font-semibold font-montserrat">Publicar
                 Artículo</button>
             <button wire:click.prevent="saveDraft"
@@ -397,6 +480,25 @@
             <a href="" wire:click.prevent="cancel"
                 class="flex-1 flex justify-center items-center h-12 text-base font-semibold font-montserrat border text-gray-light border-gray-light hover:bg-sage transition-colors">Cancelar</a>
         </div>
+
+        @if (session('message'))
+            <div class="w-full p-4 bg-green-50 border border-green-200 text-green-800">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        <span class="font-opensans text-sm">{{ session('message') }}</span>
+                    </div>
+                    <button type="button" onclick="this.parentElement.parentElement.remove()" 
+                        class="text-green-600 hover:text-green-800 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        @endif
 
     </form>
 
