@@ -145,6 +145,9 @@
             <div id="section-content"
                 class="accordion-content px-6 py-6 space-y-6 border-t border-gray-lighter @if (!$openSections['content']) hidden @endif">
                 <livewire:content-editor />
+                @error('content')
+                    <p class="text-red-500 text-xs font-opensans mt-1">{{ $message }}</p>
+                @enderror
             </div>
         </div>
 
@@ -243,40 +246,46 @@
                                                 {{ $suggestion['title'] }}
                                             </div>
                                             <div class="flex items-center gap-2 text-xs text-gray-500">
-                                                @if($suggestion['section'])
+                                                @if ($suggestion['section'])
                                                     <span class="px-2 py-1 bg-sage text-primary text-xs font-medium">
                                                         @switch($suggestion['section'])
                                                             @case('destinations')
                                                                 Destinos
-                                                                @break
+                                                            @break
+
                                                             @case('inspiring_stories')
                                                                 Historias que Inspiran
-                                                                @break
+                                                            @break
+
                                                             @case('social_events')
                                                                 Eventos Sociales
-                                                                @break
+                                                            @break
+
                                                             @case('health_wellness')
                                                                 Salud y Bienestar
-                                                                @break
+                                                            @break
+
                                                             @case('gastronomy')
                                                                 Gastronomía
-                                                                @break
+                                                            @break
+
                                                             @case('living_culture')
                                                                 Cultura Viva
-                                                                @break
+                                                            @break
+
                                                             @default
                                                                 {{ $suggestion['section'] }}
                                                         @endswitch
                                                     </span>
                                                 @endif
-                                                @if($suggestion['attribution'])
+                                                @if ($suggestion['attribution'])
                                                     <span>Por {{ $suggestion['attribution'] }}</span>
                                                 @endif
-                                                @if($suggestion['published_at'])
+                                                @if ($suggestion['published_at'])
                                                     <span>• {{ $suggestion['published_at'] }}</span>
                                                 @endif
                                             </div>
-                                            @if($suggestion['summary'])
+                                            @if ($suggestion['summary'])
                                                 <div class="text-xs text-gray-600 line-clamp-2">
                                                     {{ $suggestion['summary'] }}
                                                 </div>
@@ -298,37 +307,44 @@
                                             {{ $article['title'] }}
                                         </div>
                                         <div class="flex items-center gap-2 text-xs text-gray-500">
-                                            @if(isset($article['section']) && $article['section'])
-                                                <span class="px-2 py-1 bg-white border border-gray-300 text-primary text-xs font-medium">
+                                            @if (isset($article['section']) && $article['section'])
+                                                <span
+                                                    class="px-2 py-1 bg-white border border-gray-300 text-primary text-xs font-medium">
                                                     @switch($article['section'])
                                                         @case('destinations')
                                                             Destinos
-                                                            @break
+                                                        @break
+
                                                         @case('inspiring_stories')
                                                             Historias que Inspiran
-                                                            @break
+                                                        @break
+
                                                         @case('social_events')
                                                             Eventos Sociales
-                                                            @break
+                                                        @break
+
                                                         @case('health_wellness')
                                                             Salud y Bienestar
-                                                            @break
+                                                        @break
+
                                                         @case('gastronomy')
                                                             Gastronomía
-                                                            @break
+                                                        @break
+
                                                         @case('living_culture')
                                                             Cultura Viva
-                                                            @break
+                                                        @break
+
                                                         @default
                                                             {{ $article['section'] }}
                                                     @endswitch
                                                 </span>
                                             @endif
-                                            @if(isset($article['attribution']) && $article['attribution'])
+                                            @if (isset($article['attribution']) && $article['attribution'])
                                                 <span>Por {{ $article['attribution'] }}</span>
                                             @endif
                                         </div>
-                                        @if(isset($article['summary']) && $article['summary'])
+                                        @if (isset($article['summary']) && $article['summary'])
                                             <div class="text-xs text-gray-600">
                                                 {{ $article['summary'] }}
                                             </div>
@@ -465,7 +481,7 @@
         </div>
 
         <div class="flex flex-col sm:flex-row gap-4 pt-4">
-            <button  wire:click.prevent="store"
+            <button wire:click.prevent="store"
                 class=" flex-1 h-12 bg-primary text-white text-base font-semibold font-montserrat">Publicar
                 Artículo</button>
             <button wire:click.prevent="saveDraft"
@@ -480,14 +496,17 @@
                 <div class="flex items-center justify-between">
                     <div class="flex items-center">
                         <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            <path fill-rule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                clip-rule="evenodd" />
                         </svg>
                         <span class="font-opensans text-sm">{{ session('message') }}</span>
                     </div>
-                    <button type="button" onclick="this.parentElement.parentElement.remove()" 
+                    <button type="button" onclick="this.parentElement.parentElement.remove()"
                         class="text-green-600 hover:text-green-800 transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
                 </div>

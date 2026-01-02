@@ -22,7 +22,7 @@ class CreateArticle extends Component
     public $image;
 
     // Content
-    public $content;
+    public $content = [];
 
     // Classification
     public $section;
@@ -60,7 +60,7 @@ class CreateArticle extends Component
 
         'image' => 'required|image|mimes:jpeg,jpg,png,webp,gif|max:10240', // Max 10MB
 
-        // 'content' => 'required|array|min:1',
+        'content' => 'required|array|min:1',
 
         'section' => 'required|in:destinations,inspiring_stories,social_events,health_wellness,gastronomy,living_culture',
 
