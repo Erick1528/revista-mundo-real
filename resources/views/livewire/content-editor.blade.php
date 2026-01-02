@@ -1,11 +1,4 @@
 <div class="space-y-4">
-    <!-- Mensajes de error -->
-    @if (session()->has('error'))
-        <div class="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded font-opensans text-sm">
-            {{ session('error') }}
-        </div>
-    @endif
-
     <!-- Indicador de carga para subida de imágenes -->
     <div wire:loading.delay wire:target="blocks"
         class="mb-4 p-3 bg-blue-100 border border-blue-400 text-blue-700 rounded flex items-center gap-2 font-opensans text-sm">
@@ -220,7 +213,7 @@
                                                     <div class="text-center space-y-2">
                                                         <img src="{{ $imageUrl }}" alt="{{ $block['alt_text'] ?? '' }}"
                                                             class="@if ($size === 'small') max-w-xs @elseif($size === 'medium') max-w-md @else max-w-full @endif mx-auto h-auto max-h-96 object-contain">
-                                                        @if(!empty($block['credits']))
+                                                        @if (!empty($block['credits']))
                                                             <p class="text-xs text-gray-500 font-opensans italic">
                                                                 {{ $block['credits'] }}
                                                             </p>
@@ -230,10 +223,12 @@
                                                     <!-- Imagen izquierda, texto derecha -->
                                                     <div class="flex gap-4 items-start">
                                                         <div class="flex-shrink-0 space-y-1">
-                                                            <img src="{{ $imageUrl }}" alt="{{ $block['alt_text'] ?? '' }}"
+                                                            <img src="{{ $imageUrl }}"
+                                                                alt="{{ $block['alt_text'] ?? '' }}"
                                                                 class="@if ($size === 'small') w-32 @elseif($size === 'medium') w-48 @else w-64 @endif h-auto max-h-80 object-contain">
-                                                            @if(!empty($block['credits']))
-                                                                <p class="text-xs text-gray-500 font-opensans italic text-center">
+                                                            @if (!empty($block['credits']))
+                                                                <p
+                                                                    class="text-xs text-gray-500 font-opensans italic text-center">
                                                                     {{ $block['credits'] }}
                                                                 </p>
                                                             @endif
@@ -253,10 +248,12 @@
                                                             </p>
                                                         </div>
                                                         <div class="flex-shrink-0 space-y-1">
-                                                            <img src="{{ $imageUrl }}" alt="{{ $block['alt_text'] ?? '' }}"
+                                                            <img src="{{ $imageUrl }}"
+                                                                alt="{{ $block['alt_text'] ?? '' }}"
                                                                 class="@if ($size === 'small') w-32 @elseif($size === 'medium') w-48 @else w-64 @endif h-auto max-h-80 object-contain">
-                                                            @if(!empty($block['credits']))
-                                                                <p class="text-xs text-gray-500 font-opensans italic text-center">
+                                                            @if (!empty($block['credits']))
+                                                                <p
+                                                                    class="text-xs text-gray-500 font-opensans italic text-center">
                                                                     {{ $block['credits'] }}
                                                                 </p>
                                                             @endif
@@ -269,7 +266,7 @@
                                                             <img src="{{ $imageUrl }}"
                                                                 alt="{{ $block['alt_text'] ?? '' }}"
                                                                 class="@if ($size === 'small') max-w-xs @elseif($size === 'medium') max-w-md @else max-w-full @endif mx-auto h-auto max-h-96 border border-gray-200">
-                                                            @if(!empty($block['credits']))
+                                                            @if (!empty($block['credits']))
                                                                 <p class="text-xs text-gray-500 font-opensans italic">
                                                                     {{ $block['credits'] }}
                                                                 </p>
@@ -323,15 +320,21 @@
                                                     </div>
 
                                                     <!-- File input -->
-                                                    <div wire:loading.remove
+                                                    <div class="block w-full" wire:loading.remove
                                                         wire:target="blocks.{{ $index }}.image_file">
                                                         <label class="block text-xs font-medium text-gray-700 mb-1">Cambiar
                                                             imagen</label>
-                                                        <input type="file" accept="image/*"
+                                                        <input type="file" accept="image/*,.avif"
                                                             class="w-full px-4 py-3 border border-gray-300 bg-gray-50 focus:outline-none focus:border-primary text-sm file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-medium file:bg-primary file:text-white hover:file:bg-dark-sage font-opensans"
                                                             wire:model="blocks.{{ $index }}.image_file">
                                                         <p class="text-xs text-gray-500 mt-1 font-opensans">Tamaño máximo:
-                                                            10MB. Formatos: JPG, PNG, WEBP</p>
+                                                            10MB. Se convertirá automáticamente a WebP</p>
+                                                        @if (session()->has('error'))
+                                                            <div
+                                                                class="mt-2 p-3 bg-red-100 border border-red-400 text-red-700 font-opensans text-sm">
+                                                                {{ session('error') }}
+                                                            </div>
+                                                        @endif
                                                     </div>
                                                 </div>
                                             </div>
@@ -348,15 +351,22 @@
                                                 </div>
 
                                                 <!-- File input -->
-                                                <div wire:loading.remove wire:target="blocks.{{ $index }}.image_file">
+                                                <div class="block w-full" wire:loading.remove
+                                                    wire:target="blocks.{{ $index }}.image_file">
                                                     <label
                                                         class="block text-sm font-medium text-gray-700 mb-1 font-opensans">Imagen
                                                         Principal</label>
-                                                    <input type="file" accept="image/*"
+                                                    <input type="file" accept="image/*,.avif"
                                                         class="w-full px-4 py-3 border border-gray-300 bg-gray-50 focus:outline-none focus:border-primary text-sm file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-medium file:bg-primary file:text-white hover:file:bg-dark-sage font-opensans"
                                                         wire:model="blocks.{{ $index }}.image_file">
                                                     <p class="text-xs text-gray-500 mt-1 font-opensans">Tamaño máximo: 10MB.
-                                                        Formatos: JPG, PNG, WEBP</p>
+                                                        Se convertirá automáticamente a WebP</p>
+                                                    @if (session()->has('error'))
+                                                        <div
+                                                            class="mt-2 p-3 bg-red-100 border border-red-400 text-red-700 font-opensans text-sm">
+                                                            {{ session('error') }}
+                                                        </div>
+                                                    @endif
                                                 </div>
                                             </div>
                                         @endif

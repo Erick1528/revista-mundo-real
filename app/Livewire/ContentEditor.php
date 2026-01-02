@@ -369,17 +369,18 @@ class ContentEditor extends Component
 
     private function processImageUpload($file)
     {
-        // Generar nombre único para la imagen
+        // Generar nombre único para la imagen (siempre WebP)
         $timestamp = now()->format('Ymd_His');
         $randomString = substr(str_shuffle('0123456789abcdefghijklmnopqrstuvwxyz'), 0, 8);
-        $extension = strtolower($file->getClientOriginalExtension());
+        $originalExtension = strtolower($file->getClientOriginalExtension());
 
-        // Validar extensión
-        if (!in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
-            throw new \Exception('Formato de imagen no soportado. Use JPG, PNG, GIF o WebP.');
+        // Validar extensión de entrada
+        if (!in_array($originalExtension, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif'])) {
+            throw new \Exception('Formato de imagen no soportado. Use JPG, PNG, GIF, WebP o AVIF.');
         }
 
-        $fileName = "revista_{$timestamp}_{$randomString}.{$extension}";
+        // Siempre generar archivo WebP
+        $fileName = "revista_{$timestamp}_{$randomString}.webp";
 
         // Crear directorio si no existe
         $uploadPath = storage_path('app/public/images');
@@ -391,13 +392,13 @@ class ContentEditor extends Component
         $tempPath = $file->getRealPath();
         $finalPath = $uploadPath . '/' . $fileName;
 
-        // Optimizar imagen según el tipo
-        $this->optimizeImage($tempPath, $finalPath, $extension);
+        // Optimizar imagen y convertir siempre a WebP
+        $this->optimizeImage($tempPath, $finalPath, $originalExtension);
 
         return 'images/' . $fileName;
     }
 
-    private function optimizeImage($sourcePath, $destinationPath, $extension)
+    private function optimizeImage($sourcePath, $destinationPath, $originalExtension)
     {
         // Obtener dimensiones originales
         list($width, $height) = getimagesize($sourcePath);
@@ -416,7 +417,7 @@ class ContentEditor extends Component
         }
 
         // Crear imagen desde el archivo original
-        $sourceImage = $this->createImageFromFile($sourcePath, $extension);
+        $sourceImage = $this->createImageFromFile($sourcePath, $originalExtension);
 
         if (!$sourceImage) {
             throw new \Exception('No se pudo procesar la imagen');
@@ -425,8 +426,8 @@ class ContentEditor extends Component
         // Crear nueva imagen redimensionada
         $resizedImage = imagecreatetruecolor($newWidth, $newHeight);
 
-        // Preservar transparencia para PNG y GIF
-        if ($extension === 'png' || $extension === 'gif') {
+        // Preservar transparencia para PNG y GIF (se convertirá a WebP con transparencia)
+        if ($originalExtension === 'png' || $originalExtension === 'gif') {
             imagealphablending($resizedImage, false);
             imagesavealpha($resizedImage, true);
             $transparent = imagecolorallocatealpha($resizedImage, 255, 255, 255, 127);
@@ -436,15 +437,15 @@ class ContentEditor extends Component
         // Redimensionar imagen
         imagecopyresampled($resizedImage, $sourceImage, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
 
-        // Guardar imagen optimizada
-        $this->saveOptimizedImage($resizedImage, $destinationPath, $extension);
+        // Guardar siempre como WebP
+        imagewebp($resizedImage, $destinationPath, 85); // Calidad 85%
 
         // Liberar memoria
         imagedestroy($sourceImage);
         imagedestroy($resizedImage);
 
         // Verificar tamaño del archivo y recomprimir si es necesario
-        $this->adjustFileSize($destinationPath, $extension);
+        $this->adjustFileSize($destinationPath, 'webp');
     }
 
     private function createImageFromFile($path, $extension)
@@ -459,6 +460,14 @@ class ContentEditor extends Component
                 return imagecreatefromgif($path);
             case 'webp':
                 return imagecreatefromwebp($path);
+            case 'avif':
+                // AVIF requiere extensión especial, convertir a WebP como fallback
+                if (function_exists('imagecreatefromavif')) {
+                    return imagecreatefromavif($path);
+                } else {
+                    // Si no hay soporte nativo, intentar crear desde WebP
+                    return imagecreatefromwebp($path);
+                }
             default:
                 return false;
         }
@@ -480,6 +489,15 @@ class ContentEditor extends Component
             case 'webp':
                 imagewebp($image, $path, 85); // Calidad 85%
                 break;
+            case 'avif':
+                // AVIF requiere extensión especial, guardar como WebP como fallback
+                if (function_exists('imageavif')) {
+                    imageavif($image, $path, 85); // Calidad 85%
+                } else {
+                    // Si no hay soporte nativo, guardar como WebP
+                    imagewebp($image, $path, 85);
+                }
+                break;
         }
     }
 
@@ -494,19 +512,15 @@ class ContentEditor extends Component
             return;
         }
 
-        // Si es muy grande, reducir calidad
-        if ($currentSize > $maxSize && in_array($extension, ['jpg', 'jpeg', 'webp'])) {
-            $image = $this->createImageFromFile($path, $extension);
+        // Si es muy grande, reducir calidad (siempre WebP ahora)
+        if ($currentSize > $maxSize) {
+            $image = imagecreatefromwebp($path);
 
             // Reducir calidad progresivamente
             $qualities = [75, 65, 55, 45, 35, 25];
 
             foreach ($qualities as $quality) {
-                if ($extension === 'webp') {
-                    imagewebp($image, $path, $quality);
-                } else {
-                    imagejpeg($image, $path, $quality);
-                }
+                imagewebp($image, $path, $quality);
 
                 $newSize = filesize($path);
                 if ($newSize <= $maxSize && $newSize >= $minSize) {
