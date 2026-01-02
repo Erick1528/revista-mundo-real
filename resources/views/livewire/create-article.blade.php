@@ -144,13 +144,7 @@
 
             <div id="section-content"
                 class="accordion-content px-6 py-6 space-y-6 border-t border-gray-lighter @if (!$openSections['content']) hidden @endif">
-                <div class="border-2 border-dashed border-gray-300 p-8 text-center">
-                    <div class="text-4xl mb-4">📝</div>
-                    <h3 class="font-montserrat font-medium text-primary text-lg mb-2">Editor de Contenido</h3>
-                    <p class="text-gray-light font-opensans">El editor de contenido por bloques se implementará aquí.
-                    </p>
-                    <p class="text-sm text-gray-500 mt-2">Permitirá agregar texto, imágenes, videos, citas y más.</p>
-                </div>
+                <livewire:content-editor />
             </div>
         </div>
 
