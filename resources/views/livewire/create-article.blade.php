@@ -85,7 +85,7 @@
             </button>
             <div id="section-image"
                 class="accordion-content px-6 py-6 space-y-6 border-t border-gray-lighter @if (!$openSections['image']) hidden @endif">
-                <div class="space-y-2">
+                <div class="space-y-2 grid grid-cols-1 gap-3">
                     @if ($image)
                         <div class="relative w-full h-auto bg-sage flex items-center justify-center">
                             <img src="{{ $image->temporaryUrl() }}" alt=""
