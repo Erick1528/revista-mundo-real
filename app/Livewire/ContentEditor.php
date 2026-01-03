@@ -13,6 +13,44 @@ class ContentEditor extends Component
     public $showBlockSelector = false;
     public $blockSelectorIndex = null;
 
+    protected $listeners = ['requestContentData' => 'provideContentData'];
+
+    public function provideContentData()
+    {
+        // Enviar los bloques actuales al componente padre
+        $this->dispatch('contentDataResponse', [
+            'blocks' => $this->blocks,
+            'word_count' => $this->calculateWordCount(),
+            'blocks_count' => count($this->blocks)
+        ]);
+    }
+
+    private function calculateWordCount()
+    {
+        $totalWords = 0;
+        
+        foreach ($this->blocks as $block) {
+            switch ($block['type']) {
+                case 'paragraph':
+                case 'heading':
+                case 'quote':
+                    $content = $block['content'] ?? '';
+                    $totalWords += str_word_count(strip_tags($content));
+                    break;
+                    
+                case 'list':
+                    if (isset($block['items']) && is_array($block['items'])) {
+                        foreach ($block['items'] as $item) {
+                            $totalWords += str_word_count(strip_tags($item));
+                        }
+                    }
+                    break;
+            }
+        }
+        
+        return $totalWords;
+    }
+
     public function mount()
     {
         // Inicializar con array vacío si no se pasan bloques
@@ -311,8 +349,8 @@ class ContentEditor extends Component
                     // Procesar y optimizar la nueva imagen
                     $imagePath = $this->processImageUpload($file);
 
-                    // Actualizar la URL del bloque
-                    $this->blocks[$blockIndex]['url'] = asset('storage/' . $imagePath);
+                    // Actualizar la URL del bloque (solo ruta relativa)
+                    $this->blocks[$blockIndex]['url'] = '/storage/' . $imagePath;
 
                     // Limpiar el campo temporal
                     $this->blocks[$blockIndex]['image_file'] = null;

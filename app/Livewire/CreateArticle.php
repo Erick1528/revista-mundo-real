@@ -3,9 +3,11 @@
 namespace App\Livewire;
 
 use App\Models\Article;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class CreateArticle extends Component
 {
@@ -49,6 +51,30 @@ class CreateArticle extends Component
         'seo' => false,
         'metrics' => false,
     ];
+
+    // Flag para controlar el flujo de validación
+    public $waitingForContentData = false;
+
+    public function updatedImage()
+    {
+        // Validar extensión inmediatamente cuando se selecciona archivo
+        if ($this->image) {
+            $extension = strtolower($this->image->getClientOriginalExtension());
+            $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+
+            if (!in_array($extension, $allowedExtensions)) {
+                $this->image = null;
+                $this->addError('image', 'Extensión no soportada. Solo se permiten: JPG, PNG, GIF, WebP');
+                return;
+            }
+        }
+
+        // Limpiar errores previos si la extensión es válida
+        $this->resetErrorBag('image');
+    }
+
+    // Listeners para eventos
+    protected $listeners = ['contentDataResponse' => 'receiveContentData'];
 
     // Agregar funciones para rellenar los arrays de tags y related_articles
     protected $rules = [
@@ -312,35 +338,106 @@ class CreateArticle extends Component
             })->toArray();
     }
 
-    public function store()
+    public function receiveContentData($data)
+    {
+        // Actualizar la propiedad content con los datos recibidos del editor
+        $this->content = $data['blocks'] ?? [];
+
+        // Si estábamos esperando los datos para proceder con la validación
+        if ($this->waitingForContentData) {
+            $this->waitingForContentData = false;
+            $this->proceedWithValidation();
+        }
+    }
+
+    private function proceedWithValidation()
     {
         try {
             $this->validate();
-            return session()->flash('message', 'Artículo creado exitosamente.');
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            $errorBags = $e->validator->getMessageBag()->getMessages();
-            // Mapear errores a secciones
-            $sectionMap = [
-                'basic' => ['title', 'subtitle', 'attribution', 'summary'],
-                'image' => ['image'],
-                'content' => ['content'],
-                'classification' => ['section', 'tags', 'tags.*', 'tagInput', 'related_articles', 'related_articles.*', 'relatedArticleSearch'],
-                'publication' => ['visibility', 'published_at'],
-                'seo' => ['meta_description', 'reading_time'],
-                'metrics' => [],
+
+            // Preparar datos del artículo
+            $articleData = [
+                'title' => $this->title,
+                'subtitle' => $this->subtitle,
+                'slug' => $this->generateUniqueSlug($this->title, $this->subtitle),
+                'attribution' => $this->attribution,
+                'summary' => $this->summary,
+                'content' => $this->content,
+                'section' => $this->section,
+                'tags' => $this->tags,
+                'related_articles' => array_column($this->related_articles, 'id'),
+                'visibility' => $this->visibility,
+                'published_at' => $this->published_at,
+                'meta_description' => $this->meta_description,
+                'reading_time' => $this->reading_time,
+                'user_id' => Auth::user()->id,
+                'status' => 'review',
             ];
-            foreach ($sectionMap as $section => $fields) {
-                foreach ($fields as $field) {
-                    foreach ($errorBags as $errorKey => $messages) {
-                        // Soporta errores tipo tags.0, tags.1, etc.
-                        if ($field === $errorKey || (str_ends_with($field, '.*') && str_starts_with($errorKey, rtrim($field, '.*')))) {
-                            $this->openSections[$section] = true;
-                        }
+
+            // Procesar imagen si existe
+            if ($this->image) {
+                try {
+                    $imagePath = $this->processImageUpload($this->image);
+                    $articleData['image_path'] = '/storage/' . $imagePath;
+                } catch (\Exception $e) {
+                    // Mostrar error específico para debugging
+                    session()->flash('error', 'Error al procesar la imagen: ' . $e->getMessage());
+                    // También abrir la sección de imagen para mostrar el error
+                    $this->openSections['image'] = true;
+                    return; // No continuar si hay error en la imagen
+                }
+            }
+
+            // Crear el artículo
+            Article::create($articleData);
+
+            // Resetear formulario
+            $this->resetFormData();
+
+            // Redireccionar al dashboard con mensaje de éxito
+            session()->flash('success', 'Artículo creado exitosamente.');
+            return redirect()->route('dashboard');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $this->handleValidationErrors($e);
+            throw $e;
+        }
+    }
+
+    private function handleValidationErrors($e)
+    {
+        $errorBags = $e->validator->getMessageBag()->getMessages();
+        // Mapear errores a secciones
+        $sectionMap = [
+            'basic' => ['title', 'subtitle', 'attribution', 'summary'],
+            'image' => ['image'],
+            'content' => ['content'],
+            'classification' => ['section', 'tags', 'tags.*', 'tagInput', 'related_articles', 'related_articles.*', 'relatedArticleSearch'],
+            'publication' => ['visibility', 'published_at'],
+            'seo' => ['meta_description', 'reading_time'],
+            'metrics' => [],
+        ];
+
+        foreach ($sectionMap as $section => $fields) {
+            foreach ($fields as $field) {
+                foreach ($errorBags as $errorKey => $messages) {
+                    // Soporta errores tipo tags.0, tags.1, etc.
+                    if ($field === $errorKey || (str_ends_with($field, '.*') && str_starts_with($errorKey, rtrim($field, '.*')))) {
+                        $this->openSections[$section] = true;
                     }
                 }
             }
-            throw $e;
         }
+    }
+
+    public function store()
+    {
+        // Marcar que estamos esperando los datos del content editor
+        $this->waitingForContentData = true;
+
+        // Solicitar los datos del content editor
+        $this->dispatch('requestContentData');
+
+        // La validación continuará en receiveContentData()
     }
 
     public function saveDraft()
@@ -351,6 +448,236 @@ class CreateArticle extends Component
     public function cancel()
     {
         dd('Cancelar creación');
+    }
+
+    private function resetFormData()
+    {
+        // Resetear información básica
+        $this->title = '';
+        $this->subtitle = '';
+        $this->attribution = '';
+        $this->summary = '';
+
+        // Resetear media
+        $this->image = null;
+
+        // Resetear contenido
+        $this->content = [];
+
+        // Resetear clasificación
+        $this->section = '';
+        $this->tags = [];
+        $this->tagInput = '';
+        $this->related_articles = [];
+        $this->relatedArticleSearch = '';
+
+        // Resetear publicación
+        $this->visibility = '';
+        $this->published_at = '';
+
+        // Resetear SEO
+        $this->meta_description = '';
+        $this->reading_time = '';
+
+        // Resetear accordion state
+        $this->openSections = [
+            'basic' => true,
+            'image' => false,
+            'content' => false,
+            'classification' => false,
+            'publication' => false,
+            'seo' => false,
+            'metrics' => false,
+        ];
+
+        // Resetear flags
+        $this->waitingForContentData = false;
+
+        // Limpiar errores
+        $this->resetValidation();
+        $this->resetErrorBag();
+    }
+
+    private function generateUniqueSlug($title, $subtitle = null)
+    {
+        // Crear slug base desde título o título + subtítulo
+        $baseText = trim($title);
+        if (!empty($subtitle)) {
+            $baseText = trim($title . ' ' . $subtitle);
+        }
+
+        // Generar slug base
+        $baseSlug = Str::slug($baseText);
+
+        // Si el slug base está vacío, usar un slug genérico
+        if (empty($baseSlug)) {
+            $baseSlug = 'articulo';
+        }
+
+        // Verificar si el slug existe
+        $slug = $baseSlug;
+        $counter = 1;
+
+        while (Article::where('slug', $slug)->exists()) {
+            $slug = $baseSlug . '-' . $counter;
+            $counter++;
+        }
+
+        return $slug;
+    }
+
+    private function processImageUpload($file)
+    {
+        // Generar nombre único para la imagen (siempre WebP)
+        $timestamp = now()->format('Ymd_His');
+        $randomString = substr(str_shuffle('0123456789abcdefghijklmnopqrstuvwxyz'), 0, 8);
+        $originalExtension = strtolower($file->getClientOriginalExtension());
+
+        Log::info("Procesando imagen", [
+            'extension' => $originalExtension,
+            'size' => $file->getSize(),
+            'mime' => $file->getMimeType()
+        ]);
+
+        // Validar extensión de entrada
+        if (!in_array($originalExtension, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
+            throw new \Exception('Formato de imagen no soportado. Use JPG, PNG, GIF o WebP.');
+        }
+
+        // Siempre generar archivo WebP
+        $fileName = "revista_article_{$timestamp}_{$randomString}.webp";
+
+        // Crear directorio si no existe
+        $uploadPath = storage_path('app/public/images');
+        if (!file_exists($uploadPath)) {
+            mkdir($uploadPath, 0755, true);
+        }
+
+        // Ruta temporal del archivo subido
+        $tempPath = $file->getRealPath();
+        $finalPath = $uploadPath . '/' . $fileName;
+
+        try {
+            // Optimizar imagen y convertir siempre a WebP
+            $this->optimizeImage($tempPath, $finalPath, $originalExtension);
+            Log::info("Imagen procesada exitosamente", ['file' => $fileName]);
+        } catch (\Exception $e) {
+            Log::error("Error procesando imagen", [
+                'extension' => $originalExtension,
+                'error' => $e->getMessage()
+            ]);
+            throw $e;
+        }
+
+        return 'images/' . $fileName;
+    }
+
+    private function optimizeImage($sourcePath, $destinationPath, $originalExtension)
+    {
+        // Obtener dimensiones originales
+        $imageInfo = getimagesize($sourcePath);
+
+        if ($imageInfo === false) {
+            throw new \Exception('No se puede leer la información de la imagen');
+        }
+
+        list($width, $height) = $imageInfo;
+
+        // Calcular nuevas dimensiones (máximo 1920px de ancho para imagen principal)
+        $maxWidth = 1920;
+        $maxHeight = 1440;
+
+        if ($width > $maxWidth || $height > $maxHeight) {
+            $ratio = min($maxWidth / $width, $maxHeight / $height);
+            $newWidth = intval($width * $ratio);
+            $newHeight = intval($height * $ratio);
+        } else {
+            $newWidth = $width;
+            $newHeight = $height;
+        }
+
+        // Crear imagen desde el archivo original
+        try {
+            $sourceImage = $this->createImageFromFile($sourcePath, $originalExtension);
+        } catch (\Exception $e) {
+            throw new \Exception('Error al cargar la imagen (' . $originalExtension . '): ' . $e->getMessage());
+        }
+
+        if (!$sourceImage) {
+            throw new \Exception('No se pudo crear la imagen desde el archivo ' . $originalExtension);
+        }
+
+        // Crear nueva imagen redimensionada
+        $resizedImage = imagecreatetruecolor($newWidth, $newHeight);
+
+        // Preservar transparencia para PNG y GIF (se convertirá a WebP con transparencia)
+        if ($originalExtension === 'png' || $originalExtension === 'gif') {
+            imagealphablending($resizedImage, false);
+            imagesavealpha($resizedImage, true);
+            $transparent = imagecolorallocatealpha($resizedImage, 255, 255, 255, 127);
+            imagefill($resizedImage, 0, 0, $transparent);
+        }
+
+        // Redimensionar imagen
+        imagecopyresampled($resizedImage, $sourceImage, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+
+        // Guardar siempre como WebP con alta calidad
+        imagewebp($resizedImage, $destinationPath, 95); // Calidad 95% para portada
+
+        // Liberar memoria
+        imagedestroy($sourceImage);
+        imagedestroy($resizedImage);
+
+        // Verificar tamaño del archivo y recomprimir si es necesario
+        $this->adjustFileSize($destinationPath);
+    }
+
+    private function createImageFromFile($path, $extension)
+    {
+        switch ($extension) {
+            case 'jpg':
+            case 'jpeg':
+                return imagecreatefromjpeg($path);
+            case 'png':
+                return imagecreatefrompng($path);
+            case 'gif':
+                return imagecreatefromgif($path);
+            case 'webp':
+                return imagecreatefromwebp($path);
+            default:
+                throw new \Exception('Formato de imagen no reconocido: ' . $extension);
+        }
+    }
+
+    private function adjustFileSize($path)
+    {
+        $maxSize = 300 * 1024; // 300KB en bytes para imagen de portada
+        $minSize = 150 * 1024; // 150KB en bytes
+        $currentSize = filesize($path);
+
+        // Si el archivo está dentro del rango deseado, no hacer nada
+        if ($currentSize >= $minSize && $currentSize <= $maxSize) {
+            return;
+        }
+
+        // Si es muy grande, reducir calidad progresivamente (manteniendo alta calidad)
+        if ($currentSize > $maxSize) {
+            $image = imagecreatefromwebp($path);
+
+            // Reducir calidad progresivamente con valores más altos
+            $qualities = [90, 85, 80, 75, 70, 65];
+
+            foreach ($qualities as $quality) {
+                imagewebp($image, $path, $quality);
+
+                $newSize = filesize($path);
+                if ($newSize <= $maxSize && $newSize >= $minSize) {
+                    break;
+                }
+            }
+
+            imagedestroy($image);
+        }
     }
 
     public function render()
