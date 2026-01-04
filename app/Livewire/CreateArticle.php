@@ -9,6 +9,12 @@ use Livewire\WithFileUploads;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 
+// TODO: Agregar validación para el editor de contenido, verificar cada bloque y ver si tiene contenido válido
+// Mostrar error o exito en la vista de dashboard al crear artículo
+// Mejorar el editor de contenido para manejar listas, texto enriquecido, titulos y otras cosas en un mismo bloque
+// Calcular el tiempo de lectura automáticamente basado en el contenido
+// Agregar spinner de carga al publicar articulo
+
 class CreateArticle extends Component
 {
 
