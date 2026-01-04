@@ -85,4 +85,6 @@
 
     </div>
 
+    {{-- Agregar lista de artículos y sus filtros --}}
+
 </div>

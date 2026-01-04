@@ -440,7 +440,7 @@
                                                     <div class="w-full flex flex-col items-center justify-center py-4 text-center"
                                                         wire:loading wire:target="blocks.{{ $index }}.image_file">
                                                         <div
-                                                            class="w-6 h-6 border-2 border-primary border-t-transparent animate-spin mx-auto">
+                                                            class="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto">
                                                         </div>
                                                         <span
                                                             class="mt-3 text-primary font-opensans text-sm">Cargando...</span>
@@ -472,7 +472,7 @@
                                                 <div class="w-full flex flex-col items-center justify-center py-8 text-center"
                                                     wire:loading wire:target="blocks.{{ $index }}.image_file">
                                                     <div
-                                                        class="w-6 h-6 border-2 border-primary border-t-transparent animate-spin mx-auto">
+                                                        class="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto">
                                                     </div>
                                                     <span class="mt-3 text-primary font-opensans text-sm">Cargando...</span>
                                                 </div>
@@ -481,8 +481,7 @@
                                                 <div class="block w-full" wire:loading.remove
                                                     wire:target="blocks.{{ $index }}.image_file">
                                                     <label
-                                                        class="block text-sm font-medium text-gray-700 mb-1 font-opensans">Imagen
-                                                        Principal</label>
+                                                        class="block text-sm font-medium text-gray-700 mb-1 font-opensans">Imagen</label>
                                                     <input type="file" accept="image/*,.avif"
                                                         class="w-full px-4 py-3 border border-gray-300 bg-gray-50 focus:outline-none focus:border-primary text-sm file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-medium file:bg-primary file:text-white hover:file:bg-dark-sage font-opensans"
                                                         wire:model="blocks.{{ $index }}.image_file">
