@@ -12,6 +12,7 @@ class ContentEditor extends Component
     public $blocks = [];
     public $showBlockSelector = false;
     public $blockSelectorIndex = null;
+    public $galleryFiles = [];
 
     protected $listeners = ['requestContentData' => 'provideContentData'];
 
@@ -28,7 +29,7 @@ class ContentEditor extends Component
     private function calculateWordCount()
     {
         $totalWords = 0;
-        
+
         foreach ($this->blocks as $block) {
             switch ($block['type']) {
                 case 'paragraph':
@@ -37,7 +38,7 @@ class ContentEditor extends Component
                     $content = $block['content'] ?? '';
                     $totalWords += str_word_count(strip_tags($content));
                     break;
-                    
+
                 case 'list':
                     if (isset($block['items']) && is_array($block['items'])) {
                         foreach ($block['items'] as $item) {
@@ -47,7 +48,7 @@ class ContentEditor extends Component
                     break;
             }
         }
-        
+
         return $totalWords;
     }
 
@@ -324,6 +325,13 @@ class ContentEditor extends Component
                     'provider' => '', // youtube | vimeo | other
                 ]);
 
+            case 'gallery':
+                return array_merge($baseBlock, [
+                    'images' => [],
+                    'currentImage' => 0,
+                    'caption' => '',
+                ]);
+
             default:
                 return array_merge($baseBlock, [
                     'content' => '',
@@ -391,17 +399,25 @@ class ContentEditor extends Component
         try {
             // Extraer la ruta del storage desde la URL
             if (str_contains($imageUrl, '/storage/')) {
-                $relativePath = str_replace(asset('storage/'), '', $imageUrl);
+                // Quitar '/storage/' del inicio para obtener la ruta relativa
+                $relativePath = str_replace('/storage/', '', $imageUrl);
                 $fullPath = storage_path('app/public/' . $relativePath);
+
+                // Debug
+                session()->flash('debug', "Intentando eliminar archivo en: $fullPath");
 
                 // Eliminar el archivo si existe
                 if (file_exists($fullPath)) {
                     unlink($fullPath);
+                    session()->flash('debug', 'Archivo eliminado del servidor');
+                } else {
+                    session()->flash('debug', 'Archivo no encontrado en: ' . $fullPath);
                 }
             }
         } catch (\Exception $e) {
             // Silencioso: si hay error eliminando, no mostrar al usuario
             Log::warning('No se pudo eliminar imagen: ' . $e->getMessage());
+            session()->flash('debug', 'Error eliminando archivo: ' . $e->getMessage());
         }
     }
 
@@ -567,6 +583,105 @@ class ContentEditor extends Component
             }
 
             imagedestroy($image);
+        }
+    }
+
+    // Métodos para galería
+    public function updatedGalleryFiles($value, $key)
+    {
+        if (is_array($value) && !empty($value)) {
+            $blockIndex = (int) explode('.', $key)[0];
+
+            // Verificar límite de imágenes
+            $currentImageCount = count($this->blocks[$blockIndex]['images'] ?? []);
+            $maxImages = 15;
+
+            if ($currentImageCount >= $maxImages) {
+                session()->flash('error', "Máximo {$maxImages} imágenes permitidas por galería");
+                $this->galleryFiles[$blockIndex] = [];
+                return;
+            }
+
+            foreach ($value as $file) {
+                // Verificar límite antes de procesar cada imagen
+                if ($currentImageCount >= $maxImages) {
+                    session()->flash('error', "Máximo {$maxImages} imágenes permitidas. Solo se procesaron las primeras imágenes.");
+                    break;
+                }
+
+                if ($file && $file->isValid()) {
+                    try {
+                        // Usar el mismo método que las imágenes normales
+                        $imagePath = $this->processImageUpload($file);
+
+                        // Agregar URL a la galería (misma estructura que imágenes normales)
+                        $imageUrl = '/storage/' . $imagePath;
+                        if (!isset($this->blocks[$blockIndex]['images'])) {
+                            $this->blocks[$blockIndex]['images'] = [];
+                        }
+                        $this->blocks[$blockIndex]['images'][] = $imageUrl;
+                        $currentImageCount++;
+                    } catch (\Exception $e) {
+                        session()->flash('error', 'Error al subir imagen: ' . $e->getMessage());
+                    }
+                }
+            }
+
+            // Limpiar archivo temporal
+            $this->galleryFiles[$blockIndex] = [];
+        }
+    }
+
+    public function removeGalleryImage($blockIndex, $imageIndex)
+    {
+        try {
+            if (isset($this->blocks[$blockIndex]['images'][$imageIndex])) {
+                // Eliminar archivo físico usando el mismo método que las imágenes normales
+                $imageUrl = $this->blocks[$blockIndex]['images'][$imageIndex];
+
+                // Debug: verificar la URL
+                session()->flash('debug', "Intentando eliminar imagen: $imageUrl");
+
+                $this->deleteImageFromStorage($imageUrl);
+
+                // Remover de la lista
+                array_splice($this->blocks[$blockIndex]['images'], $imageIndex, 1);
+
+                // Ajustar currentImage si es necesario
+                $imagesCount = count($this->blocks[$blockIndex]['images']);
+                if ($this->blocks[$blockIndex]['currentImage'] >= $imagesCount && $imagesCount > 0) {
+                    $this->blocks[$blockIndex]['currentImage'] = $imagesCount - 1;
+                } elseif ($imagesCount === 0) {
+                    $this->blocks[$blockIndex]['currentImage'] = 0;
+                }
+
+                session()->flash('message', 'Imagen eliminada correctamente');
+            }
+        } catch (\Exception $e) {
+            session()->flash('error', 'Error al eliminar imagen: ' . $e->getMessage());
+        }
+    }
+
+    public function setGalleryImage($blockIndex, $imageIndex)
+    {
+        if (isset($this->blocks[$blockIndex]['images'][$imageIndex])) {
+            $this->blocks[$blockIndex]['currentImage'] = $imageIndex;
+        }
+    }
+
+    public function changeGalleryImage($blockIndex, $direction)
+    {
+        if (!isset($this->blocks[$blockIndex]['images']) || empty($this->blocks[$blockIndex]['images'])) {
+            return;
+        }
+
+        $currentIndex = $this->blocks[$blockIndex]['currentImage'] ?? 0;
+        $maxIndex = count($this->blocks[$blockIndex]['images']) - 1;
+
+        if ($direction === 'next' && $currentIndex < $maxIndex) {
+            $this->blocks[$blockIndex]['currentImage'] = $currentIndex + 1;
+        } elseif ($direction === 'prev' && $currentIndex > 0) {
+            $this->blocks[$blockIndex]['currentImage'] = $currentIndex - 1;
         }
     }
 

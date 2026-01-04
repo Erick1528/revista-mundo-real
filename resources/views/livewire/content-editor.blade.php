@@ -1,7 +1,7 @@
 <div class="space-y-4">
     <!-- Indicador de carga para subida de imágenes -->
     <div wire:loading.delay wire:target="blocks"
-        class="mb-4 p-3 bg-blue-100 border border-blue-400 text-blue-700 rounded flex items-center gap-2 font-opensans text-sm">
+        class="mb-4 p-3 bg-blue-100 border border-blue-400 text-blue-700 flex items-center gap-2 font-opensans text-sm">
         <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
             </circle>
@@ -14,7 +14,7 @@
 
     <!-- Header del Editor -->
     <div class="flex items-center justify-between">
-        <h3 class="font-montserrat font-medium text-primary text-lg">Editor de Contenido</h3>
+        <h3 class="font-montserrat font-medium text-primary text-lg">Bloques del Artículo</h3>
         <div class="flex items-center gap-2">
             <span class="text-sm text-gray-500 font-opensans">{{ count($blocks) }} bloque(s)</span>
             <button type="button"
@@ -25,27 +25,118 @@
     </div>
 
     <!-- Área de contenido -->
-    <div class="border border-gray-300 bg-white {{ empty($blocks) ? 'min-h-[400px]' : 'min-h-0' }}">
+    <div class="border border-gray-300 bg-white {{ empty($blocks) ? 'min-h-[200px]' : 'min-h-0' }}">
 
         @if (empty($blocks))
             <!-- Estado vacío -->
-            <div class="flex flex-col items-center justify-center py-16 text-center">
-                <div class="text-6xl mb-4">📝</div>
-                <h4 class="font-montserrat font-medium text-primary text-lg mb-2">Comienza a escribir tu artículo</h4>
-                <p class="text-gray-500 font-opensans mb-6 max-w-md">
-                    Agrega bloques de contenido como texto, imágenes, videos y más para crear un artículo atractivo.
-                </p>
-                <div class="space-y-3">
+            @if (!$showBlockSelector)
+                <div class="flex flex-col items-center justify-center py-12 text-center">
+                    <h4 class="font-montserrat font-medium text-primary text-lg mb-2">Comienza a escribir tu artículo
+                    </h4>
+                    <p class="text-gray-500 font-opensans mb-6 max-w-md">
+                        Agrega bloques de contenido como texto, imágenes, videos y más para crear un artículo atractivo.
+                    </p>
                     <button type="button" wire:click="testClick"
                         class="px-6 py-3 bg-primary text-white font-montserrat font-medium hover:bg-dark-sage transition-colors">
                         + Agregar primer bloque
                     </button>
-                    <button type="button" wire:click="openBlockSelector"
-                        class="px-6 py-3 bg-gray-500 text-white font-montserrat font-medium hover:bg-gray-600 transition-colors">
-                        Test alternativo
-                    </button>
                 </div>
-            </div>
+            @else
+                <!-- Panel de tipos de bloque -->
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="font-montserrat font-medium text-primary text-lg">Selecciona un tipo de bloque</h4>
+                        <button type="button" wire:click="closeBlockSelector"
+                            class="text-gray-400 hover:text-gray-600 transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button type="button" wire:click="addBlock('paragraph', null)"
+                            class="flex items-center gap-3 p-4 text-left hover:bg-gray-50 border border-gray-200 transition-colors">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                            </svg>
+                            <div>
+                                <div class="font-opensans font-medium text-sm">Párrafo</div>
+                                <div class="font-opensans text-xs text-gray-500">Texto normal</div>
+                            </div>
+                        </button>
+                        <button type="button" wire:click="addBlock('heading', null)"
+                            class="flex items-center gap-3 p-4 text-left hover:bg-gray-50 border border-gray-200 transition-colors">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                            </svg>
+                            <div>
+                                <div class="font-opensans font-medium text-sm">Encabezado</div>
+                                <div class="font-opensans text-xs text-gray-500">H2, H3, H4</div>
+                            </div>
+                        </button>
+                        <button type="button" wire:click="addBlock('image', null)"
+                            class="flex items-center gap-3 p-4 text-left hover:bg-gray-50 border border-gray-200 transition-colors">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <div>
+                                <div class="font-opensans font-medium text-sm">Imagen</div>
+                                <div class="font-opensans text-xs text-gray-500">Subir archivo</div>
+                            </div>
+                        </button>
+                        <button type="button" wire:click="addBlock('quote', null)"
+                            class="flex items-center gap-3 p-4 text-left hover:bg-gray-50 border border-gray-200 transition-colors">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                            </svg>
+                            <div>
+                                <div class="font-opensans font-medium text-sm">Cita</div>
+                                <div class="font-opensans text-xs text-gray-500">Destacar texto</div>
+                            </div>
+                        </button>
+                        <button type="button" wire:click="addBlock('list', null)"
+                            class="flex items-center gap-3 p-4 text-left hover:bg-gray-50 border border-gray-200 transition-colors">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                            </svg>
+                            <div>
+                                <div class="font-opensans font-medium text-sm">Lista</div>
+                                <div class="font-opensans text-xs text-gray-500">Con viñetas o numerada</div>
+                            </div>
+                        </button>
+                        <button type="button" wire:click="addBlock('video', null)"
+                            class="flex items-center gap-3 p-4 text-left hover:bg-gray-50 border border-gray-200 transition-colors">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                            </svg>
+                            <div>
+                                <div class="font-opensans font-medium text-sm">Video</div>
+                                <div class="font-opensans text-xs text-gray-500">YouTube, Vimeo</div>
+                            </div>
+                        </button>
+                        <button type="button" wire:click="addBlock('gallery', null)"
+                            class="flex items-center gap-3 p-4 text-left hover:bg-gray-50 border border-gray-200 transition-colors">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                            </svg>
+                            <div>
+                                <div class="font-opensans font-medium text-sm">Galería</div>
+                                <div class="font-opensans text-xs text-gray-500">Múltiples imágenes</div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            @endif
         @else
             <!-- Bloques de contenido -->
             <div class="p-6 space-y-8">
@@ -118,21 +209,57 @@
                                                 </span>
                                             </div>
                                         </div>
-                                        <textarea id="paragraph-{{ $index }}" rows="4"
-                                            placeholder="Escribe tu párrafo aquí... Usa *cursiva* y **negrita**"
-                                            class="w-full border-0 resize-none focus:outline-none font-opensans text-sm leading-relaxed p-2"
-                                            wire:model.blur="blocks.{{ $index }}.content">{{ $block['content'] ?? '' }}</textarea>
+                                        <textarea id="paragraph-{{ $index }}"
+                                            placeholder="Escribe tu contenido aquí... Soporta *cursiva*, **negrita**, listas (- elemento) y saltos de línea"
+                                            class="w-full border-0 focus:outline-none font-opensans text-sm leading-relaxed p-2 min-h-20 resize-none"
+                                            style="field-sizing: content;" wire:model.blur="blocks.{{ $index }}.content">{{ $block['content'] ?? '' }}</textarea>
 
                                         @if (!empty($block['content']))
                                             <div class="border-t border-gray-100 pt-2">
-                                                <div class="text-xs text-gray-500 font-opensans mb-1">Vista previa:</div>
-                                                <div
-                                                    class="text-sm font-opensans leading-relaxed text-gray-700 bg-gray-50 p-2 border border-gray-200">
-                                                    {!! preg_replace(
-                                                        ['/\*\*\*(.*?)\*\*\*/', '/\*\*(.*?)\*\*/', '/\*(.*?)\*/'],
-                                                        ['<strong><em>$1</em></strong>', '<strong>$1</strong>', '<em>$1</em>'],
-                                                        e($block['content']),
-                                                    ) !!}
+                                                <button type="button"
+                                                    class="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 font-opensans mb-1 transition-colors"
+                                                    onclick="this.nextElementSibling.classList.toggle('hidden')">
+                                                    <svg class="w-3 h-3 transform transition-transform" fill="none"
+                                                        stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                            d="M19 9l-7 7-7-7" />
+                                                    </svg>
+                                                    Vista previa
+                                                </button>
+                                                <div class="hidden">
+                                                    <div
+                                                        class="text-sm font-opensans leading-relaxed text-gray-700 bg-gray-50 p-2 border border-gray-200 whitespace-pre-line">
+                                                        @php
+                                                            $content = e($block['content']);
+                                                            // Aplicar formato básico
+                                                            $content = preg_replace(
+                                                                [
+                                                                    '/\*\*\*(.*?)\*\*\*/',
+                                                                    '/\*\*(.*?)\*\*/',
+                                                                    '/\*(.*?)\*/',
+                                                                ],
+                                                                [
+                                                                    '<strong><em>$1</em></strong>',
+                                                                    '<strong>$1</strong>',
+                                                                    '<em>$1</em>',
+                                                                ],
+                                                                $content,
+                                                            );
+
+                                                            // Procesar listas (reemplazar toda la línea)
+                                                            $content = preg_replace(
+                                                                '/^- (.+)/m',
+                                                                '<span class="flex items-start gap-1"><span>•</span><span>$1</span></span>',
+                                                                $content,
+                                                            );
+                                                            $content = preg_replace(
+                                                                '/^\d+\. (.+)/m',
+                                                                '<span class="flex items-start gap-1"><span>$0</span></span>',
+                                                                $content,
+                                                            );
+                                                        @endphp
+                                                        {!! $content !!}
+                                                    </div>
                                                 </div>
                                             </div>
                                         @endif
@@ -313,7 +440,7 @@
                                                     <div class="w-full flex flex-col items-center justify-center py-4 text-center"
                                                         wire:loading wire:target="blocks.{{ $index }}.image_file">
                                                         <div
-                                                            class="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto">
+                                                            class="w-6 h-6 border-2 border-primary border-t-transparent animate-spin mx-auto">
                                                         </div>
                                                         <span
                                                             class="mt-3 text-primary font-opensans text-sm">Cargando...</span>
@@ -345,7 +472,7 @@
                                                 <div class="w-full flex flex-col items-center justify-center py-8 text-center"
                                                     wire:loading wire:target="blocks.{{ $index }}.image_file">
                                                     <div
-                                                        class="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto">
+                                                        class="w-6 h-6 border-2 border-primary border-t-transparent animate-spin mx-auto">
                                                     </div>
                                                     <span class="mt-3 text-primary font-opensans text-sm">Cargando...</span>
                                                 </div>
@@ -532,6 +659,144 @@
                                     </div>
                                 @break
 
+                                @case('gallery')
+                                    <div class="space-y-4">
+                                        <div class="flex items-center justify-between mb-3">
+                                            <div class="flex items-center gap-2">
+                                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                                </svg>
+                                                <span class="text-xs text-gray-500 font-opensans font-medium">GALERÍA</span>
+                                            </div>
+                                        </div>
+
+                                        @php
+                                            $images = $block['images'] ?? [];
+                                            $currentImage = $block['currentImage'] ?? 0;
+                                        @endphp
+
+                                        <!-- Spinner de carga para galería -->
+                                        <div class="w-full flex flex-col items-center justify-center py-8 text-center"
+                                            wire:loading wire:target="galleryFiles.{{ $index }}">
+                                            <div
+                                                class="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto">
+                                            </div>
+                                            <span class="mt-3 text-primary font-opensans text-sm">Subiendo imágenes...</span>
+                                        </div>
+
+                                        <!-- Contenedor principal (ocultar durante carga) -->
+                                        <div wire:loading.remove wire:target="galleryFiles.{{ $index }}">
+
+                                            <!-- Imagen principal -->
+                                            @if (!empty($images))
+                                                <div class="relative border border-gray-200 bg-white">
+                                                    <img src="{{ $images[$currentImage] }}"
+                                                        alt="Imagen {{ $currentImage + 1 }}"
+                                                        class="w-full h-auto max-h-96 object-contain">
+                                                    <!-- Botón eliminar solo en imagen principal -->
+                                                    <button type="button"
+                                                        wire:click="removeGalleryImage({{ $index }}, {{ $currentImage }})"
+                                                        class="absolute top-2 right-2 z-10 h-8 w-8 text-primary hover:text-white transition-colors flex items-center justify-center"
+                                                        style="hover:background-color: var(--color-red-light);"
+                                                        onmouseover="this.style.backgroundColor='var(--color-red-light)'"
+                                                        onmouseout="this.style.backgroundColor='transparent'">
+                                                        <x-close-svg width="20px" height="20px" fill="currentColor" />
+                                                    </button>
+
+                                                    <!-- Contador simple -->
+                                                    <div
+                                                        class="absolute bottom-3 right-3 bg-black bg-opacity-70 text-white px-3 py-1 text-xs font-opensans whitespace-nowrap min-w-0">
+                                                        {{ $currentImage + 1 }} / {{ count($images) }}
+                                                    </div>
+                                                </div>
+                                            @endif
+
+                                            <!-- Miniaturas + botón agregar (solo si hay imágenes) -->
+                                            @if (!empty($images))
+                                                <div class="flex gap-2 overflow-x-auto py-2">
+                                                    @foreach ($images as $imageIndex => $imageUrl)
+                                                        <div class="flex-shrink-0">
+                                                            <img src="{{ $imageUrl }}"
+                                                                alt="Imagen {{ $imageIndex + 1 }}"
+                                                                class="w-16 h-16 object-cover border-2 cursor-pointer transition-colors {{ $imageIndex === $currentImage ? 'border-primary' : 'border-gray-300 hover:border-gray-400' }}"
+                                                                wire:click="setGalleryImage({{ $index }}, {{ $imageIndex }})">
+                                                        </div>
+                                                    @endforeach
+
+                                                    <!-- Miniatura para agregar nueva imagen (solo si no se alcanzó el límite) -->
+                                                    @if (count($images) < 15)
+                                                        <label class="flex-shrink-0 cursor-pointer">
+                                                            <div
+                                                                class="w-16 h-16 border-2 border-dashed border-gray-300 hover:border-primary transition-colors flex items-center justify-center bg-gray-50 hover:bg-gray-100">
+                                                                <svg class="w-6 h-6 text-gray-400" fill="none"
+                                                                    stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                                        stroke-width="2" d="M12 4v16m8-8H4" />
+                                                                </svg>
+                                                            </div>
+                                                            <input type="file" multiple accept="image/*"
+                                                                wire:model="galleryFiles.{{ $index }}" class="hidden">
+                                                        </label>
+                                                    @endif
+                                                </div>
+                                            @endif
+
+                                            <!-- Área de subida inicial (solo si no hay imágenes) -->
+                                            @if (empty($images))
+                                                <label class="block cursor-pointer">
+                                                    <div
+                                                        class="border-2 border-dashed border-gray-300 hover:border-primary transition-colors p-8 text-center">
+                                                        <svg class="mx-auto h-12 w-12 text-gray-400 mb-4"
+                                                            stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                                            <path
+                                                                d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                                                                stroke-width="2" stroke-linecap="round"
+                                                                stroke-linejoin="round" />
+                                                        </svg>
+                                                        <span class="font-opensans text-primary hover:text-primary/80">Agregar
+                                                            imágenes a la galería</span>
+                                                        <p class="text-xs text-gray-500 font-opensans mt-2">Selecciona
+                                                            múltiples archivos (máximo 15)</p>
+                                                    </div>
+                                                    <input type="file" multiple accept="image/*"
+                                                        wire:model="galleryFiles.{{ $index }}" class="hidden">
+                                                </label>
+                                            @endif
+
+                                            <!-- Mensaje de límite alcanzado -->
+                                            @if (!empty($images) && count($images) >= 15)
+                                                <div class="mt-2 p-2 bg-yellow-50 border border-yellow-200 text-center">
+                                                    <p class="text-xs text-yellow-700 font-opensans">
+                                                        Límite de 15 imágenes alcanzado
+                                                    </p>
+                                                </div>
+                                            @endif
+
+                                            <!-- Botones de navegación simples -->
+                                            @if (count($images) > 1)
+                                                <div class="flex justify-between mt-3">
+                                                    <button type="button"
+                                                        wire:click="changeGalleryImage({{ $index }}, 'prev')"
+                                                        class="px-3 py-2 bg-white border border-gray-300 hover:bg-gray-50 font-opensans text-sm {{ $currentImage === 0 ? 'opacity-50 cursor-not-allowed' : '' }}"
+                                                        {{ $currentImage === 0 ? 'disabled' : '' }}>
+                                                        ← Anterior
+                                                    </button>
+
+                                                    <button type="button"
+                                                        wire:click="changeGalleryImage({{ $index }}, 'next')"
+                                                        class="px-3 py-2 bg-white border border-gray-300 hover:bg-gray-50 font-opensans text-sm {{ $currentImage === count($images) - 1 ? 'opacity-50 cursor-not-allowed' : '' }}"
+                                                        {{ $currentImage === count($images) - 1 ? 'disabled' : '' }}>
+                                                        Siguiente →
+                                                    </button>
+                                                </div>
+                                            @endif
+
+                                        </div>
+                                    </div>
+                                @break
+
                                 @default
                                     <div class="text-center py-4 text-gray-500">
                                         <p class="font-opensans text-sm">Tipo de bloque no reconocido</p>
@@ -551,113 +816,113 @@
                             </button>
                         </div>
                     </div>
+
+                    <!-- Selector de tipos de bloque (aparece después del bloque seleccionado) -->
+                    @if ($showBlockSelector && $blockSelectorIndex === $index)
+                        <div class="p-6 bg-gray-50 border border-gray-200">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="font-opensans font-medium text-sm text-gray-700">Selecciona un tipo de
+                                    bloque</h3>
+                                <button type="button" wire:click="closeBlockSelector"
+                                    class="text-gray-400 hover:text-gray-600 transition-colors">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <button type="button" wire:click="addBlock('paragraph', {{ $index }})"
+                                    class="flex items-center gap-3 p-4 text-left hover:bg-gray-50 border border-gray-200 transition-colors">
+                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                    </svg>
+                                    <div>
+                                        <div class="font-opensans font-medium text-sm">Párrafo</div>
+                                        <div class="font-opensans text-xs text-gray-500">Texto normal</div>
+                                    </div>
+                                </button>
+                                <button type="button" wire:click="addBlock('heading', {{ $index }})"
+                                    class="flex items-center gap-3 p-4 text-left hover:bg-gray-50 border border-gray-200 transition-colors">
+                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                    </svg>
+                                    <div>
+                                        <div class="font-opensans font-medium text-sm">Encabezado</div>
+                                        <div class="font-opensans text-xs text-gray-500">H2, H3, H4</div>
+                                    </div>
+                                </button>
+                                <button type="button" wire:click="addBlock('image', {{ $index }})"
+                                    class="flex items-center gap-3 p-4 text-left hover:bg-gray-50 border border-gray-200 transition-colors">
+                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                    <div>
+                                        <div class="font-opensans font-medium text-sm">Imagen</div>
+                                        <div class="font-opensans text-xs text-gray-500">Subir archivo</div>
+                                    </div>
+                                </button>
+                                <button type="button" wire:click="addBlock('quote', {{ $index }})"
+                                    class="flex items-center gap-3 p-4 text-left hover:bg-gray-50 border border-gray-200 transition-colors">
+                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                    </svg>
+                                    <div>
+                                        <div class="font-opensans font-medium text-sm">Cita</div>
+                                        <div class="font-opensans text-xs text-gray-500">Destacar texto</div>
+                                    </div>
+                                </button>
+                                <button type="button" wire:click="addBlock('list', {{ $index }})"
+                                    class="flex items-center gap-3 p-4 text-left hover:bg-gray-50 border border-gray-200 transition-colors">
+                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                                    </svg>
+                                    <div>
+                                        <div class="font-opensans font-medium text-sm">Lista</div>
+                                        <div class="font-opensans text-xs text-gray-500">Con viñetas o numerada</div>
+                                    </div>
+                                </button>
+                                <button type="button" wire:click="addBlock('video', {{ $index }})"
+                                    class="flex items-center gap-3 p-4 text-left hover:bg-gray-50 border border-gray-200 transition-colors">
+                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                    </svg>
+                                    <div>
+                                        <div class="font-opensans font-medium text-sm">Video</div>
+                                        <div class="font-opensans text-xs text-gray-500">YouTube, Vimeo</div>
+                                    </div>
+                                </button>
+                                <button type="button" wire:click="addBlock('gallery', {{ $index }})"
+                                    class="flex items-center gap-3 p-4 text-left hover:bg-gray-50 border border-gray-200 transition-colors">
+                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                    </svg>
+                                    <div>
+                                        <div class="font-opensans font-medium text-sm">Galería</div>
+                                        <div class="font-opensans text-xs text-gray-500">Múltiples imágenes</div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    @endif
                 @endforeach
             </div>
         @endif
 
-    </div>
-
-    <!-- Debug info -->
-    @if (session('debug'))
-        <div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 text-sm">
-            {{ session('debug') }} - showBlockSelector: {{ $showBlockSelector ? 'true' : 'false' }}
-        </div>
-    @endif
-
-    <!-- Panel de tipos de bloque (aparece al hacer clic en +) -->
-    @if ($showBlockSelector)
-        <div class="bg-white border-2 border-primary shadow-lg p-4 space-y-2 mt-4">
-            <div class="flex items-center justify-between mb-3">
-                <h4 class="font-montserrat font-medium text-primary text-sm">Selecciona un tipo de bloque</h4>
-                <button type="button" wire:click="closeBlockSelector"
-                    class="text-gray-400 hover:text-gray-600 transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-            <div class="grid grid-cols-2 gap-2">
-                <button type="button" wire:click="addBlock('paragraph', {{ $blockSelectorIndex ?? 'null' }})"
-                    class="flex items-center gap-3 p-3 text-left hover:bg-gray-50 border border-gray-200 transition-colors">
-                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                    </svg>
-                    <div>
-                        <div class="font-opensans font-medium text-sm">Párrafo</div>
-                        <div class="font-opensans text-xs text-gray-500">Texto normal</div>
-                    </div>
-                </button>
-                <button type="button" wire:click="addBlock('heading', {{ $blockSelectorIndex ?? 'null' }})"
-                    class="flex items-center gap-3 p-3 text-left hover:bg-gray-50 border border-gray-200 transition-colors">
-                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                    </svg>
-                    <div>
-                        <div class="font-opensans font-medium text-sm">Encabezado</div>
-                        <div class="font-opensans text-xs text-gray-500">H2, H3, H4</div>
-                    </div>
-                </button>
-                <button type="button" wire:click="addBlock('image', {{ $blockSelectorIndex ?? 'null' }})"
-                    class="flex items-center gap-3 p-3 text-left hover:bg-gray-50 border border-gray-200 transition-colors">
-                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <div>
-                        <div class="font-opensans font-medium text-sm">Imagen</div>
-                        <div class="font-opensans text-xs text-gray-500">Subir archivo</div>
-                    </div>
-                </button>
-                <button type="button" wire:click="addBlock('quote', {{ $blockSelectorIndex ?? 'null' }})"
-                    class="flex items-center gap-3 p-3 text-left hover:bg-gray-50 border border-gray-200 transition-colors">
-                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                    </svg>
-                    <div>
-                        <div class="font-opensans font-medium text-sm">Cita</div>
-                        <div class="font-opensans text-xs text-gray-500">Destacar texto</div>
-                    </div>
-                </button>
-                <button type="button" wire:click="addBlock('list', {{ $blockSelectorIndex ?? 'null' }})"
-                    class="flex items-center gap-3 p-3 text-left hover:bg-gray-50 border border-gray-200 transition-colors">
-                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                    </svg>
-                    <div>
-                        <div class="font-opensans font-medium text-sm">Lista</div>
-                        <div class="font-opensans text-xs text-gray-500">Con viñetas o numerada</div>
-                    </div>
-                </button>
-                <button type="button" wire:click="addBlock('video', {{ $blockSelectorIndex ?? 'null' }})"
-                    class="flex items-center gap-3 p-3 text-left hover:bg-gray-50 border border-gray-200 transition-colors">
-                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                    </svg>
-                    <div>
-                        <div class="font-opensans font-medium text-sm">Video</div>
-                        <div class="font-opensans text-xs text-gray-500">YouTube, Vimeo</div>
-                    </div>
-                </button>
-            </div>
-        </div>
-    @endif
-
-    <!-- Debug temporal -->
-    <div class="text-xs text-gray-500 mt-2 p-2 bg-gray-100 border">
-        <strong>Debug Info:</strong><br>
-        showBlockSelector = {{ $showBlockSelector ? 'true' : 'false' }}<br>
-        blockSelectorIndex = {{ $blockSelectorIndex ?? 'null' }}<br>
-        bloques = {{ count($blocks) }}<br>
-        Livewire ID = {{ $this->getId() }}<br>
-        @if (session('debug'))
-            <span class="text-green-600">{{ session('debug') }}</span>
-        @endif
     </div>
 </div>
 
