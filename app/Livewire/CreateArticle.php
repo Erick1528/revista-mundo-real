@@ -422,6 +422,19 @@ class CreateArticle extends Component
                     }
                     break;
 
+                case 'gallery':
+                    if (empty($block['images']) || !is_array($block['images']) || count($block['images']) === 0) {
+                        $errors[] = "Bloque #$blockNumber (Galería): Debe tener al menos una imagen";
+                    } else {
+                        // Validar que las URLs de imágenes sean válidas
+                        foreach ($block['images'] as $index => $imageUrl) {
+                            if (empty(trim($imageUrl))) {
+                                $errors[] = "Bloque #$blockNumber (Galería): Imagen #" . ($index + 1) . " tiene una URL vacía";
+                            }
+                        }
+                    }
+                    break;
+
                 case 'separator':
                     // Los separadores no necesitan validación de contenido
                     break;
@@ -438,6 +451,8 @@ class CreateArticle extends Component
     private function proceedWithValidation()
     {
         try {
+            session()->flash('message', 'Artículo creado exitosamente.');
+            return redirect()->route('dashboard');
             // Limpiar errores previos de contenido
             $this->contentErrors = [];
 
@@ -506,7 +521,7 @@ class CreateArticle extends Component
             $this->resetFormData();
 
             // Redireccionar al dashboard con mensaje de éxito
-            session()->flash('success', 'Artículo creado exitosamente.');
+            session()->flash('message', 'Artículo creado exitosamente.');
             return redirect()->route('dashboard');
         } catch (\Illuminate\Validation\ValidationException $e) {
             $this->handleValidationErrors($e);
