@@ -451,8 +451,6 @@ class CreateArticle extends Component
     private function proceedWithValidation()
     {
         try {
-            // session()->flash('message', 'Artículo creado exitosamente.');
-            // return redirect()->route('dashboard');
             // Limpiar errores previos de contenido
             $this->contentErrors = [];
 
