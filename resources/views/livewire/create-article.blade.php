@@ -145,9 +145,40 @@
             <div id="section-content"
                 class="accordion-content px-6 py-6 space-y-6 border-t border-gray-lighter @if (!$openSections['content']) hidden @endif">
                 <livewire:content-editor />
+
                 @error('content')
                     <p class="text-red-500 text-xs font-opensans mt-1">{{ $message }}</p>
                 @enderror
+
+                <!-- Mostrar errores específicos de validación de contenido -->
+                @if (!empty($contentErrors))
+                    <div class="w-full p-4 bg-red-50 border border-red-200 text-red-800">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <div class="flex items-center mb-2">
+                                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                                            clip-rule="evenodd"></path>
+                                    </svg>
+                                    <span class="font-opensans text-sm font-medium">Errores en el contenido:</span>
+                                </div>
+                                <div class="space-y-1">
+                                    @foreach ($contentErrors as $error)
+                                        <p class="font-opensans text-xs ml-7">• {{ $error }}</p>
+                                    @endforeach
+                                </div>
+                            </div>
+                            <button type="button" wire:click="$set('contentErrors', [])"
+                                class="text-red-600 hover:text-red-800 transition-colors ml-4 flex-shrink-0">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                @endif
             </div>
         </div>
 
@@ -482,11 +513,25 @@
 
         <div class="flex flex-col sm:flex-row gap-4 pt-4">
             <button wire:click.prevent="store"
-                class=" flex-1 h-12 bg-primary text-white text-base font-semibold font-montserrat">Publicar
-                Artículo</button>
+                class="flex-1 h-12 bg-primary text-white text-base font-semibold font-montserrat flex items-center justify-center gap-2 transition-colors disabled:opacity-70"
+                wire:loading.attr="disabled" wire:target="store">
+                <!-- Spinner de carga -->
+                <div wire:loading wire:target="store" class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <!-- Texto del botón -->
+                <span wire:loading.remove wire:target="store">Publicar Artículo</span>
+                <span wire:loading wire:target="store">Publicando...</span>
+            </button>
+            
             <button wire:click.prevent="saveDraft"
-                class="flex-1 h-12 text-base font-semibold font-montserrat border border-primary hover:bg-sage transition-colors">Guardar
-                Borrador</button>
+                class="flex-1 h-12 text-base font-semibold font-montserrat border border-primary hover:bg-sage transition-colors flex items-center justify-center gap-2 disabled:opacity-70"
+                wire:loading.attr="disabled" wire:target="saveDraft">
+                <!-- Spinner de carga -->
+                <div wire:loading wire:target="saveDraft" class="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                <!-- Texto del botón -->
+                <span wire:loading.remove wire:target="saveDraft">Guardar Borrador</span>
+                <span wire:loading wire:target="saveDraft">Guardando...</span>
+            </button>
+            
             <a href="" wire:click.prevent="cancel"
                 class="flex-1 flex justify-center items-center h-12 text-base font-semibold font-montserrat border text-gray-light border-gray-light hover:bg-sage transition-colors">Cancelar</a>
         </div>

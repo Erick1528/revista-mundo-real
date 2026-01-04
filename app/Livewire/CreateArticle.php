@@ -61,6 +61,9 @@ class CreateArticle extends Component
     // Flag para controlar el flujo de validación
     public $waitingForContentData = false;
 
+    // Errores específicos de validación de contenido
+    public $contentErrors = [];
+
     public function updatedImage()
     {
         // Validar extensión inmediatamente cuando se selecciona archivo
@@ -356,10 +359,112 @@ class CreateArticle extends Component
         }
     }
 
+    private function validateBlocks()
+    {
+        $errors = [];
+
+        for ($i = 0; $i < count($this->content); $i++) {
+            $block = $this->content[$i];
+            $blockNumber = $i + 1;
+
+            // Verificar que el bloque tenga tipo
+            if (!isset($block['type'])) {
+                $errors[] = "Bloque #$blockNumber: Tipo de bloque no válido";
+                continue;
+            }
+
+            // Validar contenido según el tipo de bloque
+            switch ($block['type']) {
+                case 'paragraph':
+                    if (empty(trim($block['content'] ?? ''))) {
+                        $errors[] = "Bloque #$blockNumber (Párrafo): No puede estar vacío";
+                    }
+                    break;
+
+                case 'heading':
+                    if (empty(trim($block['content'] ?? ''))) {
+                        $errors[] = "Bloque #$blockNumber (Título): No puede estar vacío";
+                    }
+                    break;
+
+                case 'quote':
+                    if (empty(trim($block['content'] ?? ''))) {
+                        $errors[] = "Bloque #$blockNumber (Cita): No puede estar vacío";
+                    }
+                    break;
+
+                case 'list':
+                    if (empty($block['items']) || !is_array($block['items'])) {
+                        $errors[] = "Bloque #$blockNumber (Lista): Debe tener al menos un elemento";
+                    } else {
+                        $hasContent = false;
+                        foreach ($block['items'] as $item) {
+                            if (!empty(trim($item))) {
+                                $hasContent = true;
+                                break;
+                            }
+                        }
+                        if (!$hasContent) {
+                            $errors[] = "Bloque #$blockNumber (Lista): Debe tener al menos un elemento con contenido";
+                        }
+                    }
+                    break;
+
+                case 'image':
+                    if (empty($block['url'] ?? '')) {
+                        $errors[] = "Bloque #$blockNumber (Imagen): Debe tener una URL válida";
+                    }
+                    break;
+
+                case 'video':
+                    if (empty($block['url'] ?? '')) {
+                        $errors[] = "Bloque #$blockNumber (Video): Debe tener una URL válida";
+                    }
+                    break;
+
+                case 'separator':
+                    // Los separadores no necesitan validación de contenido
+                    break;
+
+                default:
+                    $errors[] = "Bloque #$blockNumber: Tipo desconocido '{$block['type']}'";
+                    break;
+            }
+        }
+
+        return $errors;
+    }
+
     private function proceedWithValidation()
     {
         try {
-            $this->validate();
+            // Limpiar errores previos de contenido
+            $this->contentErrors = [];
+
+            // Si hay bloques, limpiar error de validación de Laravel para content
+            if (!empty($this->content)) {
+                $this->resetErrorBag('content');
+            }
+
+            // Validar bloques de contenido antes de la validación general
+            $blockErrors = $this->validateBlocks();
+            if (!empty($blockErrors)) {
+                // Guardar errores en la propiedad específica
+                $this->contentErrors = $blockErrors;
+                // Abrir la sección de contenido para mostrar los errores
+                $this->openSections['content'] = true;
+                session()->flash('error', 'Hay errores en el contenido del artículo. Revisa los bloques vacíos.');
+                return;
+            }
+
+            // Si hay bloques, validar sin las reglas de content para evitar mensaje duplicado
+            if (!empty($this->content)) {
+                $rules = $this->rules;
+                unset($rules['content']);
+                $this->validate($rules);
+            } else {
+                $this->validate();
+            }
 
             // Preparar datos del artículo
             $articleData = [
@@ -498,6 +603,7 @@ class CreateArticle extends Component
 
         // Resetear flags
         $this->waitingForContentData = false;
+        $this->contentErrors = [];
 
         // Limpiar errores
         $this->resetValidation();
