@@ -49,7 +49,7 @@ class Login extends Component
 
             // Cerrar Modal y redireccionar a dashboard
             $this->closeModal();
-            redirect()->route('dashboard');
+            return $this->redirect(route('dashboard'));
         }
 
         // Solo se ejecuta si el login falló
