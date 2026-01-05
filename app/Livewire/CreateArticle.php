@@ -9,11 +9,12 @@ use Livewire\WithFileUploads;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 
-// TODO: Agregar validación para el editor de contenido, verificar cada bloque y ver si tiene contenido válido
-// Mostrar error o exito en la vista de dashboard al crear artículo
+// TODO:
 // Mejorar el editor de contenido para manejar listas, texto enriquecido, titulos y otras cosas en un mismo bloque
 // Calcular el tiempo de lectura automáticamente basado en el contenido
-// Agregar spinner de carga al publicar articulo
+// Agregar campo de caption para la galeria de imagenes
+// Mejorar el bloque de imagen (alt text, credits, tamaños, layouts)
+// Agregar bloques faltantes
 
 class CreateArticle extends Component
 {
@@ -63,6 +64,9 @@ class CreateArticle extends Component
 
     // Errores específicos de validación de contenido
     public $contentErrors = [];
+
+    // Modal de confirmación para cancelar
+    public $showCancelModal = false;
 
     public function updatedImage()
     {
@@ -571,7 +575,23 @@ class CreateArticle extends Component
 
     public function cancel()
     {
-        dd('Cancelar creación');
+        $this->showCancelModal = true;
+    }
+
+    public function confirmCancel()
+    {
+        $this->resetFormData();
+        
+        // Enviar dispatch al content-editor para limpiar recursos de bloques de imagen/galería
+        $this->dispatch('cleanupBlockResources');
+        
+        session()->flash('message', 'Creación de artículo cancelada');
+        return redirect()->route('dashboard'); // Ajustar ruta según tu aplicación
+    }
+
+    public function closeCancelModal()
+    {
+        $this->showCancelModal = false;
     }
 
     private function resetFormData()
