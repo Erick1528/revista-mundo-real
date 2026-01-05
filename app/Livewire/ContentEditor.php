@@ -11,10 +11,14 @@ class ContentEditor extends Component
     use WithFileUploads;
     public $blocks = [];
     public $showBlockSelector = false;
+    public $showMoreBlocks = false;
     public $blockSelectorIndex = null;
     public $galleryFiles = [];
 
-    protected $listeners = ['requestContentData' => 'provideContentData'];
+    protected $listeners = [
+        'requestContentData' => 'provideContentData',
+        'cleanupBlockResources' => 'cleanupAllBlockResources',
+    ];
 
     public function provideContentData()
     {
@@ -24,6 +28,25 @@ class ContentEditor extends Component
             'word_count' => $this->calculateWordCount(),
             'blocks_count' => count($this->blocks)
         ]);
+    }
+
+    public function cleanupAllBlockResources()
+    {
+        // Primero eliminar todas las galerías
+        foreach ($this->blocks as $block) {
+            if ($block['type'] === 'gallery' && !empty($block['images'])) {
+                foreach ($block['images'] as $imagePath) {
+                    $this->deleteImageFromStorage($imagePath);
+                }
+            }
+        }
+
+        // Después eliminar todas las imágenes
+        foreach ($this->blocks as $block) {
+            if ($block['type'] === 'image' && !empty($block['url'])) {
+                $this->deleteImageFromStorage($block['url']);
+            }
+        }
     }
 
     private function calculateWordCount()
@@ -106,6 +129,11 @@ class ContentEditor extends Component
         $this->blockSelectorIndex = null;
     }
 
+    public function toggleMoreBlocks()
+    {
+        $this->showMoreBlocks = !$this->showMoreBlocks;
+    }
+
     public function deleteBlock($index)
     {
         try {
@@ -115,6 +143,13 @@ class ContentEditor extends Component
                 // Si es un bloque de imagen, eliminar la imagen del storage
                 if ($block['type'] === 'image' && !empty($block['url'])) {
                     $this->deleteImageFromStorage($block['url']);
+                }
+
+                // Si es un bloque de galería, eliminar todas las imágenes del storage
+                if ($block['type'] === 'gallery' && !empty($block['images'])) {
+                    foreach ($block['images'] as $imageUrl) {
+                        $this->deleteImageFromStorage($imageUrl);
+                    }
                 }
 
                 // Eliminar el bloque del array
@@ -217,6 +252,11 @@ class ContentEditor extends Component
                         $duplicatedBlock['url'] = $blockToDuplicate['url'] ?? '';
                         $duplicatedBlock['caption'] = $blockToDuplicate['caption'] ?? '';
                         $duplicatedBlock['provider'] = $blockToDuplicate['provider'] ?? '';
+                        break;
+
+                    case 'gallery':
+                        $duplicatedBlock['images'] = [];
+                        $duplicatedBlock['currentImage'] = 0;
                         break;
 
                     default:
