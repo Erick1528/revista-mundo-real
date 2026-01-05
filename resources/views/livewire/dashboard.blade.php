@@ -1,4 +1,4 @@
-<div class=" px-10 lg:px-[120px] py-12 max-w-[1200px] mx-auto w-full">
+<div class=" px-4 sm:px-10 lg:px-[120px] py-12 max-w-[1200px] mx-auto w-full">
 
     <h2 class=" mb-6 font-serif text-3xl text-primary">Acciones Rápidas</h2>
 
