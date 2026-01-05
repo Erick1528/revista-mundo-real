@@ -6,8 +6,8 @@
                 Administración</h1>
             <p class=" text-[12px] sm:text-sm font-montserrat text-left mt-3 text-gray-light uppercase">
                 Bienvenido al panel editorial de Revista Mundo Real</p>
-        @elseif (request()->is('articles/create'))
-            <a href="javascript:history.back()"
+        @elseif ($showCreateArticleView)
+            <button wire:click="cancelCreateArticle"
                 class="inline-flex items-center gap-2 text-primary hover:text-dark-sage transition-colors mb-8">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
@@ -15,7 +15,7 @@
                         d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
                 <p class=" text-sm font-montserrat">Volver al Dashboard</p>
-            </a>
+            </button>
 
             <h1 class=" text-4xl sm:text-5xl font-serif text-left text-primary text-balance font-normal">Crear Nuevo
                 Artículo

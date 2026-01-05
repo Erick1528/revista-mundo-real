@@ -87,7 +87,10 @@ class CreateArticle extends Component
     }
 
     // Listeners para eventos
-    protected $listeners = ['contentDataResponse' => 'receiveContentData'];
+    protected $listeners = [
+        'contentDataResponse' => 'receiveContentData',
+        'cancelCreateArticle' => 'cancel',
+    ];
 
     // Agregar funciones para rellenar los arrays de tags y related_articles
     protected $rules = [
@@ -581,10 +584,10 @@ class CreateArticle extends Component
     public function confirmCancel()
     {
         $this->resetFormData();
-        
+
         // Enviar dispatch al content-editor para limpiar recursos de bloques de imagen/galería
         $this->dispatch('cleanupBlockResources');
-        
+
         session()->flash('message', 'Creación de artículo cancelada');
         return redirect()->route('dashboard'); // Ajustar ruta según tu aplicación
     }
