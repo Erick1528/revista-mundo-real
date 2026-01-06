@@ -574,7 +574,7 @@ class CreateArticle extends Component
 
     public function saveDraft()
     {
-        dd('Guardar borrador');
+        $this->dispatch('openDevelopModal', 'Guardar Borrador');
     }
 
     public function cancel()

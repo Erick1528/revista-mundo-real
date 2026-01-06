@@ -516,22 +516,24 @@
                 class="w-full sm:flex-1 h-12 bg-primary text-white text-base font-semibold font-montserrat flex items-center justify-center gap-2 transition-colors disabled:opacity-70"
                 wire:loading.attr="disabled" wire:target="store">
                 <!-- Spinner de carga -->
-                <div wire:loading wire:target="store" class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <div wire:loading wire:target="store"
+                    class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                 <!-- Texto del botón -->
                 <span wire:loading.remove wire:target="store">Publicar Artículo</span>
                 <span wire:loading wire:target="store">Publicando...</span>
             </button>
-            
+
             <button wire:click.prevent="saveDraft"
                 class="w-full sm:flex-1 h-12 text-base font-semibold font-montserrat border border-primary hover:bg-sage transition-colors flex items-center justify-center gap-2 disabled:opacity-70"
                 wire:loading.attr="disabled" wire:target="saveDraft">
                 <!-- Spinner de carga -->
-                <div wire:loading wire:target="saveDraft" class="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                <div wire:loading wire:target="saveDraft"
+                    class="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
                 <!-- Texto del botón -->
                 <span wire:loading.remove wire:target="saveDraft">Guardar Borrador</span>
                 <span wire:loading wire:target="saveDraft">Guardando...</span>
             </button>
-            
+
             <button type="button" wire:click="cancel"
                 class="w-full sm:flex-1 flex justify-center items-center h-12 text-base font-semibold font-montserrat border text-gray-light border-gray-light hover:bg-sage transition-colors">
                 Cancelar
@@ -564,43 +566,42 @@
 
     <!-- Modal de confirmación para cancelar -->
     @if ($showCancelModal)
-        <div class="fixed inset-0 bg-[rgba(0,0,0,0.5)] flex items-center justify-center z-50 p-4" 
-             x-data="{ 
-                 init() { 
-                     document.body.style.overflow = 'hidden'; 
-                     document.body.style.paddingRight = (window.innerWidth - document.documentElement.clientWidth) + 'px';
-                 },
-                 destroy() {
-                     document.body.style.overflow = '';
-                     document.body.style.paddingRight = '';
-                 }
-             }"
-             x-init="init()"
-             x-on:click.self="$wire.closeCancelModal(); destroy()">
+        <div class="fixed inset-0 bg-[rgba(0,0,0,0.5)] flex items-center justify-center z-50 p-4"
+            x-data="{
+                init() {
+                        document.body.style.overflow = 'hidden';
+                        document.body.style.paddingRight = (window.innerWidth - document.documentElement.clientWidth) + 'px';
+                    },
+                    destroy() {
+                        document.body.style.overflow = '';
+                        document.body.style.paddingRight = '';
+                    }
+            }" x-init="init()" x-on:click.self="$wire.closeCancelModal(); destroy()">
             <div class="bg-white max-w-md w-full mx-4 border border-gray-lighter shadow-xl" x-on:click.stop>
                 <div class="px-6 py-6">
                     <div class="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-sage">
                         <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
                         </svg>
                     </div>
-                    
+
                     <h3 class="text-lg font-montserrat font-semibold text-primary text-center mb-2">
                         ¿Confirmar cancelación?
                     </h3>
-                    
+
                     <p class="text-sm font-opensans text-gray-light text-center mb-6">
-                        Si cancelas ahora, <strong class="text-primary">se perderá todo el contenido</strong> que has escrito. Esta acción no se puede deshacer.
+                        Si cancelas ahora, <strong class="text-primary">se perderá todo el contenido</strong> que has
+                        escrito. Esta acción no se puede deshacer.
                     </p>
-                    
+
                     <div class="flex flex-col sm:flex-row gap-3">
                         <button type="button" wire:click="closeCancelModal"
                             class="w-full sm:flex-1 px-4 py-2 h-10 border border-primary text-primary bg-white hover:bg-sage font-montserrat font-medium transition-colors"
                             x-on:click="destroy()">
                             Continuar editando
                         </button>
-                        
+
                         <button type="button" wire:click="confirmCancel"
                             class="w-full sm:flex-1 px-4 py-2 h-10 bg-primary text-white hover:bg-dark-sage font-montserrat font-medium transition-colors"
                             x-on:click="destroy()">
@@ -611,5 +612,8 @@
             </div>
         </div>
     @endif
+
+    <!-- Modal de desarrollo -->
+    <livewire:develop-modal />
 
 </div>
