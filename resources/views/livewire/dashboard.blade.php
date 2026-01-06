@@ -61,7 +61,7 @@
             <p class=" text-gray-light text-sm">Crear una nueva publicación para la revista</p>
         </a>
 
-        <div
+        <div wire:click="showInDevelopment('Editar Borradores')"
             class=" border border-dark-sage p-8 text-dark-sage md:max-w-[304px] w-full hover:bg-dark-sage/9 transition-all duration-200 cursor-pointer">
             <svg xmlns="http://www.w3.org/2000/svg" height="32px" width="32px" viewBox="0 0 24 24" stroke="#b7b699"
                 stroke-width="2" fill="none">
@@ -72,7 +72,7 @@
             <p class=" text-gray-light text-sm">Continuar trabajando en artículos guardados</p>
         </div>
 
-        <div
+        <div wire:click="showInDevelopment('Ver Estadísticas')"
             class=" border border-dark-sage p-8 text-dark-sage md:max-w-[304px] w-full hover:bg-dark-sage/9 transition-all duration-200 cursor-pointer">
             <svg xmlns="http://www.w3.org/2000/svg" height="32px" width="32px" viewBox="0 0 24 24" stroke="#b7b699"
                 stroke-width="2" fill="none">
