@@ -33,3 +33,38 @@
 
     </div>
 </div>
+
+<script>
+    // Detectar cuando el usuario presiona el botón atrás del navegador o gestos en móvil
+    document.addEventListener('DOMContentLoaded', function() {
+        // Agregar una entrada al historial cuando se muestra la vista de crear artículo
+        if (@js($showCreateArticleView)) {
+            // Crear una entrada en el historial
+            history.pushState({
+                createArticle: true
+            }, '', window.location.href);
+        }
+    });
+
+    // Detectar navegación hacia atrás
+    window.addEventListener('popstate', function(event) {
+        // Si estamos en la vista de crear artículo y el usuario navega hacia atrás
+        if (@js($showCreateArticleView)) {
+            event.preventDefault();
+            @this.call('cancelCreateArticle');
+            return false;
+        }
+    });
+
+    // Detectar también el evento beforeunload como respaldo
+    window.addEventListener('beforeunload', function(event) {
+        if (@js($showCreateArticleView)) {
+            // Solo para casos donde popstate no funcione
+            setTimeout(() => {
+                if (document.hidden) {
+                    @this.call('cancelCreateArticle');
+                }
+            }, 100);
+        }
+    });
+</script>
