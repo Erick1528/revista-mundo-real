@@ -31,7 +31,8 @@
             <!-- Estado vacío -->
             @if (!$showBlockSelector)
                 <div class="flex flex-col items-center justify-center py-8 sm:py-12 text-center px-4">
-                    <h4 class="font-montserrat font-medium text-primary text-base sm:text-lg mb-2">Comienza a escribir tu artículo
+                    <h4 class="font-montserrat font-medium text-primary text-base sm:text-lg mb-2">Comienza a escribir
+                        tu artículo
                     </h4>
                     <p class="text-gray-500 font-opensans mb-4 sm:mb-6 max-w-xs sm:max-w-md text-sm sm:text-base">
                         Agrega bloques de contenido como texto, imágenes, videos y más para crear un artículo atractivo.
@@ -45,7 +46,8 @@
                 <!-- Panel de tipos de bloque -->
                 <div class="p-4 sm:p-6">
                     <div class="flex items-center justify-between mb-4">
-                        <h4 class="font-montserrat font-medium text-primary text-base sm:text-lg">Selecciona un tipo de bloque</h4>
+                        <h4 class="font-montserrat font-medium text-primary text-base sm:text-lg">Selecciona un tipo de
+                            bloque</h4>
                         <button type="button" wire:click="closeBlockSelector"
                             class="text-gray-400 hover:text-gray-600 transition-colors">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -54,7 +56,7 @@
                             </svg>
                         </button>
                     </div>
-                    
+
                     <!-- Bloques principales (siempre visibles) -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
                         <button type="button" wire:click="addBlock('paragraph', null)"
@@ -68,7 +70,7 @@
                                 <div class="font-opensans text-xs text-gray-500">Texto normal</div>
                             </div>
                         </button>
-                        
+
                         <button type="button" wire:click="addBlock('heading', null)"
                             class="flex items-center gap-3 p-3 sm:p-4 text-left hover:bg-gray-50 border border-gray-200 transition-colors">
                             <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -80,7 +82,7 @@
                                 <div class="font-opensans text-xs text-gray-500">H2, H3, H4</div>
                             </div>
                         </button>
-                        
+
                         <button type="button" wire:click="addBlock('image', null)"
                             class="flex items-center gap-3 p-3 sm:p-4 text-left hover:bg-gray-50 border border-gray-200 transition-colors">
                             <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -92,7 +94,7 @@
                                 <div class="font-opensans text-xs text-gray-500">Subir archivo</div>
                             </div>
                         </button>
-                        
+
                         <button type="button" wire:click="addBlock('quote', null)"
                             class="flex items-center gap-3 p-3 sm:p-4 text-left hover:bg-gray-50 border border-gray-200 transition-colors">
                             <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -105,13 +107,14 @@
                             </div>
                         </button>
                     </div>
-                    
+
                     <!-- Bloques adicionales (colapsables) -->
                     @if ($showMoreBlocks)
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
                             <button type="button" wire:click="addBlock('list', null)"
                                 class="flex items-center gap-3 p-3 sm:p-4 text-left hover:bg-gray-50 border border-gray-200 transition-colors">
-                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                                 </svg>
@@ -120,10 +123,11 @@
                                     <div class="font-opensans text-xs text-gray-500">Con viñetas o numerada</div>
                                 </div>
                             </button>
-                            
+
                             <button type="button" wire:click="addBlock('video', null)"
                                 class="flex items-center gap-3 p-3 sm:p-4 text-left hover:bg-gray-50 border border-gray-200 transition-colors">
-                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                                 </svg>
@@ -132,10 +136,11 @@
                                     <div class="font-opensans text-xs text-gray-500">YouTube, Vimeo</div>
                                 </div>
                             </button>
-                            
+
                             <button type="button" wire:click="addBlock('gallery', null)"
                                 class="flex items-center gap-3 p-3 sm:p-4 text-left hover:bg-gray-50 border border-gray-200 transition-colors">
-                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                                 </svg>
@@ -144,16 +149,30 @@
                                     <div class="font-opensans text-xs text-gray-500">Múltiples imágenes</div>
                                 </div>
                             </button>
+
+                            <button type="button" wire:click="addBlock('review', null)"
+                                class="flex items-center gap-3 p-3 sm:p-4 text-left hover:bg-gray-50 border border-gray-200 transition-colors">
+                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                </svg>
+                                <div>
+                                    <div class="font-opensans font-medium text-sm">Reseña</div>
+                                    <div class="font-opensans text-xs text-gray-500">Testimonios con foto</div>
+                                </div>
+                            </button>
                         </div>
                     @endif
-                    
+
                     <!-- Botón para mostrar más/menos opciones -->
                     <div class="text-center border-t border-gray-100 pt-4">
                         @if ($showMoreBlocks)
                             <button type="button" wire:click="toggleMoreBlocks"
                                 class="inline-flex items-center gap-2 px-4 py-2 text-sm font-opensans text-gray-600 hover:text-primary transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 15l7-7 7 7" />
                                 </svg>
                                 Mostrar menos opciones
                             </button>
@@ -161,7 +180,8 @@
                             <button type="button" wire:click="toggleMoreBlocks"
                                 class="inline-flex items-center gap-2 px-4 py-2 text-sm font-opensans text-gray-600 hover:text-primary transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
                                 </svg>
                                 Ver más opciones (3)
                             </button>
@@ -323,7 +343,8 @@
 
                                 @case('image')
                                     <div class="space-y-4">
-                                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-3">
+                                        <div
+                                            class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-3">
                                             <div class="flex items-center gap-2">
                                                 <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor"
                                                     viewBox="0 0 24 24">
@@ -828,6 +849,357 @@
                                     </div>
                                 @break
 
+                                @case('review')
+                                    <div class="space-y-4">
+                                        <div class="flex items-center justify-between mb-3">
+                                            <div class="flex items-center gap-2">
+                                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                                </svg>
+                                                <span class="text-xs text-gray-500 font-opensans font-medium">RESEÑAS</span>
+                                            </div>
+                                        </div>
+
+                                        @php
+                                            $reviews = $block['reviews'] ?? [];
+                                            $currentReview = $block['currentReview'] ?? 0;
+                                        @endphp
+
+                                        <!-- Vista previa principal -->
+                                        @if (!empty($reviews))
+                                            @if (count($reviews) > 1)
+                                                <div class="flex justify-end mb-4">
+                                                    <button type="button"
+                                                        wire:click="removeReview({{ $index }}, {{ $currentReview }})"
+                                                        class="text-xs text-red-500 hover:text-red-700 font-opensans flex items-center gap-1">
+                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor"
+                                                            viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2"
+                                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                        </svg>
+                                                        Eliminar esta reseña
+                                                    </button>
+                                                </div>
+                                            @endif
+
+                                            <div class="border border-gray-200 bg-white p-6 relative">
+                                                @php
+                                                    $review = $reviews[$currentReview] ?? [];
+                                                @endphp
+
+                                                <!-- Estructura de una reseña -->
+                                                <div class="flex gap-6 items-start">
+                                                    <!-- Foto de la persona -->
+                                                    <div class="shrink-0">
+                                                        @if (!empty($review['photo']))
+                                                            <img src="{{ $review['photo'] }}"
+                                                                alt="{{ $review['name'] ?? 'Persona' }}"
+                                                                class="w-20 h-20 rounded-full object-cover border-2 border-gray-200">
+                                                        @else
+                                                            <div
+                                                                class="w-20 h-20 rounded-full bg-gray-200 border-2 border-gray-300 flex items-center justify-center">
+                                                                <svg class="w-8 h-8 text-gray-400" fill="none"
+                                                                    stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                                        stroke-width="2"
+                                                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                                                </svg>
+                                                            </div>
+                                                        @endif
+                                                    </div>
+
+                                                    <!-- Contenido de la reseña -->
+                                                    <div class="flex-1 min-w-0">
+                                                        <!-- Texto de la reseña -->
+                                                        <blockquote
+                                                            class="text-gray-700 font-opensans text-base leading-relaxed mb-4 italic">
+                                                            "{{ $review['content'] ?? 'Escribe aquí el contenido de la reseña...' }}"
+                                                        </blockquote>
+
+                                                        <!-- Nombre y título -->
+                                                        <div class="space-y-1">
+                                                            <div class="font-montserrat font-semibold text-primary">
+                                                                {{ $review['name'] ?? 'Nombre de la persona' }}
+                                                            </div>
+                                                            @if (!empty($review['title']))
+                                                                <div class="font-opensans text-sm text-gray-500">
+                                                                    {{ $review['title'] }}
+                                                                </div>
+                                                            @endif
+                                                        </div>
+
+                                                        <!-- Estrellas (opcional) -->
+                                                        @if (!empty($review['rating']) && $review['rating'] > 0)
+                                                            <div class="flex gap-1 mt-2">
+                                                                @for ($i = 1; $i <= 5; $i++)
+                                                                    @if ($i <= $review['rating'])
+                                                                        <svg class="w-4 h-4 text-yellow-400"
+                                                                            fill="currentColor" viewBox="0 0 20 20">
+                                                                            <path
+                                                                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                                        </svg>
+                                                                    @else
+                                                                        <svg class="w-4 h-4 text-gray-300" fill="currentColor"
+                                                                            viewBox="0 0 20 20">
+                                                                            <path
+                                                                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                                        </svg>
+                                                                    @endif
+                                                                @endfor
+                                                            </div>
+                                                        @endif
+                                                    </div>
+                                                </div>
+
+                                                <!-- Contador si hay múltiples reseñas -->
+                                                @if (count($reviews) > 1)
+                                                    <div
+                                                        class="absolute bottom-3 right-3 bg-black bg-opacity-70 text-white px-3 py-1 text-xs font-opensans">
+                                                        {{ $currentReview + 1 }} / {{ count($reviews) }}
+                                                    </div>
+                                                @endif
+                                            </div>
+
+                                            <!-- Controles de carrusel -->
+                                            @if (count($reviews) > 1)
+                                                <div class="flex justify-between items-center mt-4">
+                                                    <button type="button"
+                                                        wire:click="changeReview({{ $index }}, 'prev')"
+                                                        class="flex items-center gap-2 px-3 py-2 text-sm font-opensans text-gray-600 hover:text-primary transition-colors {{ $currentReview === 0 ? 'opacity-50 cursor-not-allowed' : '' }}"
+                                                        {{ $currentReview === 0 ? 'disabled' : '' }}>
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                            viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2" d="M15 19l-7-7 7-7" />
+                                                        </svg>
+                                                        Anterior
+                                                    </button>
+
+                                                    <button type="button"
+                                                        wire:click="changeReview({{ $index }}, 'next')"
+                                                        class="flex items-center gap-2 px-3 py-2 text-sm font-opensans text-gray-600 hover:text-primary transition-colors {{ $currentReview === count($reviews) - 1 ? 'opacity-50 cursor-not-allowed' : '' }}"
+                                                        {{ $currentReview === count($reviews) - 1 ? 'disabled' : '' }}>
+                                                        Siguiente
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                            viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2" d="M9 5l7 7-7 7" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+
+                                                <!-- Indicadores de puntos -->
+                                                <div class="flex justify-center gap-2 mt-3">
+                                                    @foreach ($reviews as $index => $rev)
+                                                        <button type="button"
+                                                            wire:click="setCurrentReview({{ $index }}, {{ $index }})"
+                                                            class="w-2 h-2 rounded-full transition-colors {{ $index === $currentReview ? 'bg-primary' : 'bg-gray-300 hover:bg-gray-400' }}">
+                                                        </button>
+                                                    @endforeach
+                                                </div>
+                                            @endif
+                                        @else
+                                            <!-- Estado vacío -->
+                                            <button type="button" wire:click="addReview({{ $index }})"
+                                                class="w-full border-2 border-dashed border-gray-300 p-8 text-center bg-gray-50 hover:bg-gray-100 hover:border-primary transition-colors cursor-pointer">
+                                                <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none"
+                                                    stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                                </svg>
+                                                <div class="font-opensans text-primary font-medium">
+                                                    Agregar primera reseña
+                                                </div>
+                                                <p class="text-xs text-gray-500 font-opensans mt-1">Testimonios de clientes o
+                                                    usuarios</p>
+                                            </button>
+                                        @endif
+
+                                        <!-- Panel de edición -->
+                                        @if (!empty($reviews))
+                                            <div class="pt-4 space-y-4">
+                                                <div class="space-y-4">
+                                                    <!-- Foto -->
+                                                    <div class=" grid grid-cols-1 gap-3">
+                                                        <label class="block text-sm font-medium text-gray-700 mb-2">Foto de la
+                                                            persona</label>
+
+                                                        <!-- Vista previa de la foto actual -->
+                                                        @if (!empty($reviews[$currentReview]['photo'] ?? ''))
+                                                            <div class="mb-3 relative">
+                                                                <img src="{{ $reviews[$currentReview]['photo'] }}"
+                                                                    alt="Vista previa"
+                                                                    class="w-20 h-20 object-cover border-2 border-gray-200">
+                                                                <!-- Botón eliminar foto -->
+                                                                <button type="button"
+                                                                    wire:click="removeReviewPhoto({{ $index }}, {{ $currentReview }})"
+                                                                    class="absolute top-2 right-2 z-10 h-8 w-8 text-primary hover:text-white transition-colors flex items-center justify-center"
+                                                                    style="hover:background-color: var(--color-red-light);"
+                                                                    onmouseover="this.style.backgroundColor='var(--color-red-light)'"
+                                                                    onmouseout="this.style.backgroundColor='transparent'"
+                                                                    title="Eliminar foto">
+                                                                    <x-close-svg width="20px" height="20px"
+                                                                        fill="currentColor" />
+                                                                </button>
+                                                                {{-- <p class="text-xs text-green-600 mt-2">✓ Foto cargada</p> --}}
+                                                            </div>
+                                                        @endif
+
+                                                        <!-- Loading spinner -->
+                                                        <div class="w-full flex flex-col items-center justify-center py-6 text-center"
+                                                            wire:loading
+                                                            wire:target="reviewFiles.{{ $index }}.{{ $currentReview }}">
+                                                            <div
+                                                                class="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto">
+                                                            </div>
+                                                            <span
+                                                                class="mt-3 text-primary font-opensans text-sm">Subiendo...</span>
+                                                        </div>
+
+                                                        <!-- File input -->
+                                                        <div wire:loading.remove
+                                                            wire:target="reviewFiles.{{ $index }}.{{ $currentReview }}">
+                                                            <input type="file" accept="image/*"
+                                                                class="w-full px-4 py-3 border border-gray-300 bg-gray-50 focus:outline-none focus:border-primary text-sm file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-medium file:bg-primary file:text-white hover:file:bg-dark-sage font-opensans"
+                                                                wire:model="reviewFiles.{{ $index }}.{{ $currentReview }}">
+                                                            <p class="text-xs text-gray-500 mt-2 font-opensans h-auto">Tamaño
+                                                                máximo: 10MB. Se convertirá a WebP</p>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Nombre -->
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700 mb-2">Nombre
+                                                            completo</label>
+                                                        <input type="text" placeholder="Nombre de la persona"
+                                                            class="w-full border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:border-primary h-12"
+                                                            wire:model.blur="blocks.{{ $index }}.reviews.{{ $currentReview }}.name"
+                                                            value="{{ $reviews[$currentReview]['name'] ?? '' }}">
+                                                    </div>
+
+                                                    <!-- Título/Cargo -->
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700 mb-2">Título o
+                                                            cargo (opcional)</label>
+                                                        <input type="text" placeholder="Ej: CEO, Cliente, Usuario"
+                                                            class="w-full border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:border-primary h-12"
+                                                            wire:model.blur="blocks.{{ $index }}.reviews.{{ $currentReview }}.title"
+                                                            value="{{ $reviews[$currentReview]['title'] ?? '' }}">
+                                                    </div>
+
+                                                    <!-- Calificación -->
+                                                    <div>
+                                                        <label
+                                                            class="block text-sm font-medium text-gray-700 mb-2">Calificación
+                                                            (opcional)</label>
+                                                        <select
+                                                            class="w-full border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:border-primary h-12"
+                                                            wire:model.live="blocks.{{ $index }}.reviews.{{ $currentReview }}.rating">
+                                                            <option value="">Sin calificación</option>
+                                                            <option value="5">⭐⭐⭐⭐⭐ (5)</option>
+                                                            <option value="4">⭐⭐⭐⭐ (4)</option>
+                                                            <option value="3">⭐⭐⭐ (3)</option>
+                                                            <option value="2">⭐⭐ (2)</option>
+                                                            <option value="1">⭐ (1)</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Contenido de la reseña -->
+                                                <div class="space-y-2 border border-gray-300 p-4">
+                                                    <div class="flex items-center justify-between mb-2">
+                                                        <div class="flex items-center gap-2">
+                                                            <svg class="w-4 h-4 text-gray-400" fill="none"
+                                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    stroke-width="2"
+                                                                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                                            </svg>
+                                                            <span
+                                                                class="text-xs text-gray-500 font-opensans font-medium">CONTENIDO</span>
+                                                        </div>
+                                                        <div class="flex items-center gap-2">
+                                                            <button type="button" onclick="insertMarkdown(this, '*', '*')"
+                                                                class="px-2 py-1 text-xs border border-gray-300 hover:border-gray-400 bg-white hover:bg-gray-50 font-opensans italic"
+                                                                title="Cursiva">
+                                                                <em>I</em>
+                                                            </button>
+                                                            <button type="button" onclick="insertMarkdown(this, '**', '**')"
+                                                                class="px-2 py-1 text-xs border border-gray-300 hover:border-gray-400 bg-white hover:bg-gray-50 font-opensans font-bold"
+                                                                title="Negrita">
+                                                                B
+                                                            </button>
+                                                            <span class="text-xs text-gray-400 font-opensans ml-2">
+                                                                <span class="hidden sm:inline">Markdown</span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <textarea id="review-content-{{ $index }}-{{ $currentReview }}"
+                                                        placeholder="Escribe aquí el contenido de la reseña... Soporta *cursiva*, **negrita** y saltos de línea"
+                                                        class="w-full border-0 focus:outline-none font-opensans text-sm leading-relaxed p-2 min-h-20 resize-none"
+                                                        style="field-sizing: content;"
+                                                        wire:model.blur="blocks.{{ $index }}.reviews.{{ $currentReview }}.content">{{ $reviews[$currentReview]['content'] ?? '' }}</textarea>
+
+                                                    @if (!empty($reviews[$currentReview]['content'] ?? ''))
+                                                        <div class="border-t border-gray-100 pt-2">
+                                                            <button type="button"
+                                                                class="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 font-opensans mb-1 transition-colors"
+                                                                onclick="this.nextElementSibling.classList.toggle('hidden')">
+                                                                <svg class="w-3 h-3 transform transition-transform"
+                                                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                                        stroke-width="2" d="M19 9l-7 7-7-7" />
+                                                                </svg>
+                                                                Vista previa
+                                                            </button>
+                                                            <div class="hidden">
+                                                                <div
+                                                                    class="text-sm font-opensans leading-relaxed text-gray-700 bg-gray-50 p-2 border border-gray-200 whitespace-pre-line">
+                                                                    @php
+                                                                        $content = e(
+                                                                            $reviews[$currentReview]['content'] ?? '',
+                                                                        );
+                                                                        // Aplicar formato básico
+                                                                        $content = preg_replace(
+                                                                            [
+                                                                                '/\*\*\*(.*?)\*\*\*/',
+                                                                                '/\*\*(.*?)\*\*/',
+                                                                                '/\*(.*?)\*/',
+                                                                            ],
+                                                                            [
+                                                                                '<strong><em>$1</em></strong>',
+                                                                                '<strong>$1</strong>',
+                                                                                '<em>$1</em>',
+                                                                            ],
+                                                                            $content,
+                                                                        );
+
+                                                                        // Procesar listas (reemplazar toda la línea)
+                                                                        $content = preg_replace(
+                                                                            '/^- (.+)/m',
+                                                                            '<span class="flex items-start gap-1"><span>•</span><span>$1</span></span>',
+                                                                            $content,
+                                                                        );
+                                                                        $content = preg_replace(
+                                                                            '/^\d+\. (.+)/m',
+                                                                            '<span class="flex items-start gap-1"><span>$0</span></span>',
+                                                                            $content,
+                                                                        );
+                                                                    @endphp
+                                                                    {!! $content !!}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        @endif
+                                    </div>
+                                @break
+
                                 @default
                                     <div class="text-center py-4 text-gray-500">
                                         <p class="font-opensans text-sm">Tipo de bloque no reconocido</p>
@@ -852,7 +1224,8 @@
                     @if ($showBlockSelector && $blockSelectorIndex === $index)
                         <div class="p-4 sm:p-6 bg-gray-50 border border-gray-200">
                             <div class="flex justify-between items-center mb-4">
-                                <h3 class="font-opensans font-medium text-sm sm:text-base text-gray-700">Selecciona un tipo de
+                                <h3 class="font-opensans font-medium text-sm sm:text-base text-gray-700">Selecciona un
+                                    tipo de
                                     bloque</h3>
                                 <button type="button" wire:click="closeBlockSelector"
                                     class="text-gray-400 hover:text-gray-600 transition-colors">
@@ -862,7 +1235,7 @@
                                     </svg>
                                 </button>
                             </div>
-                            
+
                             <!-- Bloques principales (siempre visibles) -->
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
                                 <button type="button" wire:click="addBlock('paragraph', {{ $index }})"
@@ -877,7 +1250,7 @@
                                         <div class="font-opensans text-xs text-gray-500">Texto normal</div>
                                     </div>
                                 </button>
-                                
+
                                 <button type="button" wire:click="addBlock('heading', {{ $index }})"
                                     class="flex items-center gap-3 p-3 sm:p-4 text-left hover:bg-white border border-gray-200 transition-colors">
                                     <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor"
@@ -890,7 +1263,7 @@
                                         <div class="font-opensans text-xs text-gray-500">H2, H3, H4</div>
                                     </div>
                                 </button>
-                                
+
                                 <button type="button" wire:click="addBlock('image', {{ $index }})"
                                     class="flex items-center gap-3 p-3 sm:p-4 text-left hover:bg-white border border-gray-200 transition-colors">
                                     <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor"
@@ -903,7 +1276,7 @@
                                         <div class="font-opensans text-xs text-gray-500">Subir archivo</div>
                                     </div>
                                 </button>
-                                
+
                                 <button type="button" wire:click="addBlock('quote', {{ $index }})"
                                     class="flex items-center gap-3 p-3 sm:p-4 text-left hover:bg-white border border-gray-200 transition-colors">
                                     <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor"
@@ -917,7 +1290,7 @@
                                     </div>
                                 </button>
                             </div>
-                            
+
                             <!-- Bloques adicionales (colapsables) -->
                             @if ($showMoreBlocks)
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
@@ -930,10 +1303,11 @@
                                         </svg>
                                         <div>
                                             <div class="font-opensans font-medium text-sm">Lista</div>
-                                            <div class="font-opensans text-xs text-gray-500">Con viñetas o numerada</div>
+                                            <div class="font-opensans text-xs text-gray-500">Con viñetas o numerada
+                                            </div>
                                         </div>
                                     </button>
-                                    
+
                                     <button type="button" wire:click="addBlock('video', {{ $index }})"
                                         class="flex items-center gap-3 p-3 sm:p-4 text-left hover:bg-white border border-gray-200 transition-colors">
                                         <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor"
@@ -946,7 +1320,7 @@
                                             <div class="font-opensans text-xs text-gray-500">YouTube, Vimeo</div>
                                         </div>
                                     </button>
-                                    
+
                                     <button type="button" wire:click="addBlock('gallery', {{ $index }})"
                                         class="flex items-center gap-3 p-3 sm:p-4 text-left hover:bg-white border border-gray-200 transition-colors">
                                         <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor"
@@ -959,24 +1333,41 @@
                                             <div class="font-opensans text-xs text-gray-500">Múltiples imágenes</div>
                                         </div>
                                     </button>
+
+                                    <button type="button" wire:click="addBlock('review', {{ $index }})"
+                                        class="flex items-center gap-3 p-3 sm:p-4 text-left hover:bg-white border border-gray-200 transition-colors">
+                                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                        </svg>
+                                        <div>
+                                            <div class="font-opensans font-medium text-sm">Reseña</div>
+                                            <div class="font-opensans text-xs text-gray-500">Testimonios con foto</div>
+                                        </div>
+                                    </button>
                                 </div>
                             @endif
-                            
+
                             <!-- Botón para mostrar más/menos opciones -->
                             <div class="text-center border-t border-gray-300 pt-4">
                                 @if ($showMoreBlocks)
                                     <button type="button" wire:click="toggleMoreBlocks"
                                         class="inline-flex items-center gap-2 px-4 py-2 text-sm font-opensans text-gray-600 hover:text-primary transition-colors">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M5 15l7-7 7 7" />
                                         </svg>
                                         Mostrar menos opciones
                                     </button>
                                 @else
                                     <button type="button" wire:click="toggleMoreBlocks"
                                         class="inline-flex items-center gap-2 px-4 py-2 text-sm font-opensans text-gray-600 hover:text-primary transition-colors">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M19 9l-7 7-7-7" />
                                         </svg>
                                         Ver más opciones (3)
                                     </button>
@@ -996,8 +1387,15 @@
     let lastFocusedListInput = null;
 
     function insertMarkdown(button, startTag, endTag) {
-        // Encontrar el textarea más cercano al botón
-        const textarea = button.closest('.space-y-2').querySelector('textarea');
+        // Encontrar el textarea más cercano al botón - buscar en múltiples contenedores
+        let textarea = button.closest('.space-y-2')?.querySelector('textarea');
+        if (!textarea) {
+            textarea = button.closest('.space-y-4')?.querySelector('textarea');
+        }
+        if (!textarea) {
+            // Fallback: buscar el textarea más cercano en el DOM
+            textarea = button.closest('div').querySelector('textarea');
+        }
         if (!textarea) return;
 
         const start = textarea.selectionStart;

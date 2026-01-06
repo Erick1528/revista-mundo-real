@@ -14,11 +14,43 @@ class ContentEditor extends Component
     public $showMoreBlocks = false;
     public $blockSelectorIndex = null;
     public $galleryFiles = [];
+    public $reviewFiles = [];
+    
+    // Mensajes de notificación
+    public $errorMessage = null;
+    public $successMessage = null;
+    public $debugMessage = null;
 
     protected $listeners = [
         'requestContentData' => 'provideContentData',
         'cleanupBlockResources' => 'cleanupAllBlockResources',
     ];
+
+    // Métodos para mensajes
+    private function setError($message)
+    {
+        $this->clearMessages();
+        $this->errorMessage = $message;
+    }
+
+    private function setSuccess($message)
+    {
+        $this->clearMessages();
+        $this->successMessage = $message;
+    }
+
+    private function setDebug($message)
+    {
+        $this->clearMessages();
+        $this->debugMessage = $message;
+    }
+
+    private function clearMessages()
+    {
+        $this->errorMessage = null;
+        $this->successMessage = null;
+        $this->debugMessage = null;
+    }
 
     public function provideContentData()
     {
@@ -45,6 +77,17 @@ class ContentEditor extends Component
         foreach ($this->blocks as $block) {
             if ($block['type'] === 'image' && !empty($block['url'])) {
                 $this->deleteImageFromStorage($block['url']);
+            }
+        }
+
+        // Eliminar fotos de reseñas
+        foreach ($this->blocks as $block) {
+            if ($block['type'] === 'review' && !empty($block['reviews'])) {
+                foreach ($block['reviews'] as $review) {
+                    if (!empty($review['photo'])) {
+                        $this->deleteImageFromStorage($review['photo']);
+                    }
+                }
             }
         }
     }
@@ -152,6 +195,15 @@ class ContentEditor extends Component
                     }
                 }
 
+                // Si es un bloque de reseñas, eliminar todas las fotos del storage
+                if ($block['type'] === 'review' && !empty($block['reviews'])) {
+                    foreach ($block['reviews'] as $review) {
+                        if (!empty($review['photo'])) {
+                            $this->deleteImageFromStorage($review['photo']);
+                        }
+                    }
+                }
+
                 // Eliminar el bloque del array
                 unset($this->blocks[$index]);
                 // Reindexar el array para mantener índices consecutivos
@@ -230,12 +282,13 @@ class ContentEditor extends Component
                         break;
 
                     case 'image':
-                        $duplicatedBlock['url'] = $blockToDuplicate['url'] ?? '';
-                        $duplicatedBlock['caption'] = $blockToDuplicate['caption'] ?? '';
-                        $duplicatedBlock['alt_text'] = $blockToDuplicate['alt_text'] ?? '';
+                        $duplicatedBlock['url'] = ''; // No copiar la imagen
+                        $duplicatedBlock['caption'] = ''; // No copiar el caption
+                        $duplicatedBlock['alt_text'] = ''; // No copiar el alt_text
                         $duplicatedBlock['layout'] = $blockToDuplicate['layout'] ?? 'full';
                         $duplicatedBlock['size'] = $blockToDuplicate['size'] ?? 'large';
-                        $duplicatedBlock['credits'] = $blockToDuplicate['credits'] ?? '';
+                        $duplicatedBlock['credits'] = ''; // No copiar los credits
+                        $duplicatedBlock['image_file'] = null;
                         break;
 
                     case 'quote':
@@ -257,6 +310,19 @@ class ContentEditor extends Component
                     case 'gallery':
                         $duplicatedBlock['images'] = [];
                         $duplicatedBlock['currentImage'] = 0;
+                        break;
+
+                    case 'review':
+                        $duplicatedBlock['reviews'] = [
+                            [
+                                'id' => uniqid(),
+                                'name' => '',
+                                'title' => '',
+                                'rating' => 5,
+                                'content' => ''
+                            ]
+                        ];
+                        $duplicatedBlock['currentReview'] = 0;
                         break;
 
                     default:
@@ -370,6 +436,20 @@ class ContentEditor extends Component
                     'images' => [],
                     'currentImage' => 0,
                     'caption' => '',
+                ]);
+
+            case 'review':
+                return array_merge($baseBlock, [
+                    'reviews' => [
+                        [
+                            'name' => '',
+                            'title' => '',
+                            'content' => '',
+                            'rating' => 5,
+                            'photo' => '',
+                        ]
+                    ],
+                    'currentReview' => 0,
                 ]);
 
             default:
@@ -722,6 +802,190 @@ class ContentEditor extends Component
             $this->blocks[$blockIndex]['currentImage'] = $currentIndex + 1;
         } elseif ($direction === 'prev' && $currentIndex > 0) {
             $this->blocks[$blockIndex]['currentImage'] = $currentIndex - 1;
+        }
+    }
+
+    // Método específico para archivos de reseñas
+    public function updatedReviewFiles($value, $key)
+    {
+        // Patrón: blockIndex.reviewIndex
+        $parts = explode('.', $key);
+        if (count($parts) >= 2 && isset($value) && $value) {
+            $blockIndex = (int) $parts[0];
+            $reviewIndex = (int) $parts[1];
+            
+            try {
+                // Si ya había una foto, eliminar la anterior
+                if (!empty($this->blocks[$blockIndex]['reviews'][$reviewIndex]['photo'])) {
+                    $this->deleteImageFromStorage($this->blocks[$blockIndex]['reviews'][$reviewIndex]['photo']);
+                }
+
+                // Procesar y optimizar la nueva imagen usando la función existente
+                $imagePath = $this->processImageUpload($value);
+
+                // Asegurar que existe la estructura de reseña
+                if (!isset($this->blocks[$blockIndex]['reviews'][$reviewIndex])) {
+                    $this->blocks[$blockIndex]['reviews'][$reviewIndex] = [
+                        'name' => '',
+                        'title' => '',
+                        'content' => '',
+                        'rating' => 5,
+                        'photo' => '',
+                    ];
+                }
+                
+                // Actualizar la URL en la reseña
+                $this->blocks[$blockIndex]['reviews'][$reviewIndex]['photo'] = '/storage/' . $imagePath;
+
+                session()->flash('message', 'Foto de reseña subida correctamente');
+            } catch (\Exception $e) {
+                session()->flash('error', 'Error al procesar la foto: ' . $e->getMessage());
+            }
+        }
+    }
+
+    // Método unificado para agregar reseñas
+    public function addReview($blockIndex)
+    {
+        try {
+            // Verificar que el índice existe
+            if (!isset($this->blocks[$blockIndex])) {
+                $this->setError("No existe bloque en índice $blockIndex");
+                return;
+            }
+            
+            // Verificar que es de tipo review
+            $blockType = $this->blocks[$blockIndex]['type'] ?? 'sin tipo';
+            if ($blockType !== 'review') {
+                $this->setError("Este bloque es de tipo '$blockType', no 'review'. Necesitas un bloque de reseñas.");
+                return;
+            }
+            
+            // Crear nueva reseña
+            $newReview = [
+                'name' => '',
+                'title' => '',
+                'content' => '',
+                'rating' => 5,
+                'photo' => '',
+            ];
+            
+            // Inicializar array de reseñas si no existe
+            if (!isset($this->blocks[$blockIndex]['reviews'])) {
+                $this->blocks[$blockIndex]['reviews'] = [];
+            }
+            
+            // Verificar límite: solo una reseña por ahora
+            if (count($this->blocks[$blockIndex]['reviews']) >= 5) {
+                $this->setError("Ya existe una reseña en este bloque. Solo se permite una reseña por bloque por ahora.");
+                return;
+            }
+            
+            // Agregar la nueva reseña
+            $this->blocks[$blockIndex]['reviews'][] = $newReview;
+            $this->blocks[$blockIndex]['currentReview'] = 0;
+            
+            $this->setSuccess("Reseña agregada correctamente en bloque $blockIndex");
+            
+        } catch (\Exception $e) {
+            $this->setError('Error al agregar reseña: ' . $e->getMessage());
+        }
+    }
+
+    // Método para debug: mostrar información de todos los bloques
+    public function showBlocks()
+    {
+        $blocksInfo = "Bloques disponibles:\n";
+        foreach ($this->blocks as $index => $block) {
+            $type = $block['type'] ?? 'sin tipo';
+            $id = $block['id'] ?? 'sin ID';
+            $blocksInfo .= "Índice $index: $type (ID: $id)\n";
+        }
+        $this->setDebug($blocksInfo);
+    }
+
+    public function removeReview($blockIndex, $reviewIndex)
+    {
+        try {
+            if (
+                isset($this->blocks[$blockIndex]) &&
+                $this->blocks[$blockIndex]['type'] === 'review' &&
+                isset($this->blocks[$blockIndex]['reviews'][$reviewIndex]) &&
+                count($this->blocks[$blockIndex]['reviews']) > 1
+            ) {
+                // Eliminar foto si existe
+                $review = $this->blocks[$blockIndex]['reviews'][$reviewIndex];
+                if (!empty($review['photo'])) {
+                    $this->deleteImageFromStorage($review['photo']);
+                }
+                
+                // Eliminar reseña del array
+                array_splice($this->blocks[$blockIndex]['reviews'], $reviewIndex, 1);
+                
+                // Ajustar currentReview si es necesario
+                $reviewCount = count($this->blocks[$blockIndex]['reviews']);
+                if ($this->blocks[$blockIndex]['currentReview'] >= $reviewCount && $reviewCount > 0) {
+                    $this->blocks[$blockIndex]['currentReview'] = $reviewCount - 1;
+                } elseif ($reviewCount === 0) {
+                    $this->blocks[$blockIndex]['currentReview'] = 0;
+                }
+                
+                session()->flash('debug', 'Reseña eliminada');
+            }
+        } catch (\Exception $e) {
+            session()->flash('error', 'Error al eliminar reseña: ' . $e->getMessage());
+        }
+    }
+
+    public function changeReview($blockIndex, $direction)
+    {
+        try {
+            if (!isset($this->blocks[$blockIndex]['reviews']) || empty($this->blocks[$blockIndex]['reviews'])) {
+                return;
+            }
+
+            $currentIndex = $this->blocks[$blockIndex]['currentReview'] ?? 0;
+            $maxIndex = count($this->blocks[$blockIndex]['reviews']) - 1;
+
+            if ($direction === 'next' && $currentIndex < $maxIndex) {
+                $this->blocks[$blockIndex]['currentReview'] = $currentIndex + 1;
+            } elseif ($direction === 'prev' && $currentIndex > 0) {
+                $this->blocks[$blockIndex]['currentReview'] = $currentIndex - 1;
+            }
+        } catch (\Exception $e) {
+            session()->flash('error', 'Error al cambiar reseña: ' . $e->getMessage());
+        }
+    }
+
+    public function setCurrentReview($blockIndex, $reviewIndex)
+    {
+        try {
+            if (isset($this->blocks[$blockIndex]['reviews'][$reviewIndex])) {
+                $this->blocks[$blockIndex]['currentReview'] = $reviewIndex;
+            }
+        } catch (\Exception $e) {
+            session()->flash('error', 'Error al seleccionar reseña: ' . $e->getMessage());
+        }
+    }
+
+    public function removeReviewPhoto($blockIndex, $reviewIndex)
+    {
+        try {
+            if (
+                isset($this->blocks[$blockIndex]['reviews'][$reviewIndex]) &&
+                !empty($this->blocks[$blockIndex]['reviews'][$reviewIndex]['photo'])
+            ) {
+                // Usar la función existente para eliminar del storage
+                $photoUrl = $this->blocks[$blockIndex]['reviews'][$reviewIndex]['photo'];
+                $this->deleteImageFromStorage($photoUrl);
+
+                // Limpiar la foto de la reseña
+                $this->blocks[$blockIndex]['reviews'][$reviewIndex]['photo'] = '';
+
+                session()->flash('message', 'Foto eliminada correctamente');
+            }
+        } catch (\Exception $e) {
+            session()->flash('error', 'Error al eliminar foto: ' . $e->getMessage());
         }
     }
 
