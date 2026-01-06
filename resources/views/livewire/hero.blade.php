@@ -35,36 +35,58 @@
 </div>
 
 <script>
+    let historyPushed = false;
+    let isInCreateArticleView = @js($showCreateArticleView);
+
     // Detectar cuando el usuario presiona el botón atrás del navegador o gestos en móvil
     document.addEventListener('DOMContentLoaded', function() {
         // Agregar una entrada al historial cuando se muestra la vista de crear artículo
-        if (@js($showCreateArticleView)) {
-            // Crear una entrada en el historial
+        if (isInCreateArticleView && !historyPushed) {
             history.pushState({
                 createArticle: true
             }, '', window.location.href);
+            historyPushed = true;
         }
     });
 
     // Detectar navegación hacia atrás
     window.addEventListener('popstate', function(event) {
-        // Si estamos en la vista de crear artículo y el usuario navega hacia atrás
-        if (@js($showCreateArticleView)) {
+        console.log('Popstate triggered, isInCreateArticleView:', isInCreateArticleView);
+
+        // Si estamos en la vista de crear artículo
+        if (isInCreateArticleView) {
+            console.log('Calling cancelCreateArticle');
             event.preventDefault();
             @this.call('cancelCreateArticle');
             return false;
         }
     });
 
-    // Detectar también el evento beforeunload como respaldo
-    window.addEventListener('beforeunload', function(event) {
-        if (@js($showCreateArticleView)) {
-            // Solo para casos donde popstate no funcione
-            setTimeout(() => {
-                if (document.hidden) {
-                    @this.call('cancelCreateArticle');
-                }
-            }, 100);
+    // Actualizar el estado cuando Livewire se actualiza
+    document.addEventListener('livewire:updated', function() {
+        const newState = @js($showCreateArticleView);
+
+        if (newState && !historyPushed) {
+            history.pushState({
+                createArticle: true
+            }, '', window.location.href);
+            historyPushed = true;
+            isInCreateArticleView = true;
+        } else if (!newState) {
+            historyPushed = false;
+            isInCreateArticleView = false;
         }
+
+        console.log('Livewire updated, new state:', newState);
+    });
+
+    // Escuchar cambios específicos de Livewire para el componente Hero
+    window.addEventListener('livewire:init', function() {
+        Livewire.hook('component.updated', (component) => {
+            if (component.fingerprint.name === 'hero') {
+                isInCreateArticleView = component.data.showCreateArticleView || false;
+                console.log('Hero component updated, createArticleView:', isInCreateArticleView);
+            }
+        });
     });
 </script>
