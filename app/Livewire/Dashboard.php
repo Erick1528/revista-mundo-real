@@ -52,9 +52,15 @@ class Dashboard extends Component
 
     public function getFilteredArticles()
     {
+
+        $user = Auth::user();
         $query = Article::with('user')
-            ->where('user_id', Auth::user()->id)
             ->orderBy('updated_at', 'desc');
+
+        // Solo filtra por usuario si NO tiene uno de los roles especiales
+        if (!in_array($user->rol, ['editor_chief', 'moderator', 'administrator'])) {
+            $query->where('user_id', $user->id);
+        }
 
         if ($this->search) {
             $query->where(function ($q) {
