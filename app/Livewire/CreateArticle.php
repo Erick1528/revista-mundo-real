@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Log;
 // Agregar campo de caption para la galeria de imagenes
 // Mejorar el bloque de imagen (alt text, credits, tamaños, layouts)
 // Agregar bloques faltantes
+// Hacer las preview como desplegable y no fija
 
 class CreateArticle extends Component
 {
