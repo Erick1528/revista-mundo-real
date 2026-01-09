@@ -173,7 +173,7 @@
 
                         {{-- Acciones --}}
                         <div class="flex gap-1 sm:gap-3">
-                            <button wire:click="showInDevelopment('ver')"
+                            <a href="{{ route('article.show', $article->slug) }}"
                                 class="p-1 sm:p-2 text-gray-light hover:text-dark-sage transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -181,7 +181,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                 </svg>
-                            </button>
+                            </a>
                             <button wire:click="showInDevelopment('editar')"
                                 class="p-1 sm:p-2 text-gray-light hover:text-dark-sage transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
