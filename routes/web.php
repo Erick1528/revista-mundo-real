@@ -14,3 +14,6 @@ Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard'
 
     // Content Creation and Management
     Route::get('articles/create', [ArticleController::class, 'create'])->name('articles.create')->middleware('auth');
+
+// Article View
+Route::get('article/{article:slug}', [ArticleController::class, 'show'])->name('article.show');
