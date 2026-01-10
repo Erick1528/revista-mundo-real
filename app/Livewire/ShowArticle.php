@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 
 class ShowArticle extends Component
@@ -16,8 +17,15 @@ class ShowArticle extends Component
     public function mount()
     {
         $allowedRoles = ['editor_chief', 'moderator', 'administrator'];
-        if ($this->article->status !== 'published' && !in_array(Auth::user()->role, $allowedRoles)) {
-            abort(404, 'Pagina no encontrada');
+        $user = Auth::user();
+        if ($user) {
+            if (!in_array($user->rol, $allowedRoles) && $this->article->status !== 'published') {
+                abort(404, 'Pagina no encontrada');
+            }
+        } else {
+            if ($this->article->status !== 'published' || $this->article->visibility !== 'public') {
+                abort(404, 'Pagina no encontrada');
+            }
         }
 
         if ($this->article->section == 'destinations') {

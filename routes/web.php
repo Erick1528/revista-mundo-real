@@ -16,4 +16,4 @@ Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard'
     Route::get('articles/create', [ArticleController::class, 'create'])->name('articles.create')->middleware('auth');
 
 // Article View
-Route::get('article/{article:slug}', [ArticleController::class, 'show'])->name('article.show')->middleware('auth'); // Agregar comprobación de permisos antes de mostrar, si no es status published no se debe de mostrar.
+Route::get('article/{article:slug}', [ArticleController::class, 'show'])->name('article.show'); // Agregar comprobación de permisos antes de mostrar, si no es status published no se debe de mostrar.
