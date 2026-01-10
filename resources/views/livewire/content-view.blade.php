@@ -4,6 +4,7 @@
         .content-view p {
             margin-bottom: 24px;
         }
+
         .content-view ul {
             list-style-type: disc;
             list-style-position: inside;
@@ -19,13 +20,24 @@
             $text = preg_replace('/\*\s*(.*?)\s*\*/', '<em>$1</em>', $text);
             return $text;
         }
+
+        function fixStrongSpacing($html)
+        {
+            // Espacio antes de <strong> si está pegado a una letra
+            $html = preg_replace('/([a-zA-ZáéíóúÁÉÍÓÚñÑ])<strong>/', '$1 <strong>', $html);
+
+            // Espacio después de </strong> si está pegado a una letra
+            $html = preg_replace('/<\/strong>([a-zA-ZáéíóúÁÉÍÓÚñÑ])/', '</strong> $1', $html);
+
+            return $html;
+        }
     @endphp
 
     @forelse ($blocks as $block)
         @switch($block['type'])
             @case('paragraph')
                 <div class="text-primary/90 leading-relaxed font-montserrat text-base lg:text-[18px] prose">
-                    {!! Str::markdown(markdownLite($block['content'])) !!}
+                    {!! fixStrongSpacing(Str::markdown(markdownLite($block['content']))) !!}
                 </div>
             @break
 
