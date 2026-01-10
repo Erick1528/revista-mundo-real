@@ -13,10 +13,10 @@
     @php
         function markdownLite($text)
         {
-            // Negrita
-            $text = preg_replace('/\*\*(.*?)\*\*/', '<strong>$1</strong>', $text);
-            // Itálica
-            $text = preg_replace('/\*(.*?)\*/', '<em>$1</em>', $text);
+            // Negrita (soporta espacios antes y después)
+            $text = preg_replace('/\*\*\s*(.*?)\s*\*\*/', '<strong>$1</strong>', $text);
+            // Itálica (soporta espacios antes y después)
+            $text = preg_replace('/\*\s*(.*?)\s*\*/', '<em>$1</em>', $text);
             return $text;
         }
     @endphp
@@ -25,7 +25,7 @@
         @switch($block['type'])
             @case('paragraph')
                 <div class="text-primary/90 leading-relaxed font-montserrat text-base lg:text-[18px] prose">
-                    {!! Str::markdown($block['content']) !!}
+                    {!! Str::markdown(markdownLite($block['content'])) !!}
                 </div>
             @break
 
@@ -127,7 +127,7 @@
                     @endphp
 
                     <!-- Main Image -->
-                    <div class="relative aspect-[16/9] bg-muted">
+                    <div class="relative aspect-video bg-muted">
                         @foreach ($block['images'] as $index => $image)
                             <img class="carousel-image w-full h-full object-cover absolute inset-0 transition-opacity duration-300 {{ $index === 0 ? 'opacity-100' : 'opacity-0' }}"
                                 src="{{ asset($image['url'] ?? $image) }}"
@@ -161,7 +161,7 @@
                     <div class="hidden md:flex gap-2 mt-4 overflow-x-auto pb-2">
                         @foreach ($block['images'] as $index => $image)
                             <button onclick="carouselGoTo('{{ $carouselId }}', {{ $index }})"
-                                class="carousel-thumb flex-shrink-0 w-20 h-20 border-2 transition-all {{ $index === 0 ? 'border-dark-sage' : 'border-transparent' }}"
+                                class="carousel-thumb shrink-0 w-20 h-20 border-2 transition-all {{ $index === 0 ? 'border-dark-sage' : 'border-transparent' }}"
                                 data-carousel="{{ $carouselId }}" data-index="{{ $index }}">
                                 <img src="{{ asset($image['url'] ?? $image) }}"
                                     alt="{{ $image['alt_text'] ?? 'Miniatura ' . ($index + 1) }}"
