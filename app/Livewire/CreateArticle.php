@@ -443,6 +443,25 @@ class CreateArticle extends Component
                     }
                     break;
 
+                case 'review':
+                    if (empty($block['reviews']) || !is_array($block['reviews'])) {
+                        $errors[] = "Bloque #$blockNumber (Reseña): Debe tener al menos una reseña";
+                    } else {
+                        foreach ($block['reviews'] as $idx => $review) {
+                            $num = $idx + 1;
+                            if (empty(trim($review['name'] ?? ''))) {
+                                $errors[] = "Bloque #$blockNumber (Reseña #$num): El campo 'Nombre' no puede estar vacío";
+                            }
+                            // if (empty(trim($review['photo'] ?? ''))) {
+                            //     $errors[] = "Bloque #$blockNumber (Reseña #$num): El campo 'Foto' no puede estar vacío";
+                            // }
+                            if (empty(trim($review['content'] ?? ''))) {
+                                $errors[] = "Bloque #$blockNumber (Reseña #$num): El campo 'Contenido' no puede estar vacío";
+                            }
+                        }
+                    }
+                    break;
+
                 case 'separator':
                     // Los separadores no necesitan validación de contenido
                     break;
