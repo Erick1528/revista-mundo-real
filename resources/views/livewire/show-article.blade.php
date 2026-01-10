@@ -3,7 +3,7 @@
     <div class=" pt-12 pb-6">
 
         <p
-            class="inline-block px-3 py-1 bg-dark-sage text-gray-super-light text-xs font-sans uppercase tracking-wider font-semibold mb-3 md:mb-4">
+            class="inline-block px-3 py-1.5 bg-dark-sage text-gray-super-light text-xs font-sans uppercase tracking-wider font-semibold mb-3 md:mb-4">
             {{ $section }}</p>
 
         <h1 class="font-serif text-2xl md:text-4xl lg:text-5xl leading-tight text-balance mb-3 md:mb-4">
