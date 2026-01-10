@@ -1,4 +1,4 @@
-<div class=" px-[120px] max-w-7xl mx-auto">
+<div class="max-w-7xl mx-auto px-4 sm:px-10 lg:px-[120px]">
 
     <div class=" pt-12 pb-6">
 
