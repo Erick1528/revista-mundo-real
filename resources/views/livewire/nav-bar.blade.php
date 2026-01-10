@@ -13,7 +13,7 @@
             </li>
 
             <li class=" h-5">
-                <a class=" h-5 hover:text-dark-sage" href="#">Historias que inspiran</a>
+                <a class=" h-5 hover:text-dark-sage" href="#">Historias que Inspiran</a>
             </li>
 
             <li class=" h-5">
@@ -66,7 +66,7 @@
 
                 <li class="py-2 border-b border-gray-100">
                     <a href="#" class="hover:text-dark-sage transition-colors duration-200 block">Historias que
-                        inspiran</a>
+                        Inspiran</a>
                 </li>
 
                 <li class="py-2 border-b border-gray-100">
