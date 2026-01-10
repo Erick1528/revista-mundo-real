@@ -1,11 +1,10 @@
-<div class=" space-y-6">
+<div class="content-view space-y-6">
 
     <style>
-        p {
+        .content-view p {
             margin-bottom: 24px;
         }
-
-        ul {
+        .content-view ul {
             list-style-type: disc;
             list-style-position: inside;
         }
