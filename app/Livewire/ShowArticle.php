@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
 class ShowArticle extends Component
@@ -14,7 +15,7 @@ class ShowArticle extends Component
 
     public function mount()
     {
-        if ($this->article->status !== 'published') {
+        if ($this->article->status !== 'published' && Auth::user()->role !== 'admin' && Auth::user()->role !== 'editor_chief') {
             abort(404, 'Pagina no encontrada');
         }
 
