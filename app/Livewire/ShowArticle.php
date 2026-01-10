@@ -15,7 +15,8 @@ class ShowArticle extends Component
 
     public function mount()
     {
-        if ($this->article->status !== 'published' && Auth::user()->role !== 'administrator' && Auth::user()->role !== 'editor_chief') {
+        $allowedRoles = ['editor_chief', 'moderator', 'administrator'];
+        if ($this->article->status !== 'published' && !in_array(Auth::user()->role, $allowedRoles)) {
             abort(404, 'Pagina no encontrada');
         }
 
