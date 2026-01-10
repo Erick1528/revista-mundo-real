@@ -7,7 +7,7 @@
             <x-menu-svg height="36px" width="36px" />
         </button>
 
-        <ul class=" text-[14px] font-montserrat font-medium lg:flex gap-8 text-primary hidden">
+        <ul class=" text-[14px] font-montserrat font-medium lg:flex gap-8 text-primary hidden" style="list-style-type: none;">
             <li class=" h-5">
                 <a class=" h-5 hover:text-dark-sage" href="#">Destinos</a>
             </li>
@@ -59,7 +59,7 @@
 
         {{-- Menu items --}}
         <div class="p-6">
-            <ul class="text-[16px] font-montserrat font-medium text-primary space-y-4">
+            <ul class="text-[16px] font-montserrat font-medium text-primary space-y-4" style="list-style-type: none;">
                 <li class="py-2 border-b border-gray-100">
                     <a href="#" class="hover:text-dark-sage transition-colors duration-200 block">Destinos</a>
                 </li>

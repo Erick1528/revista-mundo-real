@@ -12,7 +12,7 @@
 
             <div class="sm:text-left text-center sm:order-3 md:order-2 lg:order-2">
                 <h3 class=" font-montserrat text-sm text-primary uppercase mb-4 font-semibold">Secciones</h3>
-                <ul class=" text-sm text-gray-light font-montserrat flex flex-col gap-y-2">
+                <ul class=" list-none text-sm text-gray-light font-montserrat flex flex-col gap-y-2" style="list-style-type: none;">
 
                     <li>
                         <a href="#" class="hover:text-primary">Destinos</a>
@@ -42,7 +42,7 @@
 
             <div class="sm:text-left text-center sm:order-4 md:order-3 lg:order-3">
                 <h3 class=" font-montserrat text-sm text-primary uppercase mb-4 font-semibold">Información</h3>
-                <ul class=" text-sm text-gray-light font-montserrat flex flex-col gap-y-2">
+                <ul class=" list-none text-sm text-gray-light font-montserrat flex flex-col gap-y-2" style="list-style-type: none;">
 
                     <li>
                         <a href="#" class="hover:text-primary">Sobre Nosotros</a>
