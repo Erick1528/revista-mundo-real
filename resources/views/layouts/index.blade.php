@@ -36,7 +36,7 @@
         @yield('hero')
     </header>
 
-    <main class="bg-sage">
+    <main class="@yield('bg-content', 'bg-sage')">
         {{-- Contenido principal --}}
         @yield('content')
     </main>
