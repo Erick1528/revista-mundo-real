@@ -107,7 +107,7 @@ class CreateArticle extends Component
 
         'section' => 'required|in:destinations,inspiring_stories,social_events,health_wellness,gastronomy,living_culture',
 
-        'tags' => 'required|array|min:1|max:10',
+        'tags' => 'required|array|min:5|max:10',
         'tags.*' => 'string|max:50',
 
         'related_articles' => 'nullable|array|max:5',
@@ -154,7 +154,7 @@ class CreateArticle extends Component
 
         'tags.required' => 'Debe agregar al menos un tag.',
         'tags.array' => 'Los tags deben tener un formato válido.',
-        'tags.min' => 'Debe agregar al menos un tag.',
+        'tags.min' => 'Debe agregar al menos 5 tags.',
         'tags.max' => 'No puede agregar más de 10 tags.',
         'tags.*.string' => 'Cada tag debe ser texto válido.',
         'tags.*.max' => 'Cada tag no puede tener más de 50 caracteres.',
@@ -329,6 +329,7 @@ class CreateArticle extends Component
 
         // Obtener artículos publicados con los campos necesarios
         return Article::where('status', 'published')
+            ->where('visibility', 'public')
             ->where(function ($query) use ($matchingSections) {
                 $query->where('title', 'like', '%' . $this->relatedArticleSearch . '%')
                     ->orWhere('subtitle', 'like', '%' . $this->relatedArticleSearch . '%')
