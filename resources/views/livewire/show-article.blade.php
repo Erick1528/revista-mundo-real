@@ -66,8 +66,8 @@
 
     </div>
 
-    <div class="relative aspect-video bg-muted mb-6">
-        <img class="w-full h-full object-cover" src="{{ asset($article->image_path) }}" alt="">
+    <div class="relative sm:aspect-video bg-sage mb-6">
+        <img class="w-full h-full object-contain" src="{{ asset($article->image_path) }}" alt="">
     </div>
 
     <div class="flex flex-wrap items-center gap-3 md:gap-4 mb-6 md:mb-8">

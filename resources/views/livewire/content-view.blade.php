@@ -139,9 +139,9 @@
                     @endphp
 
                     <!-- Main Image -->
-                    <div class="relative aspect-video bg-muted">
+                    <div class="relative aspect-video bg-sage">
                         @foreach ($block['images'] as $index => $image)
-                            <img class="carousel-image w-full h-full object-cover absolute inset-0 transition-opacity duration-300 {{ $index === 0 ? 'opacity-100' : 'opacity-0' }}"
+                            <img class="carousel-image w-full h-full object-contain absolute inset-0 transition-opacity duration-300 {{ $index === 0 ? 'opacity-100' : 'opacity-0' }}"
                                 src="{{ asset($image['url'] ?? $image) }}"
                                 alt="{{ $image['alt_text'] ?? 'Imagen ' . ($index + 1) }}" data-carousel="{{ $carouselId }}"
                                 data-index="{{ $index }}" data-credit="{{ $image['credits'] ?? '' }}">
@@ -254,8 +254,8 @@
             @break
 
             @case('image')
-                <div class="relative aspect-video bg-muted mb-6">
-                    <img class="w-full h-full object-cover" src="{{ asset($block['url']) }}" alt="">
+                <div class="relative aspect-video mb-6 bg-sage">
+                    <img class="w-full h-full object-contain" src="{{ asset($block['url']) }}" alt="">
                 </div>
             @break
 
