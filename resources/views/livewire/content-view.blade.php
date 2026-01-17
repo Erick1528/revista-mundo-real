@@ -254,7 +254,7 @@
             @break
 
             @case('image')
-                <div class="relative aspect-video mb-6 bg-sage">
+                <div class="relative sm:aspect-video mb-6 bg-sage">
                     <img class="w-full h-full object-contain" src="{{ asset($block['url']) }}" alt="">
                 </div>
             @break
