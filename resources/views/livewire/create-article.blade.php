@@ -87,7 +87,7 @@
                 class="accordion-content px-6 py-6 space-y-6 border-t border-gray-lighter @if (!$openSections['image']) hidden @endif">
                 <div class="space-y-2 grid grid-cols-1 gap-3">
                     @if ($image)
-                        <div class="relative w-full h-auto bg-sage flex items-center justify-center">
+                        <div class="relative w-full h-auto flex items-center justify-center">
                             <img src="{{ $image->temporaryUrl() }}" alt=""
                                 class="max-h-[380px] h-full object-contain">
 
@@ -98,6 +98,119 @@
                                 onmouseout="this.style.backgroundColor='transparent'">
                                 <x-close-svg width="20px" height="20px" fill="currentColor" />
                             </button>
+                        </div>
+
+                        <div class="space-y-4 mt-4">
+                            <div class="space-y-2 p-4 bg-white border-gray-300 border">
+                                <div class="flex items-center justify-between mb-2">
+                                    <label for="image_caption" class="block text-[12px] font-montserrat font-medium text-gray-500 uppercase">
+                                        Pie de Foto (Opcional)
+                                    </label>
+                                    <div class="flex items-center gap-2">
+                                        <button type="button" onclick="insertMarkdownCaption(this, '*', '*')"
+                                            class="px-2 py-1 text-xs border border-gray-300 hover:border-gray-400 bg-white hover:bg-gray-50 font-opensans italic"
+                                            title="Cursiva">
+                                            <em>I</em>
+                                        </button>
+                                        <button type="button" onclick="insertMarkdownCaption(this, '**', '**')"
+                                            class="px-2 py-1 text-xs border border-gray-300 hover:border-gray-400 bg-white hover:bg-gray-50 font-opensans font-bold"
+                                            title="Negrita">
+                                            B
+                                        </button>
+                                        <span class="text-xs text-gray-400 font-opensans ml-2">
+                                            <span class="hidden sm:inline">Markdown</span>
+                                        </span>
+                                    </div>
+                                </div>
+                                <textarea id="image_caption"
+                                    placeholder="Escribe un pie de foto para la imagen... Soporta *cursiva*, **negrita** y saltos de línea"
+                                    class="w-full border-0 focus:outline-none font-opensans text-sm leading-relaxed p-2 min-h-20 resize-none"
+                                    style="field-sizing: content;" wire:model.blur="image_caption">{{ $image_caption ?? '' }}</textarea>
+
+                                @error('image_caption')
+                                    <p class="text-red-500 text-xs font-opensans">{{ $message }}</p>
+                                @enderror
+
+                                @if (!empty($image_caption))
+                                    <div class="border-t border-gray-100 pt-2">
+                                        <button type="button"
+                                            class="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 font-opensans mb-1 transition-colors"
+                                            onclick="this.nextElementSibling.classList.toggle('hidden')">
+                                            <svg class="w-3 h-3 transform transition-transform" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                            Vista previa
+                                        </button>
+                                        <div class="hidden">
+                                            <div
+                                                class="text-sm font-opensans leading-relaxed text-gray-700 bg-gray-50 p-2 border border-gray-200 whitespace-pre-line">
+                                                @php
+                                                    $content = e($image_caption ?? '');
+                                                    // Aplicar formato básico
+                                                    $content = preg_replace(
+                                                        [
+                                                            '/\*\*\*(.*?)\*\*\*/',
+                                                            '/\*\*(.*?)\*\*/',
+                                                            '/\*(.*?)\*/',
+                                                        ],
+                                                        [
+                                                            '<strong><em>$1</em></strong>',
+                                                            '<strong>$1</strong>',
+                                                            '<em>$1</em>',
+                                                        ],
+                                                        $content,
+                                                    );
+
+                                                    // Procesar listas (reemplazar toda la línea)
+                                                    $content = preg_replace(
+                                                        '/^- (.+)/m',
+                                                        '<span class="flex items-start gap-1"><span>•</span><span>$1</span></span>',
+                                                        $content,
+                                                    );
+                                                    $content = preg_replace(
+                                                        '/^\d+\. (.+)/m',
+                                                        '<span class="flex items-start gap-1"><span>$0</span></span>',
+                                                        $content,
+                                                    );
+                                                @endphp
+                                                {!! $content !!}
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+
+                            <div class="space-y-2">
+                                <label for="image_alt_text" class="block text-sm font-montserrat font-medium text-primary">
+                                    Texto Alternativo (Opcional)
+                                </label>
+                                <input type="text" id="image_alt_text" wire:model="image_alt_text"
+                                    placeholder="Descripción de la imagen para accesibilidad..."
+                                    class="w-full px-4 py-3 border @error('image_alt_text') border-red-500 @else border-gray-300 @enderror bg-gray-50 focus:outline-none focus:border-dark-sage focus:shadow-[0_0_0_2px_rgba(183,182,153,0.5)] font-opensans text-sm">
+
+                                @error('image_alt_text')
+                                    <p class="text-red-500 text-xs font-opensans">{{ $message }}</p>
+                                @enderror
+
+                                <p class="text-xs text-gray-500 mt-1">Texto que describe la imagen para lectores de pantalla y SEO</p>
+                            </div>
+
+                            <div class="space-y-2">
+                                <label for="image_credits" class="block text-sm font-montserrat font-medium text-primary">
+                                    Créditos de la Imagen (Opcional)
+                                </label>
+                                <input type="text" id="image_credits" wire:model="image_credits"
+                                    placeholder="Ej: Foto: Juan Pérez / Cortesía de National Geographic"
+                                    class="w-full px-4 py-3 border @error('image_credits') border-red-500 @else border-gray-300 @enderror bg-gray-50 focus:outline-none focus:border-dark-sage focus:shadow-[0_0_0_2px_rgba(183,182,153,0.5)] font-opensans text-sm">
+
+                                @error('image_credits')
+                                    <p class="text-red-500 text-xs font-opensans">{{ $message }}</p>
+                                @enderror
+
+                                <p class="text-xs text-gray-500 mt-1">Atribución o créditos del fotógrafo/fuente de la imagen</p>
+                            </div>
                         </div>
                     @else
                         <label for="image" class="block text-sm font-montserrat font-medium text-primary">
@@ -617,3 +730,75 @@
     <livewire:develop-modal />
 
 </div>
+
+<script>
+    function insertMarkdownCaption(button, startTag, endTag) {
+        // Encontrar el textarea de caption
+        const textarea = document.getElementById('image_caption');
+        if (!textarea) return;
+
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const text = textarea.value;
+        const selectedText = text.substring(start, end);
+
+        let newText;
+        let newCursorPos;
+
+        if (start === end) {
+            // No hay selección, insertar tags vacíos y posicionar cursor en el medio
+            newText = text.substring(0, start) + startTag + endTag + text.substring(end);
+            newCursorPos = start + startTag.length;
+        } else {
+            // Hay texto seleccionado - aplicar toggle
+            let replacement;
+
+            if (startTag === '**') {
+                // Botón negrita
+                if (selectedText.startsWith('***') && selectedText.endsWith('***')) {
+                    // Tiene negrita+cursiva -> quitar negrita, mantener cursiva
+                    replacement = selectedText.slice(1, -1);
+                } else if (selectedText.startsWith('**') && selectedText.endsWith('**')) {
+                    // Tiene negrita -> quitar negrita
+                    replacement = selectedText.slice(2, -2);
+                } else if (selectedText.startsWith('*') && selectedText.endsWith('*') && !selectedText.startsWith('**')) {
+                    // Tiene cursiva -> agregar negrita (negrita+cursiva)
+                    replacement = '*' + selectedText + '*';
+                } else {
+                    // Sin formato -> agregar negrita
+                    replacement = '**' + selectedText + '**';
+                }
+            } else {
+                // Botón cursiva
+                if (selectedText.startsWith('***') && selectedText.endsWith('***')) {
+                    // Tiene negrita+cursiva -> quitar cursiva, mantener negrita
+                    replacement = selectedText.slice(1, -1);
+                } else if (selectedText.startsWith('**') && selectedText.endsWith('**')) {
+                    // Tiene negrita -> agregar cursiva (negrita+cursiva)
+                    replacement = '*' + selectedText + '*';
+                } else if (selectedText.startsWith('*') && selectedText.endsWith('*') && !selectedText.startsWith('**')) {
+                    // Tiene cursiva -> quitar cursiva
+                    replacement = selectedText.slice(1, -1);
+                } else {
+                    // Sin formato -> agregar cursiva
+                    replacement = '*' + selectedText + '*';
+                }
+            }
+
+            newText = text.substring(0, start) + replacement + text.substring(end);
+            newCursorPos = start + replacement.length;
+        }
+
+        textarea.value = newText;
+        textarea.focus();
+        textarea.setSelectionRange(newCursorPos, newCursorPos);
+
+        // Disparar eventos para Livewire
+        textarea.dispatchEvent(new Event('input', {
+            bubbles: true
+        }));
+        textarea.dispatchEvent(new Event('blur', {
+            bubbles: true
+        }));
+    }
+</script>

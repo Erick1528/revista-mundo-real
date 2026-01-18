@@ -374,6 +374,28 @@
                                             $imageUrl = $block['url'] ?? '';
                                             $layout = $block['layout'] ?? 'full';
                                             $size = $block['size'] ?? 'large';
+                                            
+                                            // Procesar caption con markdown
+                                            $captionRaw = $block['caption'] ?? '';
+                                            if (!empty($captionRaw)) {
+                                                $captionFormatted = e($captionRaw);
+                                                // Aplicar formato básico
+                                                $captionFormatted = preg_replace(
+                                                    [
+                                                        '/\*\*\*(.*?)\*\*\*/',
+                                                        '/\*\*(.*?)\*\*/',
+                                                        '/\*(.*?)\*/',
+                                                    ],
+                                                    [
+                                                        '<strong><em>$1</em></strong>',
+                                                        '<strong>$1</strong>',
+                                                        '<em>$1</em>',
+                                                    ],
+                                                    $captionFormatted,
+                                                );
+                                            } else {
+                                                $captionFormatted = '';
+                                            }
                                         @endphp
 
                                         @if ($imageUrl)
@@ -414,8 +436,12 @@
                                                             @endif
                                                         </div>
                                                         <div class="flex-1 min-w-0">
-                                                            <p class="text-sm text-gray-600 font-opensans">
-                                                                {{ $block['caption'] ?? 'Texto descriptivo aparecerá aquí...' }}
+                                                            <p class="text-sm text-gray-600 font-opensans whitespace-pre-line">
+                                                                @if (!empty($captionFormatted))
+                                                                    {!! $captionFormatted !!}
+                                                                @else
+                                                                    Texto descriptivo aparecerá aquí...
+                                                                @endif
                                                             </p>
                                                         </div>
                                                     </div>
@@ -423,8 +449,12 @@
                                                     <!-- Texto izquierda, imagen derecha -->
                                                     <div class="flex gap-4 items-start">
                                                         <div class="flex-1 min-w-0">
-                                                            <p class="text-sm text-gray-600 font-opensans">
-                                                                {{ $block['caption'] ?? 'Texto descriptivo aparecerá aquí...' }}
+                                                            <p class="text-sm text-gray-600 font-opensans whitespace-pre-line">
+                                                                @if (!empty($captionFormatted))
+                                                                    {!! $captionFormatted !!}
+                                                                @else
+                                                                    Texto descriptivo aparecerá aquí...
+                                                                @endif
                                                             </p>
                                                         </div>
                                                         <div class="flex-shrink-0 space-y-1">
@@ -452,9 +482,14 @@
                                                                 </p>
                                                             @endif
                                                         </div>
-                                                        <p class="text-sm text-gray-600 font-opensans text-left">
-                                                            {{ $block['caption'] ?? 'Texto descriptivo aparecerá aquí...' }}
-                                                        </p>
+                                                        @if (!empty($captionFormatted))
+                                                            <p class="text-sm text-gray-600 font-opensans text-left whitespace-pre-line">
+                                                                {!! $captionFormatted !!}
+                                                            </p>
+                                                            @else
+                                                                {{-- Texto descriptivo aparecerá aquí... --}}
+                                                            @endif
+                                                        
                                                     </div>
                                                 @endif
                                             </div>
@@ -463,12 +498,29 @@
                                             <div class="space-y-3 pt-3">
                                                 <div class="grid grid-cols-1 gap-3">
                                                     @if ($layout !== 'full')
-                                                        <div>
-                                                            <label
-                                                                class="block text-xs font-medium text-gray-700 mb-1">Descripción/Caption</label>
-                                                            <textarea rows="2" placeholder="Descripción que aparece con la imagen..."
-                                                                class="w-full border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:border-primary resize-none h-28"
-                                                                wire:model.blur="blocks.{{ $index }}.caption">{{ $block['caption'] ?? '' }}</textarea>
+                                                        <div class="space-y-2 bg-white border-gray-300 border p-4">
+                                                            <div class="flex items-center justify-between mb-2">
+                                                                <label
+                                                                    class="block text-xs font-medium text-gray-700">Descripción/Caption</label>
+                                                                <div class="flex items-center gap-2">
+                                                                    <button type="button" onclick="insertMarkdown(this, '*', '*')"
+                                                                        class="px-2 py-1 text-xs border border-gray-300 hover:border-gray-400 bg-white hover:bg-gray-50 font-opensans italic"
+                                                                        title="Cursiva">
+                                                                        <em>I</em>
+                                                                    </button>
+                                                                    <button type="button" onclick="insertMarkdown(this, '**', '**')"
+                                                                        class="px-2 py-1 text-xs border border-gray-300 hover:border-gray-400 bg-white hover:bg-gray-50 font-opensans font-bold"
+                                                                        title="Negrita">
+                                                                        B
+                                                                    </button>
+                                                                    <span class="text-xs text-gray-400 font-opensans ml-2">
+                                                                        <span class="hidden sm:inline">Markdown</span>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            <textarea rows="2" placeholder="Descripción que aparece con la imagen... Soporta *cursiva*, **negrita** y saltos de línea"
+                                                                class="w-full border-0 focus:outline-none font-opensans text-sm leading-relaxed p-2 min-h-20 resize-none"
+                                                                style="field-sizing: content;" wire:model.blur="blocks.{{ $index }}.caption">{{ $block['caption'] ?? '' }}</textarea>
                                                         </div>
                                                     @endif
                                                     <div>

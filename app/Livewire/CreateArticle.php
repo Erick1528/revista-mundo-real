@@ -30,6 +30,9 @@ class CreateArticle extends Component
 
     // Media
     public $image;
+    public $image_credits;
+    public $image_alt_text;
+    public $image_caption;
 
     // Content
     public $content = [];
@@ -103,6 +106,10 @@ class CreateArticle extends Component
 
         'image' => 'required|image|mimes:jpeg,jpg,png,webp,gif|max:10240', // Max 10MB
 
+        'image_credits' => 'nullable|string|max:255',
+        'image_alt_text' => 'nullable|string|max:255',
+        'image_caption' => 'nullable|string',
+
         'content' => 'required|array|min:1',
 
         'section' => 'required|in:destinations,inspiring_stories,social_events,health_wellness,gastronomy,living_culture',
@@ -143,6 +150,13 @@ class CreateArticle extends Component
         'image.mimes' => 'La imagen debe ser de tipo: jpeg, jpg, png, webp o gif.',
         'image.max' => 'La imagen no puede ser mayor a 10MB.',
 
+        'image_credits.string' => 'Los créditos deben ser texto válido.',
+        'image_credits.max' => 'Los créditos no pueden tener más de 255 caracteres.',
+
+        'image_alt_text.string' => 'El alt text debe ser texto válido.',
+        'image_alt_text.max' => 'El alt text no puede tener más de 255 caracteres.',
+
+        'image_caption.text' => 'El caption debe ser texto válido.',
         // Content
         'content.required' => 'El contenido del artículo es obligatorio.',
         'content.array' => 'El contenido debe tener un formato válido.',
@@ -188,8 +202,11 @@ class CreateArticle extends Component
     public function removeImage()
     {
         $this->image = null;
-        $this->resetValidation('image');
-        $this->resetErrorBag('image');
+        $this->image_credits = null;
+        $this->image_alt_text = null;
+        $this->image_caption = null;
+        $this->resetValidation(['image', 'image_credits', 'image_alt_text', 'image_caption']);
+        $this->resetErrorBag(['image', 'image_credits', 'image_alt_text', 'image_caption']);
     }
 
     public function addTag()
@@ -524,6 +541,9 @@ class CreateArticle extends Component
                 'reading_time' => $this->reading_time,
                 'user_id' => Auth::user()->id,
                 'status' => 'review',
+                'image_credits' => $this->image_credits,
+                'image_alt_text' => $this->image_alt_text,
+                'image_caption' => $this->image_caption,
             ];
 
             // Procesar imagen si existe
