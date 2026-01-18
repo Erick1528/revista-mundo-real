@@ -11,28 +11,6 @@
         }
     </style>
 
-    @php
-        function markdownLite($text)
-        {
-            // Negrita (soporta espacios antes y después)
-            $text = preg_replace('/\*\*\s*(.*?)\s*\*\*/', '<strong>$1</strong>', $text);
-            // Itálica (soporta espacios antes y después)
-            $text = preg_replace('/\*\s*(.*?)\s*\*/', '<em>$1</em>', $text);
-            return $text;
-        }
-
-        function fixStrongSpacing($html)
-        {
-            // Espacio antes de <strong> si está pegado a una letra
-            $html = preg_replace('/([a-zA-ZáéíóúÁÉÍÓÚñÑ])<strong>/', '$1 <strong>', $html);
-
-            // Espacio después de </strong> si está pegado a una letra
-            $html = preg_replace('/<\/strong>([a-zA-ZáéíóúÁÉÍÓÚñÑ])/', '</strong> $1', $html);
-
-            return $html;
-        }
-    @endphp
-
     @forelse ($blocks as $block)
         @switch($block['type'])
             @case('paragraph')
@@ -139,7 +117,7 @@
                     @endphp
 
                     <!-- Main Image -->
-                    <div class="relative aspect-video bg-sage">
+                    <div class="relative aspect-video">
                         @foreach ($block['images'] as $index => $image)
                             <img class="carousel-image w-full h-full object-contain absolute inset-0 transition-opacity duration-300 {{ $index === 0 ? 'opacity-100' : 'opacity-0' }}"
                                 src="{{ asset($image['url'] ?? $image) }}"
@@ -254,8 +232,12 @@
             @break
 
             @case('image')
-                <div class="relative sm:aspect-video mb-6 bg-sage">
+                <div class="relative sm:aspect-video mb-6">
                     <img class="w-full h-full object-contain" src="{{ asset($block['url']) }}" alt="">
+                    {{-- Agregar creditos si existen --}}
+                    {{-- Agregar alt si existe --}}
+                    {{-- Agregar texto si la imagen tiene y mostrar el formato segun el bloque --}}
+                    {{-- Agregar creditos y un texto corto a la imagen principal y a cada imagen de la galeria de fotos --}}
                 </div>
             @break
 

@@ -1,17 +1,49 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-10 lg:px-[120px]">
 
+    <style>
+        .image-caption-content {
+            font-size: 0.75rem;
+            color: #6b7280;
+            font-family: 'Open Sans', sans-serif;
+            font-style: italic;
+            text-align: center;
+        }
+    
+        .image-caption-content * {
+            font-size: inherit;
+            color: inherit;
+            font-family: inherit;
+            font-style: inherit;
+            text-align: inherit;
+            margin: 0;
+            padding: 0;
+            line-height: inherit;
+        }
+    
+        .image-caption-content p {
+            display: inline;
+        }
+    
+        .image-caption-content p:not(:last-child)::after {
+            content: ' ';
+        }
+    </style>
+
     <div class=" pt-12 pb-6">
 
         <p
             class="inline-block px-3 py-2 bg-dark-sage text-gray-super-light text-xs font-montserrat uppercase tracking-wider font-semibold mb-3 md:mb-4">
-            {{ $section }}</p>
+            {{ $section }}
+        </p>
 
         <h1 class="font-serif text-2xl md:text-4xl lg:text-5xl leading-tight text-balance mb-3 md:mb-4">
-            {{ $article->title }}</h1>
+            {{ $article->title }}
+        </h1>
 
         <p
             class="text-lg md:text-xl lg:text-2xl text-gray-light text-muted-foreground font-serif italic text-pretty mb-4 md:mb-6">
-            {{ $article->subtitle }}</p>
+            {{ $article->subtitle }}
+        </p>
 
         <div
             class="flex flex-wrap items-center gap-x-4 md:gap-x-6 gap-y-2 md:gap-y-3 text-xs md:text-sm text-muted-foreground font-montserrat border-t border-b border-border py-3 md:py-4 border-gray-lighter text-gray-light">
@@ -40,9 +72,9 @@
 
             @if ($article->reading_time)
                 <div class="flex items-center gap-1.5 md:gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round" class="lucide lucide-clock h-3.5 w-3.5 md:h-4 md:w-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-clock h-3.5 w-3.5 md:h-4 md:w-4">
                         <circle cx="12" cy="12" r="10"></circle>
                         <polyline points="12 6 12 12 16 14"></polyline>
                     </svg>
@@ -52,9 +84,9 @@
 
             @if ($article->view_count)
                 <div class="flex items-center gap-1.5 md:gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round" class="lucide lucide-eye h-3.5 w-3.5 md:h-4 md:w-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-eye h-3.5 w-3.5 md:h-4 md:w-4">
                         <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
                         <circle cx="12" cy="12" r="3"></circle>
                     </svg>
@@ -66,14 +98,27 @@
 
     </div>
 
-    <div class="relative sm:aspect-video bg-sage mb-6">
-        <img class="w-full h-full object-contain" src="{{ asset($article->image_path) }}" alt="">
+    <div class="relative sm:aspect-video mb-6">
+        <img class="w-full h-full object-contain mb-2" src="{{ asset($article->image_path) }}" alt="">
+
+        @if ($article->image_caption || $article->image_credits)
+            <div class="image-caption-content text-xs text-gray-500 font-opensans italic text-center">
+                @if ($article->image_caption)
+                    {!! fixStrongSpacing(Str::markdown(markdownLite($article->image_caption))) !!}
+                @endif
+                @if ($article->image_caption && $article->image_credits)
+                    <span> / </span>
+                @endif
+                @if ($article->image_credits)
+                    <span>{{ $article->image_credits }}</span>
+                @endif
+            </div>
+        @endif
     </div>
 
     <div class="flex flex-wrap items-center gap-3 md:gap-4 mb-6 md:mb-8">
         {{-- <span class="text-xs md:text-sm font-montserrat text-muted-foreground">Compartir:</span> --}}
-        <a href="#"
-            target="_blank" rel="noopener noreferrer"
+        <a href="#" target="_blank" rel="noopener noreferrer"
             class="group inline-flex items-center justify-center w-9 h-9 md:w-10 md:h-10 border border-primary hover:bg-dark-sage/40 hover:border-dark-sage transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -81,8 +126,7 @@
                 <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
             </svg>
         </a>
-        <a href="#"
-            target="_blank" rel="noopener noreferrer"
+        <a href="#" target="_blank" rel="noopener noreferrer"
             class="group inline-flex items-center justify-center w-9 h-9 md:w-10 md:h-10 border border-primary hover:bg-dark-sage/40 hover:border-dark-sage transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -92,8 +136,7 @@
                 </path>
             </svg>
         </a>
-        <a href="#"
-            target="_blank" rel="noopener noreferrer"
+        <a href="#" target="_blank" rel="noopener noreferrer"
             class="group inline-flex items-center justify-center w-9 h-9 md:w-10 md:h-10 border border-primary hover:bg-dark-sage/40 hover:border-dark-sage transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -107,9 +150,8 @@
         </a>
         <a href="#" target="_blank" rel="noopener noreferrer"
             class="group inline-flex items-center justify-center w-9 h-9 md:w-10 md:h-10 border border-primary hover:bg-dark-sage/40 hover:border-dark-sage transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round"
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                 class="lucide lucide-instagram h-4 w-4 md:h-5 md:w-5 group-hover:text-dark-sage">
                 <rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect>
                 <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
