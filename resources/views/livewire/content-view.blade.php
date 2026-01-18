@@ -278,7 +278,7 @@
                     @endphp
 
                     @if (!empty($captionAndCredits))
-                        <div class="image-caption-content text-xs text-gray-500 font-opensans italic text-center whitespace-pre-line">
+                        <div class="image-caption-content text-xs text-gray-500 font-opensans italic text-center">
                             {!! implode(' / ', $captionAndCredits) !!}
                         </div>
                     @endif
