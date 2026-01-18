@@ -9,6 +9,33 @@
             list-style-type: disc;
             list-style-position: inside;
         }
+
+        .image-caption-content {
+            font-size: 0.75rem;
+            color: #6b7280;
+            font-family: 'Open Sans', sans-serif;
+            font-style: italic;
+            text-align: center;
+        }
+
+        .image-caption-content * {
+            font-size: inherit;
+            color: inherit;
+            font-family: inherit;
+            font-style: inherit;
+            text-align: inherit;
+            margin: 0;
+            padding: 0;
+            line-height: inherit;
+        }
+
+        .image-caption-content p {
+            display: inline;
+        }
+
+        .image-caption-content p:not(:last-child)::after {
+            content: ' ';
+        }
     </style>
 
     @forelse ($blocks as $block)
@@ -233,11 +260,28 @@
 
             @case('image')
                 <div class="relative sm:aspect-video mb-6">
-                    <img class="w-full h-full object-contain" src="{{ asset($block['url']) }}" alt="">
-                    {{-- Agregar creditos si existen --}}
-                    {{-- Agregar alt si existe --}}
-                    {{-- Agregar texto si la imagen tiene y mostrar el formato segun el bloque --}}
-                    {{-- Agregar creditos y un texto corto a la imagen principal y a cada imagen de la galeria de fotos --}}
+                    <img class="w-full h-full object-contain mb-2" src="{{ asset($block['url']) }}" 
+                         alt="{{ $block['alt_text'] ?? '' }}">
+
+                    @php
+                        $captionAndCredits = [];
+                        if (!empty($block['caption'])) {
+                            $captionRaw = $block['caption'] ?? '';
+                            $captionFormatted = fixStrongSpacing(Str::markdown(markdownLite($captionRaw)));
+                            if (!empty($captionFormatted)) {
+                                $captionAndCredits[] = $captionFormatted;
+                            }
+                        }
+                        if (!empty($block['credits'])) {
+                            $captionAndCredits[] = $block['credits'];
+                        }
+                    @endphp
+
+                    @if (!empty($captionAndCredits))
+                        <div class="image-caption-content text-xs text-gray-500 font-opensans italic text-center whitespace-pre-line">
+                            {!! implode(' / ', $captionAndCredits) !!}
+                        </div>
+                    @endif
                 </div>
             @break
 
