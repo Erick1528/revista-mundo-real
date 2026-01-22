@@ -35,3 +35,52 @@ if (!function_exists('fixStrongSpacing')) {
         return $html;
     }
 }
+
+if (!function_exists('generateUniqueSlug')) {
+    /**
+     * Genera un slug único basado en título y subtítulo
+     *
+     * @param string $title
+     * @param string|null $subtitle
+     * @param int|null $excludeArticleId ID del artículo a excluir de la verificación (útil para update)
+     * @return string
+     */
+    function generateUniqueSlug($title, $subtitle = null, $excludeArticleId = null)
+    {
+        // Crear slug base desde título o título + subtítulo
+        $baseText = trim($title);
+        if (!empty($subtitle)) {
+            $baseText = trim($title . ' ' . $subtitle);
+        }
+
+        // Generar slug base
+        $baseSlug = \Illuminate\Support\Str::slug($baseText);
+
+        // Si el slug base está vacío, usar un slug genérico
+        if (empty($baseSlug)) {
+            $baseSlug = 'articulo';
+        }
+
+        // Verificar si el slug existe
+        $slug = $baseSlug;
+        $counter = 1;
+
+        while (true) {
+            $query = \App\Models\Article::where('slug', $slug);
+            
+            // Excluir el artículo actual si se está actualizando
+            if ($excludeArticleId !== null) {
+                $query->where('id', '!=', $excludeArticleId);
+            }
+            
+            if (!$query->exists()) {
+                break;
+            }
+            
+            $slug = $baseSlug . '-' . $counter;
+            $counter++;
+        }
+
+        return $slug;
+    }
+}
