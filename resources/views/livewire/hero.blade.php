@@ -22,6 +22,22 @@
             </h1>
             <p class=" text-[12px] sm:text-sm font-montserrat text-left mt-3 text-gray-light uppercase">Completa la
                 información para publicar un nuevo artículo</p>
+        @elseif ($showEditArticleView)
+            <button wire:click="cancelEditArticle"
+                class="inline-flex items-center gap-2 text-primary hover:text-dark-sage transition-colors mb-8">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                <p class=" text-sm font-montserrat">Volver al Dashboard</p>
+            </button>
+
+            <h1 class=" text-4xl sm:text-5xl font-serif text-left text-primary text-balance font-normal">Editar
+                Artículo
+            </h1>
+            <p class=" text-[12px] sm:text-sm font-montserrat text-left mt-3 text-gray-light uppercase">Completa la
+                información para actualizar el artículo</p>
         @else
             <h1
                 class=" text-6xl sm:text-7xl font-serif text-center text-primary px-6 sm:px-10 lg:px-4 text-balance font-normal">
@@ -37,6 +53,7 @@
 <script>
     let historyPushed = false;
     let isInCreateArticleView = @js($showCreateArticleView);
+    let isInEditArticleView = @js($showEditArticleView);
 
     // Detectar cuando el usuario presiona el botón atrás del navegador o gestos en móvil
     document.addEventListener('DOMContentLoaded', function() {
@@ -47,11 +64,18 @@
             }, '', window.location.href);
             historyPushed = true;
         }
+        // Agregar una entrada al historial cuando se muestra la vista de editar artículo
+        if (isInEditArticleView && !historyPushed) {
+            history.pushState({
+                editArticle: true
+            }, '', window.location.href);
+            historyPushed = true;
+        }
     });
 
     // Detectar navegación hacia atrás
     window.addEventListener('popstate', function(event) {
-        console.log('Popstate triggered, isInCreateArticleView:', isInCreateArticleView);
+        console.log('Popstate triggered, isInCreateArticleView:', isInCreateArticleView, 'isInEditArticleView:', isInEditArticleView);
 
         // Si estamos en la vista de crear artículo
         if (isInCreateArticleView) {
@@ -60,24 +84,40 @@
             @this.call('cancelCreateArticle');
             return false;
         }
+
+        // Si estamos en la vista de editar artículo
+        if (isInEditArticleView) {
+            console.log('Calling cancelEditArticle');
+            event.preventDefault();
+            @this.call('cancelEditArticle');
+            return false;
+        }
     });
 
     // Actualizar el estado cuando Livewire se actualiza
     document.addEventListener('livewire:updated', function() {
-        const newState = @js($showCreateArticleView);
+        const newCreateState = @js($showCreateArticleView);
+        const newEditState = @js($showEditArticleView);
 
-        if (newState && !historyPushed) {
+        if (newCreateState && !historyPushed) {
             history.pushState({
                 createArticle: true
             }, '', window.location.href);
             historyPushed = true;
             isInCreateArticleView = true;
-        } else if (!newState) {
+        } else if (newEditState && !historyPushed) {
+            history.pushState({
+                editArticle: true
+            }, '', window.location.href);
+            historyPushed = true;
+            isInEditArticleView = true;
+        } else if (!newCreateState && !newEditState) {
             historyPushed = false;
             isInCreateArticleView = false;
+            isInEditArticleView = false;
         }
 
-        console.log('Livewire updated, new state:', newState);
+        console.log('Livewire updated, new create state:', newCreateState, 'new edit state:', newEditState);
     });
 
     // Escuchar cambios específicos de Livewire para el componente Hero
@@ -85,7 +125,8 @@
         Livewire.hook('component.updated', (component) => {
             if (component.fingerprint.name === 'hero') {
                 isInCreateArticleView = component.data.showCreateArticleView || false;
-                console.log('Hero component updated, createArticleView:', isInCreateArticleView);
+                isInEditArticleView = component.data.showEditArticleView || false;
+                console.log('Hero component updated, createArticleView:', isInCreateArticleView, 'editArticleView:', isInEditArticleView);
             }
         });
     });
