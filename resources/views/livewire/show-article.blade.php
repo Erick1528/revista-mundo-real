@@ -1,4 +1,4 @@
-<div class="max-w-7xl mx-auto px-4 sm:px-10 lg:px-[120px]">
+<div class="max-w-7xl mx-auto px-4 sm:px-10 lg:px-[120px] pb-12">
 
     <style>
         .image-caption-content {
@@ -162,5 +162,52 @@
 
     {{-- Content --}}
     <livewire:content-view :content="$article->content" />
+
+    @if (!empty($article->tags) && is_array($article->tags) && count($article->tags) > 0)
+        <div
+            class="flex flex-wrap items-center gap-x-4 md:gap-x-6 gap-y-2 md:gap-y-3 text-xs md:text-sm text-muted-foreground font-montserrat border-t @if(!($relatedArticles && $relatedArticles->count() > 0)) border-b @endif border-gray-lighter py-3 md:py-4 text-gray-light">
+            @foreach ($article->tags as $tag)
+                <span
+                    class="group inline-flex items-center justify-center px-3 py-1.5 md:px-4 md:py-2 border border-gray-lighter hover:bg-dark-sage/40 hover:border-dark-sage transition-colors text-primary group-hover:text-dark-sage cursor-pointer">
+                    {{ $tag }}
+                </span>
+            @endforeach
+        </div>
+    @endif
+
+    @if ($relatedArticles && $relatedArticles->count() > 0)
+        <div class="border-t border-gray-lighter pt-8 md:pt-12 pb-6 md:pb-8">
+            <h2 class="font-serif text-2xl md:text-3xl lg:text-4xl mb-6 md:mb-8">
+                Artículos Relacionados
+            </h2>
+            <div class="space-y-8 md:space-y-0 md:grid md:grid-cols-3 md:gap-6 lg:gap-8">
+                @foreach ($relatedArticles->take(5) as $relatedArticle)
+                    @php
+                        $authorName = !empty(trim($relatedArticle->attribution)) 
+                            ? $relatedArticle->attribution 
+                            : ($relatedArticle->user->name ?? 'Autor desconocido');
+                    @endphp
+                    <a href="{{ route('article.show', $relatedArticle->slug) }}" class="flex gap-x-4 md:flex-col md:gap-x-0 group cursor-pointer">
+                        <div class="w-32 h-32 md:w-full md:h-auto overflow-hidden shrink-0 md:shrink">
+                            <img src="{{ asset($relatedArticle->image_path) }}" 
+                                 alt="{{ $relatedArticle->title }}"
+                                 class="w-full h-full md:aspect-[3/2] object-cover group-hover:scale-105 transition-all duration-200 aspect-square md:aspect-[3/2]">
+                        </div>
+                        <div class="space-y-2 md:space-y-2 md:mt-3 md:mb-0">
+                            <p class="text-[10px] sm:text-xs md:text-xs font-semibold uppercase font-montserrat text-gray-light tracking-wider">
+                                {{ $relatedArticle->section_name }}
+                            </p>
+                            <h3 class="text-[18px] sm:text-xl md:text-lg lg:text-xl font-serif text-primary group-hover:text-dark-sage transition-all duration-200">
+                                {{ $relatedArticle->title }}
+                            </h3>
+                            <p class="text-gray-light text-[10px] sm:text-xs md:hidden font-opensans">
+                                Por {{ $authorName }}
+                            </p>
+                        </div>
+                    </a>
+                @endforeach
+            </div>
+        </div>
+    @endif
 
 </div>

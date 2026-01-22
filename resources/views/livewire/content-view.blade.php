@@ -9,33 +9,6 @@
             list-style-type: disc;
             list-style-position: inside;
         }
-
-        .image-caption-content {
-            font-size: 0.75rem;
-            color: #6b7280;
-            font-family: 'Open Sans', sans-serif;
-            font-style: italic;
-            text-align: center;
-        }
-
-        .image-caption-content * {
-            font-size: inherit;
-            color: inherit;
-            font-family: inherit;
-            font-style: inherit;
-            text-align: inherit;
-            margin: 0;
-            padding: 0;
-            line-height: inherit;
-        }
-
-        .image-caption-content p {
-            display: inline;
-        }
-
-        .image-caption-content p:not(:last-child)::after {
-            content: ' ';
-        }
     </style>
 
     @forelse ($blocks as $block)
@@ -259,30 +232,121 @@
             @break
 
             @case('image')
-                <div class="relative sm:aspect-video mb-6">
-                    <img class="w-full h-full object-contain mb-2" src="{{ asset($block['url']) }}" 
-                         alt="{{ $block['alt_text'] ?? '' }}">
+                @php
+                    $imageUrl = $block['url'] ?? '';
+                    $layout = $block['layout'] ?? 'full';
+                    $size = $block['size'] ?? 'large';
+                    
+                    // Procesar caption con markdown
+                    $captionRaw = $block['caption'] ?? '';
+                    if (!empty($captionRaw)) {
+                        $captionFormatted = fixStrongSpacing(Str::markdown(markdownLite($captionRaw)));
+                    } else {
+                        $captionFormatted = '';
+                    }
+                    
+                    // Créditos como texto plano (sin markdown)
+                    $creditsRaw = $block['credits'] ?? '';
+                    $creditsFormatted = !empty($creditsRaw) ? $creditsRaw : '';
+                @endphp
 
-                    @php
-                        $captionAndCredits = [];
-                        if (!empty($block['caption'])) {
-                            $captionRaw = $block['caption'] ?? '';
-                            $captionFormatted = fixStrongSpacing(Str::markdown(markdownLite($captionRaw)));
-                            if (!empty($captionFormatted)) {
-                                $captionAndCredits[] = $captionFormatted;
-                            }
-                        }
-                        if (!empty($block['credits'])) {
-                            $captionAndCredits[] = $block['credits'];
-                        }
-                    @endphp
-
-                    @if (!empty($captionAndCredits))
-                        <div class="image-caption-content text-xs text-gray-500 font-opensans italic text-center">
-                            {!! implode(' / ', $captionAndCredits) !!}
+                @if ($imageUrl)
+                    @if ($layout === 'full')
+                        <!-- Solo imagen -->
+                        <div class="mb-6 text-center space-y-2">
+                            <img src="{{ asset($imageUrl) }}" alt="{{ $block['alt_text'] ?? '' }}"
+                                class="@if ($size === 'small') max-w-xs @elseif($size === 'medium') max-w-md @else max-w-full @endif mx-auto h-auto max-h-96 object-contain">
+                            @if (!empty($creditsFormatted))
+                                <div class="text-[10px] md:text-xs text-gray-500 font-opensans text-center">
+                                    {{ $creditsFormatted }}
+                                </div>
+                            @endif
+                        </div>
+                    @elseif($layout === 'text-right')
+                        @if (!empty($captionFormatted))
+                            <!-- Imagen izquierda, texto derecha -->
+                            <div class="mb-6 flex flex-col md:flex-row gap-4 md:items-stretch">
+                                <div class="@if ($size === 'small') md:flex-[0_0_25%] @elseif($size === 'medium') md:flex-[0_0_35%] @else md:flex-[0_0_45%] @endif flex flex-col space-y-1 md:space-y-2 min-w-0">
+                                    <div class="flex-1 flex items-center justify-center md:h-auto">
+                                        <img src="{{ asset($imageUrl) }}"
+                                            alt="{{ $block['alt_text'] ?? '' }}"
+                                            class="w-full h-auto md:h-full object-contain @if ($size === 'small') max-w-xs @elseif($size === 'medium') max-w-md @else max-w-full @endif mx-auto md:mx-0">
+                                    </div>
+                                    @if (!empty($creditsFormatted))
+                                        <p class="text-[10px] md:text-xs text-gray-500 font-opensans text-center !mb-0 mt-0">
+                                            {{ $creditsFormatted }}
+                                        </p>
+                                    @endif
+                                </div>
+                                <div class="flex-1 min-w-0 text-primary/90 leading-relaxed font-montserrat text-base lg:text-[18px] prose -mb-6">
+                                    {!! $captionFormatted !!}
+                                </div>
+                            </div>
+                        @else
+                            <!-- Sin caption: mostrar como full -->
+                            <div class="mb-6 text-center space-y-1 md:space-y-2">
+                                <img src="{{ asset($imageUrl) }}" alt="{{ $block['alt_text'] ?? '' }}"
+                                    class="@if ($size === 'small') max-w-xs @elseif($size === 'medium') max-w-md @else max-w-full @endif mx-auto h-auto max-h-96 object-contain">
+                                @if (!empty($creditsFormatted))
+                                    <p class="text-[10px] md:text-xs text-gray-500 font-opensans text-center !mb-0 mt-0">
+                                        {{ $creditsFormatted }}
+                                    </p>
+                                @endif
+                            </div>
+                        @endif
+                    @elseif($layout === 'text-left')
+                        @if (!empty($captionFormatted))
+                            <!-- Texto izquierda, imagen derecha -->
+                            <div class="mb-6 flex flex-col md:flex-row gap-4 md:items-stretch">
+                                <div class="flex-1 min-w-0 text-primary/90 leading-relaxed font-montserrat text-base lg:text-[18px] prose -mb-6">
+                                    {!! $captionFormatted !!}
+                                </div>
+                                <div class="@if ($size === 'small') md:flex-[0_0_25%] @elseif($size === 'medium') md:flex-[0_0_35%] @else md:flex-[0_0_45%] @endif flex flex-col space-y-1 md:space-y-2 min-w-0">
+                                    <div class="flex-1 flex items-center justify-center md:h-auto">
+                                        <img src="{{ asset($imageUrl) }}"
+                                            alt="{{ $block['alt_text'] ?? '' }}"
+                                            class="w-full h-auto md:h-full object-contain @if ($size === 'small') max-w-xs @elseif($size === 'medium') max-w-md @else max-w-full @endif mx-auto md:mx-0">
+                                    </div>
+                                    @if (!empty($creditsFormatted))
+                                        <p class="text-[10px] md:text-xs text-gray-500 font-opensans text-center !mb-0 mt-0">
+                                            {{ $creditsFormatted }}
+                                        </p>
+                                    @endif
+                                </div>
+                            </div>
+                        @else
+                            <!-- Sin caption: mostrar como full -->
+                            <div class="mb-6 text-center space-y-1 md:space-y-2">
+                                <img src="{{ asset($imageUrl) }}" alt="{{ $block['alt_text'] ?? '' }}"
+                                    class="@if ($size === 'small') max-w-xs @elseif($size === 'medium') max-w-md @else max-w-full @endif mx-auto h-auto max-h-96 object-contain">
+                                @if (!empty($creditsFormatted))
+                                    <p class="text-[10px] md:text-xs text-gray-500 font-opensans text-center !mb-0 mt-0">
+                                        {{ $creditsFormatted }}
+                                    </p>
+                                @endif
+                            </div>
+                        @endif
+                    @elseif($layout === 'text-below')
+                        <!-- Imagen arriba, texto abajo -->
+                        <div class="mb-6 space-y-3">
+                            <div class="text-center space-y-2">
+                                <img src="{{ asset($imageUrl) }}"
+                                    alt="{{ $block['alt_text'] ?? '' }}"
+                                    class="@if ($size === 'small') max-w-xs @elseif($size === 'medium') max-w-md @else max-w-full @endif mx-auto h-auto max-h-96 object-contain">
+                                @if (!empty($creditsFormatted))
+                                    <p class="text-[10px] md:text-xs text-gray-500 font-opensans text-center !mb-0 mt-0">
+                                        {{ $creditsFormatted }}
+                                    </p>
+                                @endif
+                            </div>
+                            @if (!empty($captionFormatted))
+                                <div class="text-primary/90 leading-relaxed font-montserrat text-base lg:text-[18px] prose">
+                                    {!! $captionFormatted !!}
+                                </div>
+                            @endif
                         </div>
                     @endif
-                </div>
+                @endif
             @break
 
             @default
