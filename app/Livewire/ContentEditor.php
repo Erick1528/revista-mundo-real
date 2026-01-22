@@ -15,6 +15,8 @@ class ContentEditor extends Component
     public $blockSelectorIndex = null;
     public $galleryFiles = [];
     public $reviewFiles = [];
+    public $isUpdateMode = false;
+    public $initialBlocks = []; // Copia inicial de bloques en modo de actualización
     
     // Mensajes de notificación
     public $errorMessage = null;
@@ -24,7 +26,20 @@ class ContentEditor extends Component
     protected $listeners = [
         'requestContentData' => 'provideContentData',
         'cleanupBlockResources' => 'cleanupAllBlockResources',
+        'setContentBlocks' => 'setContentBlocks',
+        'cleanupUnusedResources' => 'cleanupUnusedResources',
+
+        // Usar para cancelar la edición de un artículo
+        'cleanupNewResources' => 'cleanupNewResources',
     ];
+
+    public function setContentBlocks($blocks)
+    {
+        $this->blocks = $blocks;
+        $this->isUpdateMode = true;
+        // Guardar una copia profunda de los bloques iniciales para comparar después
+        $this->initialBlocks = json_decode(json_encode($blocks), true);
+    }
 
     // Métodos para mensajes
     private function setError($message)
@@ -55,11 +70,15 @@ class ContentEditor extends Component
     public function provideContentData()
     {
         // Enviar los bloques actuales al componente padre
-        $this->dispatch('contentDataResponse', [
+        $data = [
             'blocks' => $this->blocks,
             'word_count' => $this->calculateWordCount(),
             'blocks_count' => count($this->blocks)
-        ]);
+        ];
+        
+        // En Livewire 3, los eventos se propagan automáticamente a los componentes padre
+        // Usar dispatch sin especificar destino para que se propague a todos los componentes padre
+        $this->dispatch('contentDataResponse', $data);
     }
 
     public function cleanupAllBlockResources()
@@ -89,6 +108,97 @@ class ContentEditor extends Component
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * Extrae todos los recursos (imágenes) de un array de bloques
+     */
+    private function extractResourcesFromBlocks($blocks)
+    {
+        $resources = [];
+
+        foreach ($blocks as $block) {
+            // Imágenes de bloques tipo 'image'
+            if ($block['type'] === 'image' && !empty($block['url'])) {
+                $resources[] = $block['url'];
+            }
+
+            // Imágenes de galerías
+            if ($block['type'] === 'gallery' && !empty($block['images'])) {
+                foreach ($block['images'] as $imageUrl) {
+                    if (!empty($imageUrl)) {
+                        $resources[] = $imageUrl;
+                    }
+                }
+            }
+
+            // Fotos de reseñas
+            if ($block['type'] === 'review' && !empty($block['reviews'])) {
+                foreach ($block['reviews'] as $review) {
+                    if (!empty($review['photo'])) {
+                        $resources[] = $review['photo'];
+                    }
+                }
+            }
+        }
+
+        return array_unique($resources); // Eliminar duplicados
+    }
+
+    /**
+     * Limpia recursos no utilizados comparando bloques iniciales vs finales
+     * Solo elimina recursos que estaban en los bloques iniciales pero ya no están en los finales
+     * Se usa cuando se guarda el artículo en modo de actualización
+     * 
+     * @param array $data Opcional: array con 'finalBlocks' que contiene los bloques finales
+     */
+    public function cleanupUnusedResources($data = [])
+    {
+        if (!$this->isUpdateMode || empty($this->initialBlocks)) {
+            return; // Solo funciona en modo de actualización
+        }
+
+        // Usar los bloques finales pasados como parámetro, o los bloques actuales del componente
+        $finalBlocks = $data['finalBlocks'] ?? $this->blocks;
+
+        // Extraer recursos de bloques iniciales y finales
+        $initialResources = $this->extractResourcesFromBlocks($this->initialBlocks);
+        $finalResources = $this->extractResourcesFromBlocks($finalBlocks);
+
+        // Encontrar recursos que ya no se usan
+        $unusedResources = array_diff($initialResources, $finalResources);
+
+        // Eliminar recursos no utilizados
+        // Usar forceDelete=true para eliminar incluso si están en initialBlocks
+        // porque estos recursos ya no están en los bloques finales
+        foreach ($unusedResources as $resource) {
+            $this->deleteImageFromStorage($resource, true);
+        }
+    }
+
+    /**
+     * Limpia solo recursos nuevos (no existentes) cuando se cancela en modo de actualización
+     * Protege los recursos que estaban en los bloques iniciales
+     */
+    public function cleanupNewResources()
+    {
+        if (!$this->isUpdateMode || empty($this->initialBlocks)) {
+            // En modo de creación, limpiar todos los recursos
+            $this->cleanupAllBlockResources();
+            return;
+        }
+
+        // En modo de actualización, extraer recursos nuevos (que no están en initialBlocks)
+        $initialResources = $this->extractResourcesFromBlocks($this->initialBlocks);
+        $currentResources = $this->extractResourcesFromBlocks($this->blocks);
+
+        // Encontrar recursos nuevos (que no estaban en los iniciales)
+        $newResources = array_diff($currentResources, $initialResources);
+
+        // Eliminar solo recursos nuevos
+        foreach ($newResources as $resource) {
+            $this->deleteImageFromStorage($resource);
         }
     }
 
@@ -183,7 +293,9 @@ class ContentEditor extends Component
             if (isset($this->blocks[$index])) {
                 $block = $this->blocks[$index];
 
-                // Si es un bloque de imagen, eliminar la imagen del storage
+                // Eliminar imágenes del storage al eliminar un bloque
+                // El método deleteImageFromStorage ya verifica si está en modo de actualización
+                // y si la imagen está en los bloques iniciales para proteger recursos existentes
                 if ($block['type'] === 'image' && !empty($block['url'])) {
                     $this->deleteImageFromStorage($block['url']);
                 }
@@ -514,29 +626,39 @@ class ContentEditor extends Component
         }
     }
 
-    private function deleteImageFromStorage($imageUrl)
+    /**
+     * Elimina una imagen del storage
+     * 
+     * @param string $imageUrl URL de la imagen a eliminar
+     * @param bool $forceDelete Si es true, elimina la imagen incluso si está en initialBlocks (usado por cleanupUnusedResources)
+     */
+    private function deleteImageFromStorage($imageUrl, $forceDelete = false)
     {
         try {
+            // En modo de actualización, verificar si la imagen está en los bloques iniciales
+            // Si está, no eliminarla (es una imagen existente que no debe perderse)
+            // A menos que forceDelete sea true (cuando se llama desde cleanupUnusedResources)
+            if (!$forceDelete && $this->isUpdateMode && !empty($this->initialBlocks)) {
+                $initialResources = $this->extractResourcesFromBlocks($this->initialBlocks);
+                if (in_array($imageUrl, $initialResources)) {
+                    // La imagen está en los bloques iniciales, no eliminar
+                    return;
+                }
+            }
+
             // Extraer la ruta del storage desde la URL
             if (str_contains($imageUrl, '/storage/')) {
                 // Quitar '/storage/' del inicio para obtener la ruta relativa
-                $relativePath = str_replace('/storage/', '', $imageUrl);
+                $relativePath = ltrim($imageUrl, '/storage/');
                 $fullPath = storage_path('app/public/' . $relativePath);
-
-                // Debug
-                session()->flash('debug', "Intentando eliminar archivo en: $fullPath");
 
                 // Eliminar el archivo si existe
                 if (file_exists($fullPath)) {
                     unlink($fullPath);
-                    session()->flash('debug', 'Archivo eliminado del servidor');
-                } else {
-                    session()->flash('debug', 'Archivo no encontrado en: ' . $fullPath);
                 }
             }
         } catch (\Exception $e) {
             // Silencioso: si hay error eliminando, no mostrar al usuario
-            Log::warning('No se pudo eliminar imagen: ' . $e->getMessage());
             session()->flash('debug', 'Error eliminando archivo: ' . $e->getMessage());
         }
     }
@@ -615,6 +737,8 @@ class ContentEditor extends Component
         imagewebp($resizedImage, $destinationPath, 85); // Calidad 85%
 
         // Liberar memoria
+        // Nota: imagedestroy() está deprecado desde PHP 8.5 (desde PHP 8.0 los objetos GdImage se liberan automáticamente)
+        // Nueva forma (si necesitas liberar explícitamente): unset($sourceImage, $resizedImage);
         imagedestroy($sourceImage);
         imagedestroy($resizedImage);
 
