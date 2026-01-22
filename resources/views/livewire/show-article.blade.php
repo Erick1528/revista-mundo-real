@@ -165,7 +165,7 @@
 
     @if (!empty($article->tags) && is_array($article->tags) && count($article->tags) > 0)
         <div
-            class="flex flex-wrap items-center gap-x-4 md:gap-x-6 gap-y-2 md:gap-y-3 text-xs md:text-sm text-muted-foreground font-montserrat border-t @if(!($relatedArticles && $relatedArticles->count() > 0)) border-b @endif border-gray-lighter py-3 md:py-4 text-gray-light">
+            class=" mt-12 flex flex-wrap items-center gap-x-4 md:gap-x-6 gap-y-2 md:gap-y-3 text-xs md:text-sm text-muted-foreground font-montserrat border-t @if(!($relatedArticles && $relatedArticles->count() > 0)) border-b @endif border-gray-lighter py-3 md:py-4 text-gray-light">
             @foreach ($article->tags as $tag)
                 <span
                     class="group inline-flex items-center justify-center px-3 py-1.5 md:px-4 md:py-2 border border-gray-lighter hover:bg-dark-sage/40 hover:border-dark-sage transition-colors text-primary group-hover:text-dark-sage cursor-pointer">
