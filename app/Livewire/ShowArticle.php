@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Models\Article;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
@@ -13,6 +14,7 @@ class ShowArticle extends Component
     public $section;
     public $fecha;
     public $authorName;
+    public $relatedArticles;
 
     public function mount()
     {
@@ -76,6 +78,40 @@ class ShowArticle extends Component
         );
 
         $this->fecha = $fecha;
+
+        // Obtener artículos relacionados
+        $this->relatedArticles = $this->getRelatedArticles();
+    }
+
+    private function getRelatedArticles()
+    {
+        // Si hay artículos relacionados en el array, usarlos
+        if (!empty($this->article->related_articles) && is_array($this->article->related_articles)) {
+            $relatedIds = $this->article->related_articles;
+            $related = Article::whereIn('id', $relatedIds)
+                ->where('status', 'published')
+                ->where('visibility', 'public')
+                ->where('id', '!=', $this->article->id)
+                ->orderBy('published_at', 'desc')
+                ->limit(5)
+                ->get();
+
+            // Si encontramos los artículos del array, los retornamos
+            if ($related->count() > 0) {
+                return $related->take(5);
+            }
+        }
+
+        // Si no hay artículos relacionados o no se encontraron, generar según sección, fecha, visibilidad y status
+        $related = Article::where('section', $this->article->section)
+            ->where('status', 'published')
+            ->where('visibility', 'public')
+            ->where('id', '!=', $this->article->id)
+            ->orderBy('published_at', 'desc')
+            ->limit(5)
+            ->get();
+
+        return $related;
     }
 
     public function render()
