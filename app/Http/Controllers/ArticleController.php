@@ -12,6 +12,11 @@ class ArticleController extends Controller
         return view('dashboard.articles.create');
     }
 
+    public function edit(Article $article)
+    {
+        return view('dashboard.articles.edit', compact('article'));
+    }
+
     public function show(Article $article)
     {
         return view('show-article', compact('article'));
