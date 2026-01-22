@@ -166,7 +166,7 @@ class CreateArticle extends Component
         'section.required' => 'Debe seleccionar una sección para el artículo.',
         'section.in' => 'La sección seleccionada no es válida.',
 
-        'tags.required' => 'Debe agregar al menos un tag.',
+        'tags.required' => 'Debe agregar al menos 5 tags.',
         'tags.array' => 'Los tags deben tener un formato válido.',
         'tags.min' => 'Debe agregar al menos 5 tags.',
         'tags.max' => 'No puede agregar más de 10 tags.',
@@ -528,7 +528,7 @@ class CreateArticle extends Component
             $articleData = [
                 'title' => $this->title,
                 'subtitle' => $this->subtitle,
-                'slug' => $this->generateUniqueSlug($this->title, $this->subtitle),
+                'slug' => generateUniqueSlug($this->title, $this->subtitle),
                 'attribution' => $this->attribution,
                 'summary' => $this->summary,
                 'content' => $this->content,
@@ -685,34 +685,6 @@ class CreateArticle extends Component
         // Limpiar errores
         $this->resetValidation();
         $this->resetErrorBag();
-    }
-
-    private function generateUniqueSlug($title, $subtitle = null)
-    {
-        // Crear slug base desde título o título + subtítulo
-        $baseText = trim($title);
-        if (!empty($subtitle)) {
-            $baseText = trim($title . ' ' . $subtitle);
-        }
-
-        // Generar slug base
-        $baseSlug = Str::slug($baseText);
-
-        // Si el slug base está vacío, usar un slug genérico
-        if (empty($baseSlug)) {
-            $baseSlug = 'articulo';
-        }
-
-        // Verificar si el slug existe
-        $slug = $baseSlug;
-        $counter = 1;
-
-        while (Article::where('slug', $slug)->exists()) {
-            $slug = $baseSlug . '-' . $counter;
-            $counter++;
-        }
-
-        return $slug;
     }
 
     private function processImageUpload($file)
