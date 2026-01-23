@@ -61,16 +61,16 @@
             <p class=" text-gray-light text-sm">Crear una nueva publicación para la revista</p>
         </a>
 
-        <div wire:click="showInDevelopment('Editar Borradores')"
+        <a href="{{ route('profile') }}"
             class=" border border-dark-sage p-8 text-dark-sage md:max-w-[304px] w-full hover:bg-dark-sage/9 transition-all duration-200 cursor-pointer">
             <svg xmlns="http://www.w3.org/2000/svg" height="32px" width="32px" viewBox="0 0 24 24" stroke="#b7b699"
                 stroke-width="2" fill="none">
-                <path d="m18 2 3 3-11 11h-3v-3z"></path>
-                <path d="m21.5 6.5-3.5-3.5L7 14v3h3l11.5-10.5z"></path>
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
             </svg>
-            <h4 class=" mt-4 mb-2 font-serif text-xl text-primary">Editar Borradores</h4>
-            <p class=" text-gray-light text-sm">Continuar trabajando en artículos guardados</p>
-        </div>
+            <h4 class=" mt-4 mb-2 font-serif text-xl text-primary">Mi Perfil</h4>
+            <p class=" text-gray-light text-sm">Gestionar tu información personal y configuración</p>
+        </a>
 
         <div wire:click="showInDevelopment('Ver Estadísticas')"
             class=" border border-dark-sage p-8 text-dark-sage md:max-w-[304px] w-full hover:bg-dark-sage/9 transition-all duration-200 cursor-pointer">

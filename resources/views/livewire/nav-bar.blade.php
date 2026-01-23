@@ -7,7 +7,8 @@
             <x-menu-svg height="36px" width="36px" />
         </button>
 
-        <ul class=" text-[14px] font-montserrat font-medium lg:flex gap-8 text-primary hidden" style="list-style-type: none;">
+        <ul class=" text-[14px] font-montserrat font-medium lg:flex gap-8 text-primary hidden"
+            style="list-style-type: none;">
             <li class=" h-5">
                 <a class=" h-5 hover:text-dark-sage" href="#">Destinos</a>
             </li>
@@ -88,7 +89,14 @@
                 </li>
 
                 <li class="py-2 border-b border-gray-100">
-                    <button wire:click="$dispatch('openLoginModal')" class="hover:text-dark-sage transition-colors duration-200 block text-left w-full">Iniciar Sesión</button>
+                    @auth
+                        <a href="{{ route('dashboard') }}"
+                            class="hover:text-dark-sage transition-colors duration-200 block text-left w-full">Hola, {{  Auth::user()->name  }}</a>
+                    @else
+                        <button wire:click="$dispatch('openLoginModal')"
+                            class="hover:text-dark-sage transition-colors duration-200 block text-left w-full">Iniciar
+                            Sesión</button>
+                    @endauth
                 </li>
             </ul>
         </div>
