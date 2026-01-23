@@ -199,6 +199,19 @@ class UpdateArticle extends Component
 
     public function mount(Article $article)
     {
+
+        $user = Auth::user();
+
+        // Validar permisos: solo el dueño del artículo, editor_chief, administrator y moderator pueden editar
+        $isOwner = $article->user_id === $user->id;
+        $isEditorChief = $user->rol === 'editor_chief';
+        $isAdministrator = $user->rol === 'administrator';
+        $isModerator = $user->rol === 'moderator';
+
+        if (!$isOwner && !$isEditorChief && !$isAdministrator && !$isModerator) {
+            abort(403, 'Acceso denegado.');
+        }
+
         $this->article = $article;
 
         $this->title = $article->title;
