@@ -1,5 +1,24 @@
 <?php
 
+if (!function_exists('rol_label')) {
+    /**
+     * Devuelve la etiqueta en español para un rol de usuario.
+     */
+    function rol_label(?string $rol): string
+    {
+        $roles = [
+            'writer_junior' => 'Escritor Junior',
+            'writer_senior' => 'Escritor Senior',
+            'editor_junior' => 'Editor Junior',
+            'editor_senior' => 'Editor Senior',
+            'editor_chief' => 'Editor Jefe',
+            'moderator' => 'Moderador',
+            'administrator' => 'Administrador',
+        ];
+        return $rol ? ($roles[$rol] ?? $rol) : '';
+    }
+}
+
 if (!function_exists('markdownLite')) {
     /**
      * Convierte markdown básico (negrita e itálica) a HTML

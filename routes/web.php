@@ -19,6 +19,7 @@ Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard'
 
     // Profile Management
     Route::get('profile', [ProfileController::class, 'index'])->name('profile')->middleware('auth');
+    Route::post('logout', [LoginController::class, 'logout'])->name('logout')->middleware('auth');
 
 // Article View
 Route::get('article/{article:slug}', [ArticleController::class, 'show'])->name('article.show'); // Agregar comprobación de permisos antes de mostrar, si no es status published no se debe de mostrar.
@@ -42,3 +43,5 @@ Route::get('article/{article:slug}', [ArticleController::class, 'show'])->name('
 // Muy Importante:
 // Agregar bloque de anuncio en el editor de contenido
 // Agregar en el select de sección la opción de "Anuncio" y que sea valida en la DB
+
+// Crear CRUD para agreagr lista de temas sugeridos para los articulos.

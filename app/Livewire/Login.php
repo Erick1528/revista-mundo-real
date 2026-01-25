@@ -34,10 +34,14 @@ class Login extends Component
         // Limpiar mensajes previos
         session()->forget(['error', 'success']);
 
-        $rateLimiterKey = $this->email . '|' . request()->ip();
-        if (RateLimiter::tooManyAttempts($rateLimiterKey, 5)) {
-            session()->flash('error', 'Demasiados intentos fallidos. Inténtalo de nuevo más tarde.');
-            $this->password = ''; // Solo limpiar contraseña
+        $rateLimiterKey = 'login:' . $this->email . '|' . request()->ip();
+        $maxAttempts = 5;
+        $decaySeconds = 60;
+
+        if (RateLimiter::tooManyAttempts($rateLimiterKey, $maxAttempts)) {
+            $seconds = RateLimiter::availableIn($rateLimiterKey);
+            session()->flash('error', "Demasiados intentos fallidos. Espera {$seconds} segundos e inténtalo de nuevo.");
+            $this->password = '';
             return;
         }
 
@@ -53,7 +57,7 @@ class Login extends Component
         }
 
         // Solo se ejecuta si el login falló
-        RateLimiter::hit($rateLimiterKey);
+        RateLimiter::hit($rateLimiterKey, $decaySeconds);
         $this->password = '';
         session()->flash('error', 'El correo o la contraseña no son correctos.');
     }

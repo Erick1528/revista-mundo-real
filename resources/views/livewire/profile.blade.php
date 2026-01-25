@@ -405,10 +405,45 @@
 
                 <div id="section-password"
                     class="accordion-content px-6 py-6 space-y-6 border-t border-gray-lighter @if (!$openSections['password']) hidden @endif">
-                    <div class="p-4 bg-yellow-50 border border-yellow-200">
-                        <p class="text-sm font-opensans text-yellow-800">
-                            <strong>Próximamente:</strong> La funcionalidad para cambiar contraseña estará disponible pronto.
-                        </p>
+
+                    <div class="space-y-2">
+                        <label for="current_password" class="block text-sm font-montserrat font-medium text-primary">
+                            Contraseña actual
+                        </label>
+                        <input type="password" id="current_password" placeholder="Introduce tu contraseña actual"
+                            wire:model="current_password" autocomplete="current-password"
+                            class="w-full px-4 py-3 border @error('current_password') border-red-500 @else border-gray-300 @enderror bg-gray-50 focus:outline-none focus:border-dark-sage focus:shadow-[0_0_0_2px_rgba(183,182,153,0.5)] font-opensans text-sm">
+
+                        @error('current_password')
+                            <p class="text-red-500 text-xs font-opensans">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div class="space-y-2">
+                        <label for="password" class="block text-sm font-montserrat font-medium text-primary">
+                            Nueva contraseña
+                        </label>
+                        <input type="password" id="password" placeholder="Introduce la nueva contraseña"
+                            wire:model="password" autocomplete="new-password"
+                            class="w-full px-4 py-3 border @error('password') border-red-500 @else border-gray-300 @enderror bg-gray-50 focus:outline-none focus:border-dark-sage focus:shadow-[0_0_0_2px_rgba(183,182,153,0.5)] font-opensans text-sm">
+
+                        @error('password')
+                            <p class="text-red-500 text-xs font-opensans">{{ $message }}</p>
+                        @enderror
+                        <p class="text-xs text-gray-500 mt-1">Mínimo 6 caracteres</p>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label for="password_confirmation" class="block text-sm font-montserrat font-medium text-primary">
+                            Confirmar nueva contraseña
+                        </label>
+                        <input type="password" id="password_confirmation" placeholder="Repite la nueva contraseña"
+                            wire:model="password_confirmation" autocomplete="new-password"
+                            class="w-full px-4 py-3 border @error('password_confirmation') border-red-500 @else border-gray-300 @enderror bg-gray-50 focus:outline-none focus:border-dark-sage focus:shadow-[0_0_0_2px_rgba(183,182,153,0.5)] font-opensans text-sm">
+
+                        @error('password_confirmation')
+                            <p class="text-red-500 text-xs font-opensans">{{ $message }}</p>
+                        @enderror
                     </div>
                 </div>
             </div>

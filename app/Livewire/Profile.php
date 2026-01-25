@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\Article;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -20,6 +21,11 @@ class Profile extends Component
     public $avatar;
     public $currentAvatar;
     public $rol;
+
+    // Campos para cambiar contraseña
+    public $current_password = '';
+    public $password = '';
+    public $password_confirmation = '';
     public $articles;
     public $totalArticles;
     public $createdAt;
@@ -46,6 +52,10 @@ class Profile extends Component
         'avatar.image' => 'El archivo debe ser una imagen válida.',
         'avatar.mimes' => 'La imagen debe ser de tipo: jpeg, jpg, png, webp o gif.',
         'avatar.max' => 'La imagen no puede ser mayor a 10MB.',
+        'current_password.required' => 'La contraseña actual es obligatoria para cambiarla.',
+        'password.required' => 'La nueva contraseña es obligatoria.',
+        'password.min' => 'La nueva contraseña debe tener al menos 6 caracteres.',
+        'password.confirmed' => 'La confirmación de la nueva contraseña no coincide.',
     ];
 
     public function mount()
@@ -104,6 +114,9 @@ class Profile extends Component
             $this->email = $user->email;
             $this->description = $user->description;
             $this->currentAvatar = $user->avatar;
+            $this->current_password = '';
+            $this->password = '';
+            $this->password_confirmation = '';
             $this->loadArticles();
         }
     }
@@ -144,13 +157,30 @@ class Profile extends Component
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
+        // Reglas base
+        $rules = array_merge($this->rules, []);
+
         // Si no hay avatar nuevo, no validar avatar
-        $rules = $this->rules;
         if (!$this->avatar || !is_object($this->avatar)) {
             unset($rules['avatar']);
         }
 
+        // Si quiere cambiar contraseña, validar los tres campos
+        $changingPassword = filled($this->current_password) || filled($this->password) || filled($this->password_confirmation);
+        if ($changingPassword) {
+            $rules['current_password'] = 'required';
+            $rules['password'] = 'required|min:6|max:255|confirmed';
+        }
+
         $this->validate($rules);
+
+        // Verificar contraseña actual si está cambiando contraseña
+        if ($changingPassword) {
+            if (!Hash::check($this->current_password, $user->password)) {
+                $this->addError('current_password', 'La contraseña actual no es correcta.');
+                return;
+            }
+        }
 
         try {
             $updateData = [
@@ -168,6 +198,14 @@ class Profile extends Component
                 $avatarPath = $this->processAvatarUpload($this->avatar);
                 $updateData['avatar'] = $avatarPath;
                 $this->currentAvatar = $avatarPath;
+            }
+
+            // Actualizar contraseña si se proporcionó una nueva
+            if ($changingPassword) {
+                $user->password = $this->password;
+                $this->current_password = '';
+                $this->password = '';
+                $this->password_confirmation = '';
             }
 
             $user->fill($updateData);
