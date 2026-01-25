@@ -1,23 +1,35 @@
-// Script para crear un usuario
-// Ejecutar con: php artisan tinker < create-user.php
-// O copiar y pegar el contenido dentro de tinker
+<?php
 
-// Configura estos valores según necesites
-$name = 'Nombre del Usuario';
-$email = 'usuario@example.com';
-$password = 'password123'; // Cambia esto por una contraseña segura
-$rol = 'writer_junior'; // Opciones: writer_junior, writer_senior, editor_junior, editor_senior, editor_chief, moderator, administrator
+/**
+ * Script para crear un usuario desde consola.
+ * Ejecutar desde la ra�z del proyecto: php create-user.php
+ */
 
-// Crear el usuario
-$user = \App\Models\User::create([
-    'name' => $name,
-    'email' => $email,
-    'password' => \Illuminate\Support\Facades\Hash::make($password),
-    'rol' => $rol,
+require __DIR__ . '/vendor/autoload.php';
+$app = require_once __DIR__ . '/bootstrap/app.php';
+$app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+
+// ??? Datos del usuario (editar seg�n necesidad) ???
+
+$name     = "Nombre de usuario";
+$email    = "correo@ejemplo.com";
+$password = "contraseña";
+$rol      = "rol_del_usuario"; // writer_junior, writer_senior, editor_junior, editor_senior, editor_chief, moderator, administrator
+
+// Ejemplos de otros roles (si los usas en tu app):
+// $rol = "editor";
+// $rol = "administrator";
+
+// ??? Crear usuario ???
+
+$user = User::create([
+    "name"     => $name,
+    "email"    => $email,
+    "password" => Hash::make($password),
+    "rol"      => $rol,
 ]);
 
-echo "Usuario creado exitosamente:\n";
-echo "ID: {$user->id}\n";
-echo "Nombre: {$user->name}\n";
-echo "Email: {$user->email}\n";
-echo "Rol: {$user->rol}\n";
+echo "Usuario creado! (id: {$user->id})\n";
