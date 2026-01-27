@@ -3,6 +3,7 @@
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\CoverController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -13,7 +14,15 @@ Route::get('/', function () {
 // Dashboard
 Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard')->middleware('auth');
 
-    // Content Creation and Management
+// Portadas: listado y creación/edición (editor_chief, administrator, moderator only)
+Route::get('portadas', [CoverController::class, 'index'])
+    ->name('cover.index')
+    ->middleware('auth');
+Route::get('portadas/nueva', [CoverController::class, 'manage'])
+    ->name('cover.manage')
+    ->middleware('auth');
+
+// Content Creation and Management
     Route::get('articles/create', [ArticleController::class, 'create'])->name('articles.create')->middleware('auth');
     Route::get('articles/{article:slug}/edit', [ArticleController::class, 'edit'])->name('articles.edit')->middleware('auth');
 
@@ -26,6 +35,8 @@ Route::get('article/{article:slug}', [ArticleController::class, 'show'])->name('
 
 // TODO:
 // Crear Panel para poder gestionar la portada de la revista con drag and drop con alpine.js
+// Mejorar la vista del modal para publicar o guardar el borrador de la portada, mejorar la vista en general.
+
 // Mirar como hacer la funcionalidad de programar la publicación de un artículo a cierta hora y fecha
 // Crear vista de perfil
 // Crear botones en la vista del articulo para cambiar estado (publicado, borrador, pendiente revisión), esto solo para usuarios con permisos de editor o admin o moderator creo

@@ -4,6 +4,78 @@
     display: none !important;
 }
 
+/* Oculta la X nativa de limpiar en inputs type="search" del panel de portada */
+#cover-panel-search::-webkit-search-cancel-button,
+#cover-panel-search::-webkit-search-decoration {
+    -webkit-appearance: none;
+    appearance: none;
+}
+#cover-panel-search::-moz-search-cancel-button {
+    display: none;
+}
+
+/* Sin outline/ring de focus en los contenedores de artículos de la portada */
+.manage-cover-content a:focus,
+.manage-cover-content a:focus-visible,
+.manage-cover-content button:focus,
+.manage-cover-content button:focus-visible,
+.manage-cover-content [tabindex]:focus,
+.manage-cover-content [tabindex]:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Scrollbar completamente oculto (sin ocupar espacio) pero scroll funcional */
+.scrollbar-auto-hide {
+    scrollbar-width: none; /* Firefox: ocultar completamente */
+    -ms-overflow-style: none; /* IE/Edge: ocultar completamente */
+    overflow-y: auto; /* Scroll funcional */
+}
+
+/* WebKit (Chrome, Safari, Edge): ocultar completamente el scrollbar */
+.scrollbar-auto-hide::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+    background: transparent;
+}
+
+.scrollbar-auto-hide::-webkit-scrollbar-track {
+    display: none;
+    background: transparent;
+}
+
+.scrollbar-auto-hide::-webkit-scrollbar-thumb {
+    display: none;
+    background: transparent;
+}
+
+/* En móvil/tablet mostrar el scrollbar cuando hay scroll */
+@media (max-width: 1023px) {
+    .scrollbar-auto-hide {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+        -ms-overflow-style: auto;
+    }
+    
+    .scrollbar-auto-hide::-webkit-scrollbar {
+        display: block;
+        width: 8px;
+        background: transparent;
+    }
+    
+    .scrollbar-auto-hide::-webkit-scrollbar-track {
+        display: block;
+        background: transparent;
+    }
+    
+    .scrollbar-auto-hide::-webkit-scrollbar-thumb {
+        display: block;
+        background-color: rgba(0, 0, 0, 0.2);
+        border-radius: 4px;
+    }
+}
+
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 @source '../**/*.blade.php';
