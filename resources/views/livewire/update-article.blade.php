@@ -277,7 +277,7 @@
 
                 <!-- Mostrar errores específicos de validación de contenido -->
                 @if (!empty($contentErrors))
-                    <div class="w-full p-4 bg-red-50 border border-red-200 text-red-800">
+                    <div class="w-full p-4 bg-red-50 border border-red-500 text-red-500">
                         <div class="flex items-start justify-between">
                             <div class="flex-1">
                                 <div class="flex items-center mb-2">
@@ -295,7 +295,7 @@
                                 </div>
                             </div>
                             <button type="button" wire:click="$set('contentErrors', [])"
-                                class="text-red-600 hover:text-red-800 transition-colors ml-4 flex-shrink-0">
+                                class="text-red-500 hover:text-red-700 transition-colors ml-4 flex-shrink-0">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M6 18L18 6M6 6l12 12" />
