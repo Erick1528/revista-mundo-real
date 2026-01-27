@@ -27,7 +27,7 @@
 
     <!-- Alertas de Error -->
     @if (session('error'))
-        <div class="w-full p-4 bg-red-50 border border-red-200 text-red-800 mb-6">
+        <div class="w-full p-4 bg-red-50 border border-red-500 text-red-500 mb-6">
             <div class="flex items-center justify-between">
                 <div class="flex items-center">
                     <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -38,7 +38,7 @@
                     <span class="font-opensans text-sm">{{ session('error') }}</span>
                 </div>
                 <button type="button" onclick="this.parentElement.parentElement.remove()"
-                    class="text-red-600 hover:text-red-800 transition-colors">
+                    class="text-red-500 hover:text-red-700 transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M6 18L18 6M6 6l12 12" />
@@ -72,16 +72,18 @@
             <p class=" text-gray-light text-sm">Explorar y proponer ideas para próximos artículos</p>
         </div>
 
-        <div wire:click="showInDevelopment('Ver Estadísticas')"
+        <a href="{{ route('cover.index') }}"
             class=" border border-dark-sage p-8 text-dark-sage md:max-w-[304px] w-full hover:bg-dark-sage/9 transition-all duration-200 cursor-pointer">
             <svg xmlns="http://www.w3.org/2000/svg" height="32px" width="32px" viewBox="0 0 24 24" stroke="#b7b699"
                 stroke-width="2" fill="none">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                <circle cx="12" cy="12" r="3"></circle>
+                <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+                <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+                <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+                <rect x="14" y="14" width="7" height="7" rx="1"></rect>
             </svg>
-            <h4 class=" mt-4 mb-2 font-serif text-xl text-primary">Ver Estadísticas</h4>
-            <p class=" text-gray-light text-sm">Analizar el rendimiento de las publicaciones</p>
-        </div>
+            <h4 class=" mt-4 mb-2 font-serif text-xl text-primary">Gestionar portada</h4>
+            <p class=" text-gray-light text-sm">Ver portadas y montar la de la revista</p>
+        </a>
 
     </div>
 
