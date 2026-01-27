@@ -39,7 +39,7 @@
 
     <!-- Alertas de Error -->
     @if (session('error'))
-        <div class="w-full p-4 bg-red-50 border border-red-200 text-red-800 mb-6">
+        <div class="w-full p-4 bg-red-50 border border-red-500 text-red-500 mb-6">
             <div class="flex items-center justify-between">
                 <div class="flex items-center">
                     <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -50,7 +50,7 @@
                     <span class="font-opensans text-sm">{{ session('error') }}</span>
                 </div>
                 <button type="button" onclick="this.parentElement.parentElement.remove()"
-                    class="text-red-600 hover:text-red-800 transition-colors">
+                    class="text-red-500 hover:text-red-700 transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M6 18L18 6M6 6l12 12" />
