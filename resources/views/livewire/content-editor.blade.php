@@ -563,7 +563,7 @@
                                                             10MB. Se convertirá automáticamente a WebP</p>
                                                         @if (session()->has('error'))
                                                             <div
-                                                                class="mt-2 p-3 bg-red-100 border border-red-400 text-red-700 font-opensans text-sm">
+                                                                class="mt-2 p-3 bg-red-50 border border-red-500 text-red-500 font-opensans text-sm">
                                                                 {{ session('error') }}
                                                             </div>
                                                         @endif
@@ -594,7 +594,7 @@
                                                         Se convertirá automáticamente a WebP</p>
                                                     @if (session()->has('error'))
                                                         <div
-                                                            class="mt-2 p-3 bg-red-100 border border-red-400 text-red-700 font-opensans text-sm">
+                                                            class="mt-2 p-3 bg-red-50 border border-red-500 text-red-500 font-opensans text-sm">
                                                             {{ session('error') }}
                                                         </div>
                                                     @endif
@@ -949,10 +949,10 @@
                                                         @if (!empty($review['photo']))
                                                             <img src="{{ $review['photo'] }}"
                                                                 alt="{{ $review['name'] ?? 'Persona' }}"
-                                                                class="w-20 h-20 rounded-full object-cover border-2 border-gray-200">
+                                                                class="w-20 h-20 object-cover border-2 border-gray-200">
                                                         @else
                                                             <div
-                                                                class="w-20 h-20 rounded-full bg-gray-200 border-2 border-gray-300 flex items-center justify-center">
+                                                                class="w-20 h-20 bg-gray-200 border-2 border-gray-300 flex items-center justify-center">
                                                                 <svg class="w-8 h-8 text-gray-400" fill="none"
                                                                     stroke="currentColor" viewBox="0 0 24 24">
                                                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -1048,7 +1048,7 @@
                                                     @foreach ($reviews as $index => $rev)
                                                         <button type="button"
                                                             wire:click="setCurrentReview({{ $index }}, {{ $index }})"
-                                                            class="w-2 h-2 rounded-full transition-colors {{ $index === $currentReview ? 'bg-primary' : 'bg-gray-300 hover:bg-gray-400' }}">
+                                                            class="w-2 h-2 transition-colors {{ $index === $currentReview ? 'bg-primary' : 'bg-gray-300 hover:bg-gray-400' }}">
                                                         </button>
                                                     @endforeach
                                                 </div>
