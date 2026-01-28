@@ -14,12 +14,24 @@ Route::get('/', function () {
 // Dashboard
 Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard')->middleware('auth');
 
-// Portadas: listado y creación/edición (editor_chief, administrator, moderator only)
+// Portadas: listado, creación y edición (editor_chief, administrator, moderator only)
 Route::get('portadas', [CoverController::class, 'index'])
     ->name('cover.index')
     ->middleware('auth');
 Route::get('portadas/nueva', [CoverController::class, 'manage'])
     ->name('cover.manage')
+    ->middleware('auth');
+Route::get('portadas/{cover}/editar', [CoverController::class, 'edit'])
+    ->name('cover.edit')
+    ->middleware('auth');
+Route::post('portadas/{cover}/activar', [CoverController::class, 'activate'])
+    ->name('cover.activate')
+    ->middleware('auth');
+Route::post('portadas/{cover}/aprobar', [CoverController::class, 'approvePending'])
+    ->name('cover.approve')
+    ->middleware('auth');
+Route::post('portadas/{cover}/rechazar', [CoverController::class, 'rejectPending'])
+    ->name('cover.reject')
     ->middleware('auth');
 
 // Content Creation and Management

@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
 
-class ManageCover extends Component
+class EditCover extends Component
 {
     /**
      * Zone limits for article placement.
@@ -18,6 +18,11 @@ class ManageCover extends Component
         'mid' => 3,
         'latest' => 4,
     ];
+
+    /**
+     * The cover being edited.
+     */
+    public CoverArticle $cover;
 
     // Form fields
     public string $name = '';
@@ -30,13 +35,11 @@ class ManageCover extends Component
     public bool $showSaveModal = false;
     public bool $showCancelModal = false;
     public bool $showDuplicateWarningModal = false;
+    public bool $showActivateModal = false;
 
     public array $duplicateArticles = [];
 
-    /**
-     * Article IDs per zone - source of truth until saved.
-     * Not persisted to DB until "Save Draft" is clicked.
-     */
+    // Article IDs per zone - source of truth until saved
     public array $mainArticleIds = [];
     public array $midArticleIds = [];
     public array $latestArticleIds = [];
@@ -55,14 +58,32 @@ class ManageCover extends Component
         'ends_at.after_or_equal' => 'La fecha de fin debe ser igual o posterior a la fecha de inicio.',
     ];
 
-    public function mount(): void
+    /**
+     * Mount the component with the cover to edit.
+     */
+    public function mount(CoverArticle $cover): void
     {
-        // No draft in DB until "Save Draft" is clicked. Arrays and form are empty.
+        $this->cover = $cover;
+
+        // Load existing data into form fields
+        $this->name = $cover->name ?? '';
+        $this->notes = $cover->notes ?? '';
+        $this->visibility = $cover->visibility ?? 'public';
+        $this->scheduled_at = $cover->scheduled_at?->format('Y-m-d\TH:i');
+        $this->ends_at = $cover->ends_at?->format('Y-m-d\TH:i');
+
+        // Load article IDs
+        $this->mainArticleIds = $cover->main_articles ?? [];
+        $this->midArticleIds = $cover->mid_articles ?? [];
+        $this->latestArticleIds = $cover->latest_articles ?? [];
     }
+
+    // -------------------------------------------------------------------------
+    // Modal Actions
+    // -------------------------------------------------------------------------
 
     public function openSaveModal(): void
     {
-        // Use only current form state (or empty); don't load from draft.
         $this->showSaveModal = true;
         $this->dispatch('saveModalToggled', isOpen: true);
     }
@@ -92,6 +113,22 @@ class ManageCover extends Component
         session()->flash('message', 'Edición cancelada.');
         $this->redirect(route('cover.index'), navigate: true);
     }
+
+    public function openActivateModal(): void
+    {
+        $this->showActivateModal = true;
+        $this->dispatch('activateModalToggled', open: true);
+    }
+
+    public function closeActivateModal(): void
+    {
+        $this->showActivateModal = false;
+        $this->dispatch('activateModalToggled', open: false);
+    }
+
+    // -------------------------------------------------------------------------
+    // Zone Management
+    // -------------------------------------------------------------------------
 
     public function addToZone(string $zone, $articleId): void
     {
@@ -127,7 +164,6 @@ class ManageCover extends Component
 
     /**
      * Place an article at another article's position (reorder or insert from panel).
-     * If the article is already in the zone, it reorders. Otherwise, it inserts at that position.
      */
     public function placeArticleAt(string $zone, $articleId, $targetArticleId): void
     {
@@ -182,14 +218,36 @@ class ManageCover extends Component
         };
     }
 
+    // -------------------------------------------------------------------------
+    // Validation
+    // -------------------------------------------------------------------------
+
     /**
-     * Validation rules for saving (unique name and dates).
-     * Until saved there's no row; always validate unique name without ignoring id.
+     * Validation rules for saving.
+     * For pending versions, name is not required (inherits from parent).
+     * For regular covers, name must be unique.
      */
     protected function rulesForSave(): array
     {
+        // If editing an active cover, we create a pending version - name not strictly required
+        // since it will show as "Cambios pendientes de [parent name]"
+        if ($this->cover->is_active) {
+            return [
+                'name' => ['nullable', 'string', 'max:255'],
+                'notes' => ['nullable', 'string'],
+                'visibility' => ['required', 'in:public,private'],
+                'scheduled_at' => ['nullable', 'date'],
+                'ends_at' => ['nullable', 'date', 'after_or_equal:scheduled_at'],
+            ];
+        }
+
         return [
-            'name' => ['required', 'string', 'max:255', Rule::unique('cover_articles', 'name')->whereNull('deleted_at')],
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('cover_articles', 'name')->ignore($this->cover->id)->whereNull('deleted_at'),
+            ],
             'notes' => ['nullable', 'string'],
             'visibility' => ['required', 'in:public,private'],
             'scheduled_at' => ['nullable', 'date'],
@@ -221,9 +279,13 @@ class ManageCover extends Component
         }
     }
 
+    // -------------------------------------------------------------------------
+    // Save Actions
+    // -------------------------------------------------------------------------
+
     /**
-     * Create a new CoverArticle with draft status from the arrays and form.
-     * Redirects to cover list with success flash message.
+     * Save the cover as draft.
+     * If cover is active, creates a pending version linked to the original.
      */
     public function saveDraft(): void
     {
@@ -232,8 +294,7 @@ class ManageCover extends Component
         $scheduled = $this->parseOptionalDatetime($this->scheduled_at);
         $ends = $this->parseOptionalDatetime($this->ends_at);
 
-        CoverArticle::create([
-            'name' => $this->name,
+        $data = [
             'main_articles' => $this->mainArticleIds,
             'mid_articles' => $this->midArticleIds,
             'latest_articles' => $this->latestArticleIds,
@@ -242,14 +303,23 @@ class ManageCover extends Component
             'notes' => $this->notes ?: null,
             'scheduled_at' => $scheduled,
             'ends_at' => $ends,
-            'created_by' => Auth::id(),
-            'edited_by' => Auth::id(),
-        ]);
+        ];
+
+        if ($this->cover->is_active) {
+            // Always create a new pending version (multiple writers can each submit changes)
+            $data['name'] = $this->name ?: $this->cover->name;
+            $this->cover->createPendingVersion($data, Auth::user());
+            $message = 'Se crearon cambios pendientes. La portada activa no fue modificada.';
+        } else {
+            $data['name'] = $this->name;
+            $data['edited_by'] = Auth::id();
+            $this->cover->update($data);
+            $message = 'Borrador actualizado correctamente.';
+        }
 
         $this->showSaveModal = false;
         $this->dispatch('saveModalToggled', isOpen: false);
-        $this->dispatch('cover-saved');
-        session()->flash('message', 'Borrador guardado correctamente.');
+        session()->flash('message', $message);
         $this->redirect(route('cover.index'), navigate: true);
     }
 
@@ -260,13 +330,13 @@ class ManageCover extends Component
     {
         $allIds = array_merge($this->mainArticleIds, $this->midArticleIds, $this->latestArticleIds);
         $counts = array_count_values($allIds);
-        $duplicates = array_filter($counts, fn($count) => $count > 1);
-        
+        $duplicates = array_filter($counts, fn ($count) => $count > 1);
+
         return array_keys($duplicates);
     }
 
     /**
-     * Create a new CoverArticle with pending_review status from the arrays and form.
+     * Update the cover and send for review (pending_review status).
      */
     public function publish(): void
     {
@@ -276,10 +346,8 @@ class ManageCover extends Component
         $duplicates = $this->checkForDuplicates();
         if (! empty($duplicates)) {
             $this->duplicateArticles = $duplicates;
-            // Close save modal first
             $this->showSaveModal = false;
             $this->dispatch('saveModalToggled', isOpen: false);
-            // Show warning modal
             $this->showDuplicateWarningModal = true;
             $this->dispatch('duplicateWarningModalToggled', open: true);
 
@@ -300,25 +368,24 @@ class ManageCover extends Component
     }
 
     /**
-     * Close warning modal and allow section modification.
+     * Close duplicate warning modal and allow section modification.
      */
     public function cancelPublish(): void
     {
         $this->showDuplicateWarningModal = false;
         $this->dispatch('duplicateWarningModalToggled', open: false);
-        // Form data is preserved, user can continue editing
     }
 
     /**
-     * Execute the cover publication.
+     * Execute the publication (send for review).
+     * If cover is active, creates a pending version linked to the original.
      */
     protected function doPublish(): void
     {
         $scheduled = $this->parseOptionalDatetime($this->scheduled_at);
         $ends = $this->parseOptionalDatetime($this->ends_at);
 
-        CoverArticle::create([
-            'name' => $this->name,
+        $data = [
             'main_articles' => $this->mainArticleIds,
             'mid_articles' => $this->midArticleIds,
             'latest_articles' => $this->latestArticleIds,
@@ -327,16 +394,87 @@ class ManageCover extends Component
             'notes' => $this->notes ?: null,
             'scheduled_at' => $scheduled,
             'ends_at' => $ends,
-            'created_by' => Auth::id(),
-            'edited_by' => Auth::id(),
-        ]);
+        ];
+
+        if ($this->cover->is_active) {
+            // Always create a new pending version (multiple writers can each submit changes)
+            $data['name'] = $this->name ?: $this->cover->name;
+            $this->cover->createPendingVersion($data, Auth::user());
+            $message = 'Cambios enviados a revisión. La portada activa no fue modificada.';
+        } else {
+            $data['name'] = $this->name;
+            $data['edited_by'] = Auth::id();
+            $this->cover->update($data);
+            $message = 'Portada actualizada y enviada a revisión.';
+        }
 
         $this->showSaveModal = false;
         $this->dispatch('saveModalToggled', isOpen: false);
-        $this->dispatch('cover-published');
-        session()->flash('message', 'Portada enviada a revisión.');
+        session()->flash('message', $message);
         $this->redirect(route('cover.index'), navigate: true);
     }
+
+    // -------------------------------------------------------------------------
+    // Activation
+    // -------------------------------------------------------------------------
+
+    /**
+     * Activate this cover (and publish if needed).
+     * Cannot activate an already active cover.
+     */
+    public function activate(): void
+    {
+        $user = Auth::user();
+
+        if (! $user || ! CoverArticle::userCanActivate($user)) {
+            session()->flash('error', 'No tienes permisos para activar portadas.');
+            $this->closeActivateModal();
+
+            return;
+        }
+
+        // Cannot activate an already active cover
+        if ($this->cover->is_active) {
+            session()->flash('error', 'Esta portada ya está activa.');
+            $this->closeActivateModal();
+
+            return;
+        }
+
+        // First save current changes
+        $this->validate($this->rulesForSave());
+
+        $scheduled = $this->parseOptionalDatetime($this->scheduled_at);
+        $ends = $this->parseOptionalDatetime($this->ends_at);
+
+        $this->cover->update([
+            'name' => $this->name,
+            'main_articles' => $this->mainArticleIds,
+            'mid_articles' => $this->midArticleIds,
+            'latest_articles' => $this->latestArticleIds,
+            'visibility' => $this->visibility,
+            'notes' => $this->notes ?: null,
+            'scheduled_at' => $scheduled,
+            'ends_at' => $ends,
+        ]);
+
+        // Now activate (this will also publish if needed)
+        $result = $this->cover->activate($user);
+
+        $this->closeActivateModal();
+
+        if ($result) {
+            session()->flash('message', 'Portada activada correctamente. Ahora es la portada visible en el sitio.');
+        } else {
+            session()->flash('error', 'No se pudo activar la portada.');
+        }
+
+        $this->redirect(route('cover.index'), navigate: true);
+    }
+
+    // -------------------------------------------------------------------------
+    // Render
+    // -------------------------------------------------------------------------
 
     public function render()
     {
@@ -351,17 +489,22 @@ class ManageCover extends Component
         // Get duplicate article names for modal display
         $duplicateArticleNames = [];
         if (! empty($this->duplicateArticles)) {
-            $articles = Article::whereIn('id', $this->duplicateArticles)->pluck('title', 'id')->toArray();
-            $duplicateArticleNames = $articles;
+            $duplicateArticleNames = Article::whereIn('id', $this->duplicateArticles)
+                ->pluck('title', 'id')
+                ->toArray();
         }
 
-        return view('livewire.manage-cover', [
-            'draft' => null,
+        // Check if user can activate
+        $user = Auth::user();
+        $canActivate = $user && CoverArticle::userCanActivate($user);
+
+        return view('livewire.edit-cover', [
             'mainArticles' => $mainArticles,
             'midArticles' => $midArticles,
             'latestArticles' => $latestArticles,
             'hasContent' => $hasContent,
             'duplicateArticleNames' => $duplicateArticleNames,
+            'canActivate' => $canActivate,
         ]);
     }
 

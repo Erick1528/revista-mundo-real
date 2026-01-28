@@ -9,12 +9,15 @@ use Livewire\Component;
 
 class CoverArticlesPanel extends Component
 {
+    /**
+     * Track which accordion sections are open.
+     */
     public $openSections = [
         'my' => true,
         'all' => true,
     ];
 
-    // Filtros de búsqueda
+    // Search filters
     public $filterUser = '';
     public $filterSection = '';
     public $filterStatus = '';
@@ -22,6 +25,9 @@ class CoverArticlesPanel extends Component
     public $filterDateFrom = '';
     public $filterDateTo = '';
 
+    /**
+     * Clear all search filters.
+     */
     public function clearFilters()
     {
         $this->filterUser = '';
@@ -32,6 +38,9 @@ class CoverArticlesPanel extends Component
         $this->filterDateTo = '';
     }
 
+    /**
+     * Apply filters to query.
+     */
     protected function applyFilters($query, $includeUserFilter = true)
     {
         if ($includeUserFilter && $this->filterUser) {
@@ -61,6 +70,9 @@ class CoverArticlesPanel extends Component
         return $query;
     }
 
+    /**
+     * Get articles for the current user.
+     */
     public function getMyArticles()
     {
         $query = Article::with('user')
@@ -68,7 +80,7 @@ class CoverArticlesPanel extends Component
             ->orderBy('updated_at', 'desc')
             ->limit(50);
 
-        // En "Mis artículos", no aplicar el filtro de usuario ya que siempre es el usuario autenticado
+        // In "My articles", don't apply user filter since it's always the authenticated user
         return $this->applyFilters($query, false)->get();
     }
 
