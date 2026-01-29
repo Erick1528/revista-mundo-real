@@ -5,16 +5,75 @@
             margin-bottom: 24px;
         }
 
-        .content-view ul {
+        /* Listas dentro de párrafos (generadas por markdown) */
+        .content-view p ul,
+        .content-view p ol,
+        .content-view .prose ul,
+        .content-view .prose ol {
+            margin: 16px 0;
+            padding-left: 1.5rem;
+            list-style-position: outside;
             list-style-type: disc;
-            list-style-position: inside;
+        }
+
+        .content-view p ol,
+        .content-view .prose ol {
+            list-style-type: decimal;
+        }
+
+        .content-view p li,
+        .content-view .prose li {
+            margin-bottom: 8px;
+            padding-left: 0.35rem;
+            color: rgb(34 34 29 / 0.9);
+            line-height: 1.75;
+            font-family: 'Montserrat', ui-sans-serif, system-ui, sans-serif;
+        }
+
+        /* Listas como bloques independientes (Recursos, etc.) */
+        .content-view > ul,
+        .content-view > ol {
+            margin: 24px 0;
+            padding-left: 1.5rem;
+            list-style-position: outside;
+        }
+
+        .content-view > ul {
+            list-style-type: disc;
+        }
+
+        .content-view > ol {
+            list-style-type: decimal;
+        }
+
+        .content-view > ul > li,
+        .content-view > ol > li {
+            margin-bottom: 8px;
+            padding-left: 0.35rem;
+        }
+
+        /* Enlaces (solo dentro de .prose para no afectar el resto de la página) */
+        .content-view .prose a,
+        .content-view > ul a,
+        .content-view > ol a {
+            color: #b7b699;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+            transition: color 0.2s;
+            word-break: break-word;
+        }
+
+        .content-view .prose a:hover,
+        .content-view > ul a:hover,
+        .content-view > ol a:hover {
+            color: #22221d;
         }
     </style>
 
     @forelse ($blocks as $block)
         @switch($block['type'])
             @case('paragraph')
-                <div class="text-primary/90 leading-relaxed font-montserrat text-base lg:text-[18px] prose">
+                <div class="text-primary/90 leading-relaxed font-montserrat text-sm sm:text-base lg:text-[18px] prose">
                     {!! fixStrongSpacing(Str::markdown(markdownLite($block['content']))) !!}
                 </div>
             @break
@@ -35,17 +94,17 @@
 
             @case('list')
                 @if ($block['listType'] === 'bullet')
-                    <ul>
+                    <ul class="content-view">
                         @foreach ($block['items'] as $item)
-                            <li class="mb-2 text-primary/90 leading-relaxed font-montserrat text-base lg:text-[18px]">
+                            <li class="mb-2 text-primary/90 leading-relaxed font-montserrat text-sm sm:text-base lg:text-[18px]">
                                 {!! markdownLite($item) !!}
                             </li>
                         @endforeach
                     </ul>
                 @elseif ($block['listType'] === 'numbered')
-                    <ol class="list-decimal list-inside">
+                    <ol class="content-view">
                         @foreach ($block['items'] as $item)
-                            <li class="mb-2 text-primary/90 leading-relaxed font-montserrat text-base lg:text-[18px]">
+                            <li class="mb-2 text-primary/90 leading-relaxed font-montserrat text-sm sm:text-base lg:text-[18px]">
                                 {!! markdownLite($item) !!}
                             </li>
                         @endforeach
@@ -360,3 +419,22 @@
         @endforelse
 
     </div>
+
+    <script>
+        (function() {
+            function applyExternalLinks() {
+                document.querySelectorAll('.content-view a[href^="http"]').forEach(function(a) {
+                    if (a.hostname !== window.location.hostname) {
+                        a.setAttribute('target', '_blank');
+                        a.setAttribute('rel', 'noopener noreferrer');
+                    }
+                });
+            }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', applyExternalLinks);
+            } else {
+                applyExternalLinks();
+            }
+            document.addEventListener('livewire:navigated', applyExternalLinks);
+        })();
+    </script>
