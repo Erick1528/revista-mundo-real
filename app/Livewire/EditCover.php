@@ -284,12 +284,45 @@ class EditCover extends Component
     // -------------------------------------------------------------------------
 
     /**
+     * Whether the current user can edit this cover directly (update in place).
+     * For non-active main covers: only the owner (creator) or editor_chief/moderator/administrator.
+     * For active covers: no one (changes go as pending version). For pending versions: no one (edit in place of that row).
+     */
+    protected function userCanEditCoverDirectly(): bool
+    {
+        $user = Auth::user();
+        if (! $user) {
+            return false;
+        }
+        // Pending versions: can always save that row (it's your or someone's proposal)
+        if ($this->cover->isPendingVersion()) {
+            return true;
+        }
+        // Active main cover: never update in place, always create pending version
+        if ($this->cover->is_active) {
+            return false;
+        }
+        // Non-active main cover: only owner or users who can activate
+        return (int) $this->cover->created_by === (int) $user->id
+            || CoverArticle::userCanActivate($user);
+    }
+
+    /**
      * Save the cover as draft.
      * If cover is active, creates a pending version linked to the original.
+     * If cover is not active, only the owner or editor_chief/moderator/administrator can update in place.
      */
     public function saveDraft(): void
     {
         $this->validate($this->rulesForSave());
+
+        if (! $this->cover->is_active && ! $this->userCanEditCoverDirectly()) {
+            session()->flash('error', 'Solo el creador de la portada o un editor con permisos puede guardar cambios en esta portada.');
+            $this->showSaveModal = false;
+            $this->dispatch('saveModalToggled', isOpen: false);
+
+            return;
+        }
 
         $scheduled = $this->parseOptionalDatetime($this->scheduled_at);
         $ends = $this->parseOptionalDatetime($this->ends_at);
@@ -379,9 +412,18 @@ class EditCover extends Component
     /**
      * Execute the publication (send for review).
      * If cover is active, creates a pending version linked to the original.
+     * If cover is not active, only the owner or editor_chief/moderator/administrator can update in place.
      */
     protected function doPublish(): void
     {
+        if (! $this->cover->is_active && ! $this->userCanEditCoverDirectly()) {
+            session()->flash('error', 'Solo el creador de la portada o un editor con permisos puede enviar a revisión esta portada.');
+            $this->showSaveModal = false;
+            $this->dispatch('saveModalToggled', isOpen: false);
+
+            return;
+        }
+
         $scheduled = $this->parseOptionalDatetime($this->scheduled_at);
         $ends = $this->parseOptionalDatetime($this->ends_at);
 
@@ -497,6 +539,7 @@ class EditCover extends Component
         // Check if user can activate
         $user = Auth::user();
         $canActivate = $user && CoverArticle::userCanActivate($user);
+        $canEditDirectly = $this->userCanEditCoverDirectly();
 
         return view('livewire.edit-cover', [
             'mainArticles' => $mainArticles,
@@ -505,6 +548,7 @@ class EditCover extends Component
             'hasContent' => $hasContent,
             'duplicateArticleNames' => $duplicateArticleNames,
             'canActivate' => $canActivate,
+            'canEditDirectly' => $canEditDirectly,
         ]);
     }
 

@@ -26,9 +26,15 @@ class CoverList extends Component
 
     protected function getFilteredCovers()
     {
+        $userId = Auth::id();
+
         $query = CoverArticle::query()
             ->main()
             ->with(['creator', 'editor', 'activator', 'pendingVersions.editor'])
+            ->where(function ($q) use ($userId) {
+                $q->where('is_active', true)
+                    ->orWhere('created_by', $userId);
+            })
             ->orderByDesc('is_active')
             ->latest('updated_at');
 
@@ -55,9 +61,12 @@ class CoverList extends Component
 
     public function render()
     {
+        $user = Auth::user();
+
         return view('livewire.cover-list', [
             'covers' => $this->getFilteredCovers(),
             'hasActiveFilters' => $this->search !== '' || $this->statusFilter !== '' || $this->visibilityFilter !== '' || $this->activeFilter !== '',
+            'canActivate' => $user && CoverArticle::userCanActivate($user),
         ]);
     }
 }

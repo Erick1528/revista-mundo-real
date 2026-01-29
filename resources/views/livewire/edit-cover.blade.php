@@ -65,6 +65,18 @@
         event.currentTarget.classList.add('border-dark-sage', 'bg-sage');
     }
 }">
+    {{-- Mensajes de sesión (error al intentar guardar sin permiso, etc.) --}}
+    @if (session('error'))
+        <div class="mb-6 p-4 bg-red-50 border border-red-200 text-red-800 font-opensans text-sm">
+            {{ session('error') }}
+        </div>
+    @endif
+    @if (session('message'))
+        <div class="mb-6 p-4 bg-green-50 border border-green-200 text-green-800 font-opensans text-sm">
+            {{ session('message') }}
+        </div>
+    @endif
+
     {{-- Header with cover info --}}
     <div class="mb-8">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
@@ -125,6 +137,13 @@
                         </p>
                     </div>
                 </div>
+            </div>
+        @endif
+
+        {{-- Aviso: portada no activa y usuario no puede guardar directamente --}}
+        @if(!$cover->is_active && !$cover->isPendingVersion() && !$canEditDirectly)
+            <div class="mt-4 p-4 border border-amber-200 bg-amber-50 text-amber-800 font-opensans text-sm">
+                Solo el creador de esta portada o un editor jefe, moderador o administrador puede guardar cambios aquí. Puedes ver el contenido pero tus cambios no se aplicarán si intentas guardar.
             </div>
         @endif
 

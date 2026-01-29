@@ -111,7 +111,7 @@
                         </svg>
                         Editar
                     </a>
-                    @if(!$cover->is_active)
+                    @if($canActivate && !$cover->is_active)
                         <form id="activate-form-{{ $cover->id }}" action="{{ route('cover.activate', $cover) }}" method="POST" class="hidden">
                             @csrf
                         </form>
@@ -126,7 +126,7 @@
                     @endif
                 </div>
 
-                @if($cover->pendingVersions->isNotEmpty() && Auth::user() && in_array(Auth::user()->rol, ['editor_chief', 'administrator', 'moderator']))
+                @if($cover->pendingVersions->isNotEmpty() && $canActivate)
                     @foreach($cover->pendingVersions as $pending)
                         <div class="mt-4 ml-4 sm:ml-6 pl-4 border-l-2 border-yellow-400 bg-yellow-50/50 p-3 sm:p-4">
                             <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">

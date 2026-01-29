@@ -8,65 +8,70 @@ use Illuminate\Support\Facades\Auth;
 class CoverController extends Controller
 {
     /**
-     * Roles allowed to manage the magazine cover.
+     * Check if current user can publish/activate covers (editor_chief, moderator, administrator).
      */
-    private const ALLOWED_ROLES = ['editor_chief', 'administrator', 'moderator'];
-
-    /**
-     * Check if current user can manage covers.
-     */
-    private function authorizeCover(): void
+    private function authorizePublish(): void
     {
         $user = Auth::user();
-        if (! $user || ! in_array($user->rol, self::ALLOWED_ROLES, true)) {
-            abort(403, 'No tienes permiso para gestionar la portada.');
+        if (! $user || ! CoverArticle::userCanActivate($user)) {
+            abort(403, 'No tienes permiso para publicar o activar portadas.');
         }
     }
 
     /**
-     * Display a listing of covers (allowed roles only).
-     * Filters and list are handled by the CoverList Livewire component.
+     * Display a listing of covers. Cualquier usuario autenticado puede ver el listado.
      */
     public function index()
     {
-        $this->authorizeCover();
-
         return view('cover.index');
     }
 
     /**
-     * Show the form for creating a new cover (allowed roles only).
+     * Show the form for creating a new cover. Cualquier usuario autenticado puede crear.
      */
     public function manage()
     {
-        $this->authorizeCover();
-
         return view('cover.manage');
     }
 
     /**
-     * Show the form for editing an existing cover (allowed roles only).
+     * Show the form for editing an existing cover.
+     * Portada activa: cualquiera puede editar (cambios como versión pendiente).
+     * Portada no activa: solo el dueño (creador) puede ver y editar.
+     * Versión pendiente: se puede editar si el usuario puede ver la portada padre (activa o dueño).
      */
     public function edit(CoverArticle $cover)
     {
-        $this->authorizeCover();
+        $user = Auth::user();
+        if (! $user) {
+            abort(403, 'Debes iniciar sesión para editar portadas.');
+        }
+
+        if ($cover->isPendingVersion()) {
+            $parent = $cover->parent;
+            if (! $parent) {
+                abort(404, 'Portada no encontrada.');
+            }
+            if (! $parent->is_active && (int) $parent->created_by !== (int) $user->id) {
+                abort(403, 'Solo el dueño de la portada puede ver y editar esta versión pendiente.');
+            }
+        } else {
+            if (! $cover->is_active && (int) $cover->created_by !== (int) $user->id) {
+                abort(403, 'Solo el dueño puede ver y editar esta portada.');
+            }
+        }
 
         return view('cover.edit', ['cover' => $cover]);
     }
 
     /**
-     * Activate a cover (and publish if needed). Allowed roles only.
+     * Activate a cover (and publish if needed). Solo editor_chief, moderator, administrator.
      */
     public function activate(CoverArticle $cover)
     {
-        $this->authorizeCover();
+        $this->authorizePublish();
 
         $user = Auth::user();
-
-        if (! CoverArticle::userCanActivate($user)) {
-            return redirect()->route('cover.index')
-                ->with('error', 'No tienes permisos para activar portadas.');
-        }
 
         $result = $cover->activate($user);
 
@@ -80,18 +85,13 @@ class CoverController extends Controller
     }
 
     /**
-     * Approve and merge a specific pending version into its parent cover.
+     * Approve and merge a specific pending version into its parent cover. Solo editor_chief, moderator, administrator.
      */
     public function approvePending(CoverArticle $cover)
     {
-        $this->authorizeCover();
+        $this->authorizePublish();
 
         $user = Auth::user();
-
-        if (! CoverArticle::userCanActivate($user)) {
-            return redirect()->route('cover.index')
-                ->with('error', 'No tienes permisos para aprobar cambios.');
-        }
 
         if (! $cover->isPendingVersion()) {
             return redirect()->route('cover.index')
@@ -116,18 +116,13 @@ class CoverController extends Controller
     }
 
     /**
-     * Reject and delete a specific pending version.
+     * Reject and delete a specific pending version. Solo editor_chief, moderator, administrator.
      */
     public function rejectPending(CoverArticle $cover)
     {
-        $this->authorizeCover();
+        $this->authorizePublish();
 
         $user = Auth::user();
-
-        if (! CoverArticle::userCanActivate($user)) {
-            return redirect()->route('cover.index')
-                ->with('error', 'No tienes permisos para rechazar cambios.');
-        }
 
         if (! $cover->isPendingVersion()) {
             return redirect()->route('cover.index')
