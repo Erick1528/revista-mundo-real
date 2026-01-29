@@ -61,7 +61,7 @@
             <p class=" text-gray-light text-sm">Crear una nueva publicación para la revista</p>
         </a>
 
-        <div wire:click="showInDevelopment('Sugerencias de temas')"
+        <a href="{{ route('suggested-topics.index') }}"
             class=" border border-dark-sage p-8 text-dark-sage md:max-w-[304px] w-full hover:bg-dark-sage/9 transition-all duration-200 cursor-pointer">
             <svg xmlns="http://www.w3.org/2000/svg" height="32px" width="32px" viewBox="0 0 24 24" stroke="#b7b699"
                 stroke-width="2" fill="none">
@@ -70,7 +70,7 @@
             </svg>
             <h4 class=" mt-4 mb-2 font-serif text-xl text-primary">Sugerencias de temas</h4>
             <p class=" text-gray-light text-sm">Explorar y proponer ideas para próximos artículos</p>
-        </div>
+        </a>
 
         <a href="{{ route('cover.index') }}"
             class=" border border-dark-sage p-8 text-dark-sage md:max-w-[304px] w-full hover:bg-dark-sage/9 transition-all duration-200 cursor-pointer">
