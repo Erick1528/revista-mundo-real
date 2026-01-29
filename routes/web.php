@@ -5,6 +5,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\CoverController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SuggestedTopicController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -14,7 +15,7 @@ Route::get('/', function () {
 // Dashboard
 Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard')->middleware('auth');
 
-// Portadas: listado, creación y edición (editor_chief, administrator, moderator only)
+// Portadas: cualquier usuario autenticado puede listar, crear y editar; solo editor_chief, moderator y administrator pueden activar/publicar y aprobar/rechazar cambios
 Route::get('portadas', [CoverController::class, 'index'])
     ->name('cover.index')
     ->middleware('auth');
@@ -34,6 +35,20 @@ Route::post('portadas/{cover}/rechazar', [CoverController::class, 'rejectPending
     ->name('cover.reject')
     ->middleware('auth');
 
+// Temas Sugeridos
+Route::get('temas-sugeridos', [SuggestedTopicController::class, 'index'])
+    ->name('suggested-topics.index')
+    ->middleware('auth');
+Route::get('temas-sugeridos/crear', [SuggestedTopicController::class, 'create'])
+    ->name('suggested-topics.create')
+    ->middleware('auth');
+Route::get('temas-sugeridos/{topic}', [SuggestedTopicController::class, 'show'])
+    ->name('suggested-topics.show')
+    ->middleware('auth');
+Route::get('temas-sugeridos/{topic}/editar', [SuggestedTopicController::class, 'edit'])
+    ->name('suggested-topics.edit')
+    ->middleware('auth');
+
 // Content Creation and Management
     Route::get('articles/create', [ArticleController::class, 'create'])->name('articles.create')->middleware('auth');
     Route::get('articles/{article:slug}/edit', [ArticleController::class, 'edit'])->name('articles.edit')->middleware('auth');
@@ -46,11 +61,10 @@ Route::post('portadas/{cover}/rechazar', [CoverController::class, 'rejectPending
 Route::get('article/{article:slug}', [ArticleController::class, 'show'])->name('article.show'); // Agregar comprobación de permisos antes de mostrar, si no es status published no se debe de mostrar.
 
 // TODO:
-// Crear Panel para poder gestionar la portada de la revista con drag and drop con alpine.js
-// Mejorar la vista del modal para publicar o guardar el borrador de la portada, mejorar la vista en general.
 
 // Mirar como hacer la funcionalidad de programar la publicación de un artículo a cierta hora y fecha
-// Crear vista de perfil
+
+// Crear botones para eliminar portadas.
 // Crear botones en la vista del articulo para cambiar estado (publicado, borrador, pendiente revisión), esto solo para usuarios con permisos de editor o admin o moderator creo
 // Hacer funcionalidad de los botones de compartir en redes sociales
 // Agregar Mails para notificaciones de nuevos artículos, revisiones, etc.
