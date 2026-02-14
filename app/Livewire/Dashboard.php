@@ -12,6 +12,11 @@ class Dashboard extends Component
 {
     use WithPagination;
 
+    public function paginationView(): string
+    {
+        return 'vendor.pagination.revista-livewire';
+    }
+
     public $statusFilter = '';
     public $sectionFilter = '';
     public $visibilityFilter = '';
