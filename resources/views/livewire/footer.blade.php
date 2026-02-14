@@ -85,7 +85,7 @@
         {{-- Divisor --}}
         <div class=" bg-gray-lighter w-full h-px"></div>
 
-        <p class=" pt-8 text-center text-[12px] sm:text-sm font-montserrat text-gray-light">&copy; 2025 Revista Mundo Real. Todos los derechos reservados.</p>
+        <p class=" pt-8 text-center text-[12px] sm:text-sm font-montserrat text-gray-light">&copy; 2026 Revista Mundo Real. Todos los derechos reservados.</p>
     </div>
 
 </footer>
