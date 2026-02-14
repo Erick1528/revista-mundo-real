@@ -14,6 +14,7 @@ Route::get('/', function () {
 
 // Dashboard
 Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard')->middleware('auth');
+Route::get('dashboard/papelera', [DashboardController::class, 'papelera'])->name('dashboard.papelera')->middleware('auth');
 
 // Portadas: cualquier usuario autenticado puede listar, crear y editar; solo editor_chief, moderator y administrator pueden activar/publicar y aprobar/rechazar cambios
 Route::get('portadas', [CoverController::class, 'index'])
@@ -64,21 +65,15 @@ Route::get('article/{article:slug}', [ArticleController::class, 'show'])->name('
 
 // Mirar como hacer la funcionalidad de programar la publicación de un artículo a cierta hora y fecha
 
-// Crear botones para eliminar portadas.
-// Crear botones en la vista del articulo para cambiar estado (publicado, borrador, pendiente revisión), esto solo para usuarios con permisos de editor o admin o moderator creo
 // Hacer funcionalidad de los botones de compartir en redes sociales
-// Agregar Mails para notificaciones de nuevos artículos, revisiones, etc.
 // Crear CRUD para nuevos editores o usuarios con permisos especiales
 
 // Agregar campo de alt para imagen y credito para el bloque de galeria y que sean esos dos campos para cada foto no solo uno.
 
 // Hacer funcionalidad de borrador de artículos para poder editarlos posteriormente
-// Hacer funcionalidad de borrar articulo por medio de soft delete para recuperarlos posteriormente si es necesario.
 
 // Hacer funcion de contador de vistas y guardando la url que se visita y un id unico generado de la ip para que no se pueda repetir y se pueda hacer un analisis de las visitas a los articulos o guardar Ip y pedir cookies para estandarizar el contador de vistas.
 
 // Muy Importante:
 // Agregar bloque de anuncio en el editor de contenido
 // Agregar en el select de sección la opción de "Anuncio" y que sea valida en la DB
-
-// Crear CRUD para agreagr lista de temas sugeridos para los articulos.
