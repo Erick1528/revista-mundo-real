@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Article;
+use App\Notifications\ArticleNotificationService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -561,7 +562,10 @@ class CreateArticle extends Component
             }
 
             // Crear el artículo
-            Article::create($articleData);
+            $article = Article::create($articleData);
+
+            // Notificar a editores que hay un nuevo artículo en revisión
+            ArticleNotificationService::notifyEditorsNewArticleInReview($article);
 
             // Resetear formulario
             $this->resetFormData();

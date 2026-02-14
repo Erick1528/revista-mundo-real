@@ -625,6 +625,12 @@ class UpdateArticle extends Component
                 'image_caption' => $this->image_caption,
             ];
 
+            // Si estaba publicado, al actualizar vuelve a revisión
+            $wasPublished = $this->article->status === 'published';
+            if ($wasPublished) {
+                $articleData['status'] = 'review';
+            }
+
             // Si el título o subtítulo cambiaron, generar nuevo slug
             if ($titleChanged || $subtitleChanged) {
                 $articleData['slug'] = generateUniqueSlug($this->title, $this->subtitle, $this->article->id);
@@ -660,6 +666,12 @@ class UpdateArticle extends Component
 
             // Actualizar el artículo
             $this->article->update($articleData);
+            $this->article->refresh();
+
+            // Si estaba publicado y pasó a revisión, notificar a editores
+            if ($wasPublished) {
+                \App\Notifications\ArticleNotificationService::notifyEditorsArticleBackToReview($this->article);
+            }
 
             // Redireccionar al dashboard con mensaje de éxito
             return redirect()->route('dashboard')->with('message', 'Artículo actualizado exitosamente.');
