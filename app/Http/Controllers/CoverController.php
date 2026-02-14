@@ -76,6 +76,8 @@ class CoverController extends Controller
         $result = $cover->activate($user);
 
         if ($result) {
+            \App\Notifications\CoverNotificationService::notifyCreatorCoverActivated($cover);
+
             return redirect()->route('cover.index')
                 ->with('message', 'Portada activada correctamente. Ahora es la portada visible en el sitio.');
         }
@@ -107,6 +109,8 @@ class CoverController extends Controller
         $result = $parent->mergePendingVersion($cover, $user);
 
         if ($result) {
+            \App\Notifications\CoverNotificationService::notifyEditorChangesApproved($cover);
+
             return redirect()->route('cover.index')
                 ->with('message', 'Cambios aprobados y aplicados a la portada.');
         }
@@ -128,6 +132,8 @@ class CoverController extends Controller
             return redirect()->route('cover.index')
                 ->with('error', 'No hay cambios pendientes para rechazar.');
         }
+
+        \App\Notifications\CoverNotificationService::notifyEditorChangesRejected($cover);
 
         $cover->delete();
 

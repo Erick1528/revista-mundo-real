@@ -16,6 +16,12 @@ class CoverList extends Component
 
     public string $activeFilter = '';
 
+    public bool $showDeleteModal = false;
+
+    public ?int $selectedCoverId = null;
+
+    public string $selectedCoverName = '';
+
     public function clearFilters(): void
     {
         $this->search = '';
@@ -57,6 +63,67 @@ class CoverList extends Component
         }
 
         return $query->get();
+    }
+
+    public function openDeleteModal(int $coverId): void
+    {
+        $cover = CoverArticle::query()->main()->find($coverId);
+        if (! $cover) {
+            return;
+        }
+        $user = Auth::user();
+        if ($cover->is_active) {
+            session()->flash('error', 'No se puede eliminar la portada activa. Desactívala antes.');
+
+            return;
+        }
+        if ($cover->created_by !== $user->id && ! CoverArticle::userCanActivate($user)) {
+            session()->flash('error', 'No tienes permisos para eliminar esta portada.');
+
+            return;
+        }
+        $this->selectedCoverId = $coverId;
+        $this->selectedCoverName = $cover->name ?: 'Sin nombre';
+        $this->showDeleteModal = true;
+    }
+
+    public function closeDeleteModal(): void
+    {
+        $this->showDeleteModal = false;
+        $this->selectedCoverId = null;
+        $this->selectedCoverName = '';
+    }
+
+    public function confirmDeleteCover(): void
+    {
+        if (! $this->selectedCoverId) {
+            $this->closeDeleteModal();
+
+            return;
+        }
+        $cover = CoverArticle::query()->main()->find($this->selectedCoverId);
+        $user = Auth::user();
+        if (! $cover) {
+            session()->flash('error', 'Portada no encontrada.');
+            $this->closeDeleteModal();
+
+            return;
+        }
+        if ($cover->is_active) {
+            session()->flash('error', 'No se puede eliminar la portada activa.');
+            $this->closeDeleteModal();
+
+            return;
+        }
+        if ($cover->created_by !== $user->id && ! CoverArticle::userCanActivate($user)) {
+            session()->flash('error', 'No tienes permisos para eliminar esta portada.');
+            $this->closeDeleteModal();
+
+            return;
+        }
+        $cover->delete();
+        session()->flash('message', 'Portada eliminada correctamente.');
+        $this->closeDeleteModal();
     }
 
     public function render()

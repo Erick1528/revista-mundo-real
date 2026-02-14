@@ -276,6 +276,12 @@
                     class="sm:min-w-[140px] h-12 px-4 bg-transparent text-primary border border-primary font-montserrat font-medium text-sm hover:bg-sage transition-colors">
                     Cancelar
                 </button>
+                @if($canDeleteCover)
+                    <button wire:click="openDeleteModal" type="button"
+                        class="sm:min-w-[140px] h-12 px-4 bg-transparent text-red-600 border border-red-500 font-montserrat font-medium text-sm hover:bg-red-50 transition-colors">
+                        Eliminar portada
+                    </button>
+                @endif
             </div>
         </div>
     @endif
@@ -646,6 +652,49 @@
                     <button wire:click="activate" type="button"
                         class="w-full sm:flex-1 bg-primary text-white py-3 px-4 font-montserrat font-medium text-xs sm:text-sm hover:bg-dark-sage transition-colors">
                         Sí, activar
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- Modal de confirmación para eliminar portada --}}
+    @if($canDeleteCover ?? false)
+        <div x-show="$wire.showDeleteModal"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="fixed inset-0 bg-[rgba(0,0,0,0.5)] z-[70] flex items-center justify-center p-4"
+            x-effect="if ($wire.showDeleteModal) { document.body.style.overflow = 'hidden'; document.body.style.paddingRight = (window.innerWidth - document.documentElement.clientWidth) + 'px'; } else { document.body.style.overflow = ''; document.body.style.paddingRight = ''; }"
+            @click="$wire.closeDeleteModal()"
+            @keydown.escape.window="if($wire.showDeleteModal) $wire.closeDeleteModal()"
+            style="display: none;">
+            <div class="bg-white shadow-xl max-w-md w-full p-4 sm:p-8 mx-4" @click.stop>
+                <div class="text-center mb-4 sm:mb-6">
+                    <div class="w-12 h-12 mx-auto mb-4 bg-red-light flex items-center justify-center">
+                        <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </div>
+                    <h2 class="text-xl sm:text-2xl font-serif text-primary mb-3 sm:mb-4">¿Eliminar esta portada?</h2>
+                    <p class="text-xs sm:text-sm font-opensans text-gray-light leading-relaxed mb-3">
+                        La portada <strong class="font-semibold text-primary">{{ $cover->name ?: 'Sin nombre' }}</strong> se eliminará.
+                    </p>
+                    <p class="text-xs sm:text-sm font-opensans text-gray-light leading-relaxed">
+                        Esta acción <strong class="font-semibold text-red-500">no se puede deshacer</strong>.
+                    </p>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                    <button type="button" wire:click="closeDeleteModal"
+                        class="w-full sm:flex-1 bg-transparent text-primary py-3 px-4 border border-primary font-montserrat font-medium text-xs sm:text-sm hover:bg-sage transition-colors">
+                        Cancelar
+                    </button>
+                    <button type="button" wire:click="confirmDeleteCover"
+                        class="w-full sm:flex-1 bg-red-500 text-white py-3 px-4 font-montserrat font-medium text-xs sm:text-sm hover:bg-red-600 transition-colors">
+                        Sí, eliminar
                     </button>
                 </div>
             </div>

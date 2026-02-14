@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Article;
 use App\Models\CoverArticle;
+use App\Notifications\CoverNotificationService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
@@ -36,6 +37,7 @@ class EditCover extends Component
     public bool $showCancelModal = false;
     public bool $showDuplicateWarningModal = false;
     public bool $showActivateModal = false;
+    public bool $showDeleteModal = false;
 
     public array $duplicateArticles = [];
 
@@ -111,6 +113,42 @@ class EditCover extends Component
         $this->showCancelModal = false;
         $this->dispatch('cancelModalToggled', open: false);
         session()->flash('message', 'Edición cancelada.');
+        $this->redirect(route('cover.index'), navigate: true);
+    }
+
+    public function openDeleteModal(): void
+    {
+        if ($this->cover->isPendingVersion() || $this->cover->is_active) {
+            return;
+        }
+        $user = Auth::user();
+        if ($this->cover->created_by !== $user->id && ! CoverArticle::userCanActivate($user)) {
+            session()->flash('error', 'No tienes permisos para eliminar esta portada.');
+            return;
+        }
+        $this->showDeleteModal = true;
+    }
+
+    public function closeDeleteModal(): void
+    {
+        $this->showDeleteModal = false;
+    }
+
+    public function confirmDeleteCover(): void
+    {
+        if ($this->cover->isPendingVersion() || $this->cover->is_active) {
+            session()->flash('error', 'No se puede eliminar esta portada.');
+            $this->closeDeleteModal();
+            return;
+        }
+        $user = Auth::user();
+        if ($this->cover->created_by !== $user->id && ! CoverArticle::userCanActivate($user)) {
+            session()->flash('error', 'No tienes permisos para eliminar esta portada.');
+            $this->closeDeleteModal();
+            return;
+        }
+        $this->cover->delete();
+        session()->flash('message', 'Portada eliminada correctamente.');
         $this->redirect(route('cover.index'), navigate: true);
     }
 
@@ -341,7 +379,8 @@ class EditCover extends Component
         if ($this->cover->is_active) {
             // Always create a new pending version (multiple writers can each submit changes)
             $data['name'] = $this->name ?: $this->cover->name;
-            $this->cover->createPendingVersion($data, Auth::user());
+            $pending = $this->cover->createPendingVersion($data, Auth::user());
+            CoverNotificationService::notifyEditorsPendingCoverCreated($pending);
             $message = 'Se crearon cambios pendientes. La portada activa no fue modificada.';
         } else {
             $data['name'] = $this->name;
@@ -441,7 +480,8 @@ class EditCover extends Component
         if ($this->cover->is_active) {
             // Always create a new pending version (multiple writers can each submit changes)
             $data['name'] = $this->name ?: $this->cover->name;
-            $this->cover->createPendingVersion($data, Auth::user());
+            $pending = $this->cover->createPendingVersion($data, Auth::user());
+            CoverNotificationService::notifyEditorsPendingCoverCreated($pending);
             $message = 'Cambios enviados a revisión. La portada activa no fue modificada.';
         } else {
             $data['name'] = $this->name;
@@ -540,6 +580,10 @@ class EditCover extends Component
         $user = Auth::user();
         $canActivate = $user && CoverArticle::userCanActivate($user);
         $canEditDirectly = $this->userCanEditCoverDirectly();
+        $canDeleteCover = ! $this->cover->isPendingVersion()
+            && ! $this->cover->is_active
+            && $user
+            && ($this->cover->created_by === $user->id || $canActivate);
 
         return view('livewire.edit-cover', [
             'mainArticles' => $mainArticles,
@@ -549,6 +593,7 @@ class EditCover extends Component
             'duplicateArticleNames' => $duplicateArticleNames,
             'canActivate' => $canActivate,
             'canEditDirectly' => $canEditDirectly,
+            'canDeleteCover' => $canDeleteCover,
         ]);
     }
 
