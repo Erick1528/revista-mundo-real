@@ -19,19 +19,19 @@ El acceso es por **login**; la portada pública y la lectura de artículos publi
 ### Diagrama: flujo general de la aplicación
 
 ```mermaid
-flowchart TB
-  subgraph publico["Acceso público"]
-    Inicio(["/"])
+graph TB
+  subgraph publico[Acceso publico]
+    Inicio["/"]
     Portada[Portada del sitio]
-    VerArt[Ver artículo publicado]
+    VerArt[Ver articulo publicado]
     Inicio --> Portada
     Inicio --> VerArt
   end
 
-  subgraph auth["Requiere login"]
+  subgraph auth[Requiere login]
     Login[Login]
     Dashboard[Dashboard]
-    Art[Artículos]
+    Art[Articulos]
     Port[Portadas]
     Temas[Temas sugeridos]
     Papelera[Papelera]
@@ -50,28 +50,28 @@ flowchart TB
 ### Diagrama: flujo de estado de un artículo
 
 ```mermaid
-flowchart LR
-  subgraph estados["Estados"]
+graph LR
+  subgraph estados[Estados]
     B[Borrador]
-    R[En revisión]
+    R[En revision]
     P[Publicado]
     D[Rechazado]
   end
 
-  B -->|"Envía a revisión"| R
-  R -->|"Editor publica"| P
-  R -->|"Editor rechaza"| D
+  B -->|Envia a revision| R
+  R -->|Editor publica| P
+  R -->|Editor rechaza| D
 
-  subgraph papelera["Papelera"]
+  subgraph papelera[Papelera]
     T[(Soft delete)]
-    T -->|"Restaurar"| B
-    T -->|"+30 días"| E[Eliminación permanente]
+    T -->|Restaurar| B
+    T -->|+30 dias| E[Eliminacion permanente]
   end
 
-  B -->|"Eliminar"| T
-  R -->|"Eliminar"| T
-  P -->|"Eliminar"| T
-  D -->|"Eliminar"| T
+  B -->|Eliminar| T
+  R -->|Eliminar| T
+  P -->|Eliminar| T
+  D -->|Eliminar| T
 ```
 
 ### Flujos CRUD por módulo
@@ -81,13 +81,13 @@ Cada diagrama indica **permisos** en los nodos (quién puede hacer cada acción)
 #### Artículos
 
 ```mermaid
-flowchart TB
-  Listar["Listar en Dashboard"]
-  Crear["Crear artículo"]
-  Editar["Editar artículo"]
-  Revisar["Enviar a revisión"]
-  Publicar["Publicar / Rechazar"]
-  Eliminar["Eliminar a papelera"]
+graph TB
+  Listar[Listar en Dashboard]
+  Crear[Crear articulo]
+  Editar[Editar articulo]
+  Revisar[Enviar a revision]
+  Publicar[Publicar o Rechazar]
+  Eliminar[Eliminar a papelera]
 
   Listar --> Crear
   Listar --> Editar
@@ -106,15 +106,15 @@ flowchart TB
 #### Portadas
 
 ```mermaid
-flowchart TB
-  Listar["Listar portadas"]
-  Nueva["Nueva portada"]
-  Editar["Editar portada"]
-  Guardar["Guardar borrador"]
-  Pendiente["Guardar como pendiente"]
-  Activar["Activar portada"]
-  Aprobar["Aprobar / Rechazar cambios"]
-  Eliminar["Eliminar portada"]
+graph TB
+  Listar[Listar portadas]
+  Nueva[Nueva portada]
+  Editar[Editar portada]
+  Guardar[Guardar borrador]
+  Pendiente[Guardar como pendiente]
+  Activar[Activar portada]
+  Aprobar[Aprobar o Rechazar cambios]
+  Eliminar[Eliminar portada]
 
   Listar --> Nueva
   Listar --> Editar
@@ -136,10 +136,10 @@ flowchart TB
 #### Papelera
 
 ```mermaid
-flowchart LR
-  Listar["Listar eliminados"]
-  Restaurar["Restaurar"]
-  Definitivo["Eliminar permanente"]
+graph LR
+  Listar[Listar eliminados]
+  Restaurar[Restaurar]
+  Definitivo[Eliminar permanente]
 
   Listar --> Restaurar
   Listar --> Definitivo
@@ -154,14 +154,14 @@ flowchart LR
 #### Temas sugeridos
 
 ```mermaid
-flowchart TB
-  Listar["Listar temas"]
-  Crear["Crear tema"]
-  Ver["Ver / Editar tema"]
-  Asignar["Asignar responsable"]
-  Solicitar["Solicitar tema"]
-  Decidir["Aprobar / Rechazar solicitud"]
-  Eliminar["Eliminar tema"]
+graph TB
+  Listar[Listar temas]
+  Crear[Crear tema]
+  Ver[Ver o Editar tema]
+  Asignar[Asignar responsable]
+  Solicitar[Solicitar tema]
+  Decidir[Aprobar o Rechazar solicitud]
+  Eliminar[Eliminar tema]
 
   Listar --> Crear
   Listar --> Ver
@@ -180,10 +180,10 @@ flowchart TB
 #### Perfil
 
 ```mermaid
-flowchart LR
-  Ver["Ver perfil"]
-  Datos["Nombre, descripción, avatar"]
-  Pass["Cambiar contraseña"]
+graph LR
+  Ver[Ver perfil]
+  Datos[Nombre descripcion avatar]
+  Pass[Cambiar contrasena]
 
   Ver --> Datos
   Ver --> Pass
