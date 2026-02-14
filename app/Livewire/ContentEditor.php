@@ -882,10 +882,6 @@ class ContentEditor extends Component
             if (isset($this->blocks[$blockIndex]['images'][$imageIndex])) {
                 // Eliminar archivo físico usando el mismo método que las imágenes normales
                 $imageUrl = $this->blocks[$blockIndex]['images'][$imageIndex];
-
-                // Debug: verificar la URL
-                session()->flash('debug', "Intentando eliminar imagen: $imageUrl");
-
                 $this->deleteImageFromStorage($imageUrl);
 
                 // Remover de la lista
