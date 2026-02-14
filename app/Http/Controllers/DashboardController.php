@@ -9,7 +9,11 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        // Reotornar a vista de dashboard (aún no creada)
         return view('dashboard.index');
+    }
+
+    public function papelera()
+    {
+        return view('dashboard.papelera');
     }
 }

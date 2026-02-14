@@ -48,61 +48,103 @@
         </div>
     @endif
 
-    <div class=" flex flex-col md:grid md:grid-cols-3 gap-6">
+    <div class="flex flex-col gap-6" x-data="{ showMoreActions: false }">
+        {{-- Primera fila: máximo 3 (en móvil 1 columna con gap entre cada tarjeta) --}}
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <a href="{{ route('articles.create') }}"
+                class="border border-dark-sage p-8 text-dark-sage w-full hover:bg-dark-sage/9 transition-all duration-200 cursor-pointer block">
+                <svg xmlns="http://www.w3.org/2000/svg" height="32px" width="32px" viewBox="0 0 24 24" stroke="#b7b699"
+                    stroke-width="2" fill="none">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <h4 class="mt-4 mb-2 font-serif text-xl text-primary">Nuevo Artículo</h4>
+                <p class="text-gray-light text-sm">Crear una nueva publicación para la revista</p>
+            </a>
 
-        <a href="{{ route('articles.create') }}"
-            class=" border border-dark-sage p-8 text-dark-sage md:max-w-[304px] w-full hover:bg-dark-sage/9 transition-all duration-200 cursor-pointer">
-            <svg xmlns="http://www.w3.org/2000/svg" height="32px" width="32px" viewBox="0 0 24 24" stroke="#b7b699"
-                stroke-width="2" fill="none">
-                <line x1="12" y1="5" x2="12" y2="19"></line>
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-            </svg>
-            <h4 class=" mt-4 mb-2 font-serif text-xl text-primary">Nuevo Artículo</h4>
-            <p class=" text-gray-light text-sm">Crear una nueva publicación para la revista</p>
-        </a>
+            <a href="{{ route('dashboard.papelera') }}"
+                class="border border-dark-sage p-8 text-dark-sage w-full hover:bg-dark-sage/9 transition-all duration-200 cursor-pointer block">
+                <svg xmlns="http://www.w3.org/2000/svg" height="32px" width="32px" viewBox="0 0 24 24" stroke="#b7b699"
+                    stroke-width="2" fill="none">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                <h4 class="mt-4 mb-2 font-serif text-xl text-primary">Papelera</h4>
+                <p class="text-gray-light text-sm">Artículos eliminados. Restaurar o borrar para siempre.</p>
+            </a>
 
-        <a href="{{ route('suggested-topics.index') }}"
-            class=" border border-dark-sage p-8 text-dark-sage md:max-w-[304px] w-full hover:bg-dark-sage/9 transition-all duration-200 cursor-pointer">
-            <svg xmlns="http://www.w3.org/2000/svg" height="32px" width="32px" viewBox="0 0 24 24" stroke="#b7b699"
-                stroke-width="2" fill="none">
-                <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
-                <path d="M2 17l10 5 10-5"></path>
-            </svg>
-            <h4 class=" mt-4 mb-2 font-serif text-xl text-primary">Sugerencias de temas</h4>
-            <p class=" text-gray-light text-sm">Explorar y proponer ideas para próximos artículos</p>
-        </a>
+            <a href="{{ route('suggested-topics.index') }}"
+                class="border border-dark-sage p-8 text-dark-sage w-full hover:bg-dark-sage/9 transition-all duration-200 cursor-pointer block">
+                <svg xmlns="http://www.w3.org/2000/svg" height="32px" width="32px" viewBox="0 0 24 24" stroke="#b7b699"
+                    stroke-width="2" fill="none">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                    <path d="M2 17l10 5 10-5"></path>
+                </svg>
+                <h4 class="mt-4 mb-2 font-serif text-xl text-primary">Sugerencias de temas</h4>
+                <p class="text-gray-light text-sm">Explorar y proponer ideas para próximos artículos</p>
+            </a>
+        </div>
 
-        <a href="{{ route('cover.index') }}"
-            class=" border border-dark-sage p-8 text-dark-sage md:max-w-[304px] w-full hover:bg-dark-sage/9 transition-all duration-200 cursor-pointer">
-            <svg xmlns="http://www.w3.org/2000/svg" height="32px" width="32px" viewBox="0 0 24 24" stroke="#b7b699"
-                stroke-width="2" fill="none">
-                <rect x="3" y="3" width="7" height="7" rx="1"></rect>
-                <rect x="14" y="3" width="7" height="7" rx="1"></rect>
-                <rect x="3" y="14" width="7" height="7" rx="1"></rect>
-                <rect x="14" y="14" width="7" height="7" rx="1"></rect>
-            </svg>
-            <h4 class=" mt-4 mb-2 font-serif text-xl text-primary">Gestionar portada</h4>
-            <p class=" text-gray-light text-sm">Ver portadas y montar la de la revista</p>
-        </a>
+        {{-- Segunda fila: acciones extra (se muestra al abrir) --}}
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6" x-show="showMoreActions" x-cloak
+            x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+            style="display: none;">
+            <a href="{{ route('cover.index') }}"
+                class="border border-dark-sage p-8 text-dark-sage w-full hover:bg-dark-sage/9 transition-all duration-200 cursor-pointer block">
+                <svg xmlns="http://www.w3.org/2000/svg" height="32px" width="32px" viewBox="0 0 24 24" stroke="#b7b699"
+                    stroke-width="2" fill="none">
+                    <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+                    <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+                    <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+                    <rect x="14" y="14" width="7" height="7" rx="1"></rect>
+                </svg>
+                <h4 class="mt-4 mb-2 font-serif text-xl text-primary">Gestionar portada</h4>
+                <p class="text-gray-light text-sm">Ver portadas y montar la de la revista</p>
+            </a>
+            <button type="button" wire:click="showInDevelopment('estadísticas')"
+                class="border border-dark-sage p-8 text-dark-sage w-full hover:bg-dark-sage/9 transition-all duration-200 cursor-pointer block text-left">
+                <svg xmlns="http://www.w3.org/2000/svg" height="32px" width="32px" viewBox="0 0 24 24" stroke="#b7b699"
+                    stroke-width="2" fill="none">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                <h4 class="mt-4 mb-2 font-serif text-xl text-primary">Ver estadísticas</h4>
+                <p class="text-gray-light text-sm">Vistas, lecturas y análisis de la revista. En desarrollo.</p>
+            </button>
+        </div>
 
+        {{-- Enlace al final: Ver más / Ver menos (mismo estilo que Ver Todos y Ver papelera) --}}
+        <div class="flex justify-center">
+            <button type="button" @click="showMoreActions = !showMoreActions"
+                class="text-sm text-gray-light hover:text-primary transition-colors font-opensans">
+                <span x-show="!showMoreActions">Ver más</span>
+                <span x-show="showMoreActions" x-cloak style="display: none;">Ver menos</span>
+            </button>
+        </div>
     </div>
 
     {{-- Sección de Artículos --}}
     <div class="mt-16">
-        <div class="flex items-center justify-between mb-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-6">
             <h2 class="font-serif text-3xl text-primary">Artículos Recientes</h2>
-
-            <button type="button" wire:click="clearFilters"
-                class="hidden sm:block text-sm text-gray-light hover:text-primary transition-colors font-opensans">
-                Ver Todos
-            </button>
+            <div class="flex items-center gap-2 sm:gap-3">
+                <button type="button" wire:click="clearFilters"
+                    class="hidden sm:block text-sm text-gray-light hover:text-primary transition-colors font-opensans">
+                    Ver Todos
+                </button>
+                <span class="hidden sm:inline text-gray-light font-opensans">|</span>
+                <a href="{{ route('dashboard.papelera') }}"
+                    class="text-sm text-gray-light hover:text-primary transition-colors font-opensans">
+                    Ver papelera
+                </a>
+            </div>
         </div>
 
         {{-- Filtros --}}
         <div class="mb-8 space-y-4">
             {{-- Buscador --}}
             <div class="w-full max-w-md">
-                <input type="text" wire:model.live.debounce.300ms="search" placeholder="Buscar artículos..."
+                <input type="text" wire:model.live.debounce.300ms="search" placeholder="Buscar por título, subtítulo o nombre del autor..."
                     class="w-full px-4 py-3 border border-gray-lighter text-primary bg-white font-opensans text-sm focus:outline-none focus:border-dark-sage transition-colors">
             </div>
 
@@ -191,13 +233,15 @@
                                         d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                 </svg>
                             </a>
-                            <button wire:click="showInDevelopment('eliminar')"
-                                class="p-1 sm:p-2 text-gray-light hover:text-red-500 transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                            </button>
+                            @if($this->canDeleteArticle($article))
+                                <button type="button" wire:click="openDeleteModal({{ $article->id }})"
+                                    class="p-1 sm:p-2 text-gray-light hover:text-red-500 transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            @endif
                         </div>
                     </div>
 
@@ -262,6 +306,47 @@
                 {{ $articles->links() }}
             </div>
         @endif
+    </div>
+
+    {{-- Modal de confirmación para mover a papelera --}}
+    <div x-show="$wire.showDeleteModal"
+        x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-150"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        class="fixed inset-0 bg-[rgba(0,0,0,0.5)] z-[70] flex items-center justify-center p-4"
+        x-effect="if ($wire.showDeleteModal) { document.body.style.overflow = 'hidden'; document.body.style.paddingRight = (window.innerWidth - document.documentElement.clientWidth) + 'px'; } else { document.body.style.overflow = ''; document.body.style.paddingRight = ''; }"
+        @click="$wire.closeDeleteModal()"
+        @keydown.escape.window="if($wire.showDeleteModal) $wire.closeDeleteModal()"
+        style="display: none;">
+        <div class="bg-white shadow-xl max-w-md w-full p-4 sm:p-8 mx-4" @click.stop>
+            <div class="text-center mb-4 sm:mb-6">
+                <div class="w-12 h-12 mx-auto mb-4 bg-red-light flex items-center justify-center">
+                    <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </div>
+                <h2 class="text-xl sm:text-2xl font-serif text-primary mb-3 sm:mb-4">¿Mover a la papelera?</h2>
+                <p class="text-xs sm:text-sm font-opensans text-gray-light leading-relaxed mb-3">
+                    El artículo <strong class="font-semibold text-primary">{{ $selectedArticleTitle }}</strong> se moverá a la papelera. Podrás restaurarlo más tarde.
+                </p>
+                <p class="text-xs sm:text-sm font-opensans text-gray-light leading-relaxed">
+                    El autor recibirá un correo informando del cambio.
+                </p>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                <button type="button" wire:click="closeDeleteModal"
+                    class="w-full sm:flex-1 bg-transparent text-primary py-3 px-4 border border-primary font-montserrat font-medium text-xs sm:text-sm hover:bg-sage transition-colors">
+                    Cancelar
+                </button>
+                <button type="button" wire:click="confirmDeleteArticle"
+                    class="w-full sm:flex-1 bg-red-500 text-white py-3 px-4 font-montserrat font-medium text-xs sm:text-sm hover:bg-red-600 transition-colors">
+                    Sí, mover a papelera
+                </button>
+            </div>
+        </div>
     </div>
 
     {{-- Modal de desarrollo --}}

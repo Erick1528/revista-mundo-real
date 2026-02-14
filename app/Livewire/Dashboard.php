@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Article;
+use App\Notifications\ArticleNotificationService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -15,6 +16,10 @@ class Dashboard extends Component
     public $sectionFilter = '';
     public $visibilityFilter = '';
     public $search = '';
+
+    public bool $showDeleteModal = false;
+    public ?int $selectedArticleId = null;
+    public string $selectedArticleTitle = '';
 
     public function updatingSearch()
     {
@@ -63,9 +68,13 @@ class Dashboard extends Component
         }
 
         if ($this->search) {
-            $query->where(function ($q) {
-                $q->where('title', 'like', '%' . $this->search . '%')
-                    ->orWhere('subtitle', 'like', '%' . $this->search . '%');
+            $searchTerm = '%' . $this->search . '%';
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('title', 'like', $searchTerm)
+                    ->orWhere('subtitle', 'like', $searchTerm)
+                    ->orWhereHas('user', function ($qUser) use ($searchTerm) {
+                        $qUser->where('name', 'like', $searchTerm);
+                    });
             });
         }
 
@@ -82,6 +91,64 @@ class Dashboard extends Component
         }
 
         return $query->paginate(10);
+    }
+
+    public function openDeleteModal(int $articleId): void
+    {
+        $article = Article::find($articleId);
+        if (! $article) {
+            return;
+        }
+        $user = Auth::user();
+        if ($article->user_id !== $user->id && ! in_array($user->rol, ['editor_chief', 'moderator', 'administrator'])) {
+            session()->flash('error', 'No tienes permisos para eliminar este artículo.');
+
+            return;
+        }
+        $this->selectedArticleId = $articleId;
+        $this->selectedArticleTitle = $article->title;
+        $this->showDeleteModal = true;
+    }
+
+    public function closeDeleteModal(): void
+    {
+        $this->showDeleteModal = false;
+        $this->selectedArticleId = null;
+        $this->selectedArticleTitle = '';
+    }
+
+    public function confirmDeleteArticle(): void
+    {
+        if (! $this->selectedArticleId) {
+            $this->closeDeleteModal();
+
+            return;
+        }
+        $article = Article::find($this->selectedArticleId);
+        $user = Auth::user();
+        if (! $article) {
+            session()->flash('error', 'Artículo no encontrado.');
+            $this->closeDeleteModal();
+
+            return;
+        }
+        if ($article->user_id !== $user->id && ! in_array($user->rol, ['editor_chief', 'moderator', 'administrator'])) {
+            session()->flash('error', 'No tienes permisos para eliminar este artículo.');
+            $this->closeDeleteModal();
+
+            return;
+        }
+        ArticleNotificationService::notifyAuthorArticleDeleted($article);
+        $article->delete();
+        session()->flash('message', 'Artículo movido a la papelera. Puedes restaurarlo desde Papelera.');
+        $this->closeDeleteModal();
+    }
+
+    public function canDeleteArticle(Article $article): bool
+    {
+        $user = Auth::user();
+
+        return $article->user_id === $user->id || in_array($user->rol, ['editor_chief', 'moderator', 'administrator']);
     }
 
     public function render()
