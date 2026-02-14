@@ -3,8 +3,8 @@
 namespace App\Livewire;
 
 use App\Models\Article;
+use App\Notifications\ArticleNotificationService;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 
 class ShowArticle extends Component
@@ -16,16 +16,26 @@ class ShowArticle extends Component
     public $authorName;
     public $relatedArticles;
 
+    /** Estado seleccionado para el formulario de cambio (solo para roles con permiso). */
+    public string $newStatus = '';
+
     public function mount()
     {
         $allowedRoles = ['editor_chief', 'moderator', 'administrator'];
         $user = Auth::user();
-        if ($user) {
-            if (!in_array($user->rol, $allowedRoles) && $this->article->status !== 'published') {
+
+        if (!$user) {
+            // No logueado: solo artículos publicados y públicos
+            if ($this->article->status !== 'published' || $this->article->visibility !== 'public') {
                 abort(404, 'Pagina no encontrada');
             }
         } else {
-            if ($this->article->status !== 'published' || $this->article->visibility !== 'public') {
+            // Logueado: puede ver si está publicado, si tiene rol permitido o si es el autor
+            $isPublished = $this->article->status === 'published';
+            $hasRole = in_array($user->rol, $allowedRoles, true);
+            $isAuthor = (int) $this->article->user_id === (int) $user->id;
+
+            if (!$isPublished && !$hasRole && !$isAuthor) {
                 abort(404, 'Pagina no encontrada');
             }
         }
@@ -81,6 +91,8 @@ class ShowArticle extends Component
 
         // Obtener artículos relacionados
         $this->relatedArticles = $this->getRelatedArticles();
+
+        $this->newStatus = $this->article->status;
     }
 
     private function getRelatedArticles()
@@ -112,6 +124,64 @@ class ShowArticle extends Component
             ->get();
 
         return $related;
+    }
+
+    public function canChangeStatus(): bool
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return false;
+        }
+        return in_array($user->rol, ['editor_chief', 'moderator', 'administrator'], true);
+    }
+
+    public static function getAllowedStatuses(): array
+    {
+        return [
+            'draft' => 'Borrador',
+            'review' => 'En Revisión',
+            'published' => 'Publicado',
+            'denied' => 'Rechazado',
+        ];
+    }
+
+    public function updateStatusFromSelect(): void
+    {
+        $this->updateStatus($this->newStatus);
+    }
+
+    public function updateStatus(string $newStatus): void
+    {
+        if (!$this->canChangeStatus()) {
+            session()->flash('error', 'No tienes permiso para cambiar el estado del artículo.');
+            $this->redirect(route('dashboard'), navigate: true);
+            return;
+        }
+        $allowed = array_keys(self::getAllowedStatuses());
+        if (!in_array($newStatus, $allowed, true)) {
+            session()->flash('error', 'No se pudo actualizar el estado.');
+            $this->redirect(route('dashboard'), navigate: true);
+            return;
+        }
+        try {
+            $this->article->update(['status' => $newStatus]);
+            if ($newStatus === 'published' && !$this->article->published_at) {
+                $this->article->update(['published_at' => now()]);
+            }
+            $this->article->refresh();
+
+            if ($newStatus === 'published') {
+                ArticleNotificationService::notifyAuthorArticlePublished($this->article);
+            }
+            if ($newStatus === 'denied') {
+                ArticleNotificationService::notifyAuthorArticleDenied($this->article);
+            }
+
+            session()->flash('message', 'El estado del artículo se actualizó correctamente.');
+        } catch (\Throwable $e) {
+            session()->flash('error', 'No se pudo actualizar el estado.');
+        }
+        $this->redirect(route('dashboard'), navigate: true);
     }
 
     public function render()

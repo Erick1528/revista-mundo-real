@@ -19,6 +19,10 @@ class ArticleController extends Controller
 
     public function show(Article $article)
     {
+        if ($article->status !== 'published') {
+            abort(404);
+        }
+
         return view('show-article', compact('article'));
     }
 }
