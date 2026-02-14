@@ -73,6 +73,9 @@ class CreateArticle extends Component
     // Modal de confirmación para cancelar
     public $showCancelModal = false;
 
+    /** URL a la que redirigir al confirmar cancelación (cuando se hace clic en otro enlace del nav). */
+    public $cancelRedirectUrl = null;
+
     public function updatedImage()
     {
         // Validar extensión inmediatamente cuando se selecciona archivo
@@ -621,8 +624,13 @@ class CreateArticle extends Component
         $this->dispatch('openDevelopModal', 'Guardar Borrador');
     }
 
-    public function cancel()
+    public function cancel($redirectUrl = null)
     {
+        // Livewire puede pasar el objeto JS como array cuando se despacha desde Alpine/JS global
+        if (is_array($redirectUrl) && isset($redirectUrl['redirectUrl'])) {
+            $redirectUrl = $redirectUrl['redirectUrl'];
+        }
+        $this->cancelRedirectUrl = $redirectUrl;
         $this->showCancelModal = true;
     }
 
@@ -634,7 +642,9 @@ class CreateArticle extends Component
         $this->dispatch('cleanupBlockResources');
 
         session()->flash('message', 'Creación de artículo cancelada');
-        return redirect()->route('dashboard'); // Ajustar ruta según tu aplicación
+        $url = $this->cancelRedirectUrl;
+        $this->cancelRedirectUrl = null;
+        return $url ? redirect()->to($url) : redirect()->route('dashboard');
     }
 
     public function closeCancelModal()

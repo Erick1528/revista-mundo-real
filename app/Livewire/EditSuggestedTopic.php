@@ -35,6 +35,9 @@ class EditSuggestedTopic extends Component
     // Modal de confirmación para cancelar
     public $showCancelModal = false;
 
+    /** URL a la que redirigir al confirmar cancelación (cuando se hace clic en otro enlace del nav). */
+    public $cancelRedirectUrl = null;
+
     // Modales de confirmación para acciones
     public $showDeleteModal = false;
 
@@ -264,18 +267,23 @@ class EditSuggestedTopic extends Component
         // La validación continuará en receiveContentData()
     }
 
-    public function cancel()
+    public function cancel($redirectUrl = null)
     {
+        if (is_array($redirectUrl) && isset($redirectUrl['redirectUrl'])) {
+            $redirectUrl = $redirectUrl['redirectUrl'];
+        }
+        $this->cancelRedirectUrl = $redirectUrl;
         $this->showCancelModal = true;
     }
 
     public function confirmCancel()
     {
-        // Limpiar solo recursos nuevos (no los existentes)
         $this->dispatch('cleanupNewResources');
 
+        $url = $this->cancelRedirectUrl;
+        $this->cancelRedirectUrl = null;
         session()->flash('message', 'Edición de tema sugerido cancelada');
-        return redirect()->route('suggested-topics.index');
+        return $url ? redirect()->to($url) : redirect()->route('suggested-topics.index');
     }
 
     public function closeCancelModal()

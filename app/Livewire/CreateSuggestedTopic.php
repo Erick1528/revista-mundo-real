@@ -37,6 +37,9 @@ class CreateSuggestedTopic extends Component
     // Modal de confirmación para cancelar
     public $showCancelModal = false;
 
+    /** URL a la que redirigir al confirmar cancelación (cuando se hace clic en otro enlace del nav). */
+    public $cancelRedirectUrl = null;
+
     // Listeners para eventos
     protected $listeners = [
         'contentDataResponse' => 'receiveContentData',
@@ -295,8 +298,12 @@ class CreateSuggestedTopic extends Component
         // La validación continuará en receiveContentData()
     }
 
-    public function cancel()
+    public function cancel($redirectUrl = null)
     {
+        if (is_array($redirectUrl) && isset($redirectUrl['redirectUrl'])) {
+            $redirectUrl = $redirectUrl['redirectUrl'];
+        }
+        $this->cancelRedirectUrl = $redirectUrl;
         $this->showCancelModal = true;
     }
 
@@ -304,11 +311,12 @@ class CreateSuggestedTopic extends Component
     {
         $this->resetFormData();
 
-        // Enviar dispatch al content-editor para limpiar recursos de bloques de imagen/galería
         $this->dispatch('cleanupBlockResources');
 
+        $url = $this->cancelRedirectUrl;
+        $this->cancelRedirectUrl = null;
         session()->flash('message', 'Creación de tema sugerido cancelada');
-        return redirect()->route('suggested-topics.index');
+        return $url ? redirect()->to($url) : redirect()->route('suggested-topics.index');
     }
 
     public function closeCancelModal()

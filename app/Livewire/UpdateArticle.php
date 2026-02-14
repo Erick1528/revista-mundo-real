@@ -40,6 +40,9 @@ class UpdateArticle extends Component
     // Modal de confirmación para cancelar
     public $showCancelModal = false;
 
+    /** URL a la que redirigir al confirmar cancelación (cuando se hace clic en otro enlace del nav). */
+    public $cancelRedirectUrl = null;
+
     // Classification
     public $section;
     public $tags = [];
@@ -430,18 +433,24 @@ class UpdateArticle extends Component
         $this->dispatch('openDevelopModal', 'Guardar Cambios');
     }
 
-    public function cancel()
+    public function cancel($redirectUrl = null)
     {
+        if (is_array($redirectUrl) && isset($redirectUrl['redirectUrl'])) {
+            $redirectUrl = $redirectUrl['redirectUrl'];
+        }
+        $this->cancelRedirectUrl = $redirectUrl;
         $this->showCancelModal = true;
     }
 
     public function confirmCancel()
     {
         // Limpiar solo recursos nuevos agregados durante la edición
-        // Esto elimina imágenes nuevas que se subieron pero no se guardaron
         $this->dispatch('cleanupNewResources');
 
-        return redirect()->route('dashboard')->with('message', 'Actualización de artículo cancelada');
+        $url = $this->cancelRedirectUrl;
+        $this->cancelRedirectUrl = null;
+        session()->flash('message', 'Actualización de artículo cancelada');
+        return $url ? redirect()->to($url) : redirect()->route('dashboard');
     }
 
     public function closeCancelModal()

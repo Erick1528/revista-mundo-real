@@ -1,5 +1,28 @@
-<nav class=" lg:px-8 lg:py-0 px-10 border-b border-gray-lighter">
-
+@php
+    $navCurrentPath = request()->path();
+@endphp
+<nav class=" lg:px-8 lg:py-0 px-10 border-b border-gray-lighter"
+    x-data="{
+        currentPath: @js($navCurrentPath),
+        isDirtyRoute(path) {
+            return path === 'articles/create'
+                || /^articles\/[^\/]+\/edit$/.test(path)
+                || path === 'temas-sugeridos/crear'
+                || /^temas-sugeridos\/[^\/]+\/editar$/.test(path);
+        },
+        dispatchCancel(path, targetUrl) {
+            const payload = { redirectUrl: targetUrl };
+            if (path === 'articles/create') Livewire.dispatch('cancelCreateArticle', payload);
+            else if (/^articles\/[^\/]+\/edit$/.test(path)) Livewire.dispatch('cancelEditArticle', payload);
+            else if (path === 'temas-sugeridos/crear') Livewire.dispatch('cancelCreateTopic', payload);
+            else if (/^temas-sugeridos\/[^\/]+\/editar$/.test(path)) Livewire.dispatch('cancelEditTopic', payload);
+        },
+        handleNavLinkClick(e) {
+            if (!this.isDirtyRoute(this.currentPath)) return;
+            e.preventDefault();
+            this.dispatchCancel(this.currentPath, e.currentTarget.href);
+        }
+    }">
     <div class="flex justify-between items-center max-w-[1200px] mx-auto h-[68px]">
         <button wire:click="toggleMenuState"
             class="hover:bg-red-light h-9 w-9 flex justify-center items-center outline-none text-black hover:text-white transition-all duration-200">
@@ -96,6 +119,7 @@
                             @endif
                             <div class="mt-4 space-y-1 min-w-0">
                                 <a href="{{ route('profile') }}"
+                                    @click="handleNavLinkClick($event)"
                                     class="hover:bg-dark-sage/15 hover:text-primary flex items-center gap-2 px-2 py-2 text-sm transition-colors duration-200 min-w-0">
                                     <svg class="w-4 h-4 shrink-0 text-gray-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -103,6 +127,7 @@
                                     Mi Perfil
                                 </a>
                                 <a href="{{ route('dashboard') }}"
+                                    @click="handleNavLinkClick($event)"
                                     class="hover:bg-dark-sage/15 hover:text-primary flex items-center gap-2 px-2 py-2 text-sm transition-colors duration-200 min-w-0">
                                     <svg class="w-4 h-4 shrink-0 text-gray-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
