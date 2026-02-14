@@ -36,6 +36,13 @@
         @yield('hero')
     </header>
 
+    {{-- Navegación del panel (dashboard, papelera, portadas, temas sugeridos, perfil) --}}
+    @auth
+        @if(request()->routeIs('dashboard*', 'profile', 'cover.*', 'suggested-topics.*', 'articles.create', 'articles.edit'))
+            <x-dashboard-nav />
+        @endif
+    @endauth
+
     <main class="@yield('bg-content', 'bg-sage')">
         {{-- Contenido principal --}}
         @yield('content')
