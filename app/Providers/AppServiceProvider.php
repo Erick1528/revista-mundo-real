@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Article;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
@@ -25,5 +26,8 @@ class AppServiceProvider extends ServiceProvider
         Route::bind('article', function (string $value) {
             return Article::withoutTrashed()->where('slug', $value)->firstOrFail();
         });
+
+        // Paginación con diseño de la revista (sin rounded, sage/primary)
+        Paginator::defaultView('vendor.pagination.revista');
     }
 }
