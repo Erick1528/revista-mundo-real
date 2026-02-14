@@ -51,6 +51,8 @@ class Login extends Component
             RateLimiter::clear($rateLimiterKey);
             $this->password = '';
 
+            \App\Notifications\AuthNotificationService::notifyLogin(Auth::user());
+
             // Cerrar Modal y redireccionar a dashboard
             $this->closeModal();
             return $this->redirect(route('dashboard'));
