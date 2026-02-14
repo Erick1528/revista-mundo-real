@@ -211,6 +211,12 @@ class Profile extends Component
             $user->fill($updateData);
             $user->save();
 
+            if ($changingPassword) {
+                \App\Notifications\ProfileNotificationService::notifyPasswordChanged($user);
+            } else {
+                \App\Notifications\ProfileNotificationService::notifyProfileUpdated($user);
+            }
+
             // Actualizar propiedades locales
             $this->name = $user->name;
             $this->description = $user->description;
