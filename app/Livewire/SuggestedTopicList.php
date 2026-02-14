@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\SuggestedTopic;
 use App\Models\User;
+use App\Notifications\SuggestedTopicNotificationService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -115,6 +116,7 @@ class SuggestedTopicList extends Component
         $user = Auth::user();
 
         if ($topic->requestTopic($user)) {
+            SuggestedTopicNotificationService::notifyAssigneeTopicRequested($topic, $user);
             session()->flash('message', 'Solicitud enviada exitosamente.');
         } else {
             session()->flash('error', 'No se pudo solicitar el tema. Puede que no esté disponible o ya lo tengas asignado.');

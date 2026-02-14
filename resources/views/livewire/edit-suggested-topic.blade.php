@@ -145,8 +145,8 @@
                 Cancelar
             </button>
 
-            {{-- Botón de eliminar solo para el dueño --}}
-            @if ($isOwner)
+            {{-- Botón de eliminar: creador o editores --}}
+            @if ($canDelete)
                 <button wire:click="openDeleteModal"
                     class="w-full sm:flex-1 bg-transparent text-red-600 py-3 px-4 border border-red-300 font-montserrat font-medium text-sm relative overflow-hidden hover:text-white transition-colors duration-300 group">
                     <span class="absolute inset-0 bg-red-500 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300 ease-out"></span>
@@ -208,7 +208,7 @@
         <div class="bg-white shadow-xl max-w-md w-full p-4 sm:p-8 mx-4" @click.stop>
             <div class="text-center mb-4 sm:mb-6">
                 <div class="w-12 h-12 mx-auto mb-4 bg-red-light flex items-center justify-center">
-                    <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </div>

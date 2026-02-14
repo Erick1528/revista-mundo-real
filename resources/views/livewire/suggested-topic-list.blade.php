@@ -143,6 +143,15 @@
                             </button>
                         @endif
                     @endif
+                    @if ($topic->created_by === Auth::user()?->id || in_array(Auth::user()?->rol ?? null, ['editor_chief', 'moderator', 'administrator']))
+                        <button type="button" wire:click="openDeleteModal({{ $topic->id }})"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-montserrat font-medium text-red-600 border border-red-500 hover:bg-red-50 transition-colors">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            Eliminar
+                        </button>
+                    @endif
                 </div>
             </div>
         @empty
@@ -236,7 +245,7 @@
         <div class="bg-white shadow-xl max-w-md w-full p-4 sm:p-8 mx-4" @click.stop>
             <div class="text-center mb-4 sm:mb-6">
                 <div class="w-12 h-12 mx-auto mb-4 bg-red-light flex items-center justify-center">
-                    <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </div>
@@ -245,7 +254,7 @@
                     El tema <strong class="font-semibold text-primary">{{ $selectedTopicTitle }}</strong> será eliminado permanentemente.
                 </p>
                 <p class="text-xs sm:text-sm font-opensans text-gray-light leading-relaxed">
-                    Esta acción <strong class="font-semibold text-gray-600">no se puede deshacer</strong>.
+                    Esta acción <strong class="font-semibold text-red-500">no se puede deshacer</strong>.
                 </p>
             </div>
 

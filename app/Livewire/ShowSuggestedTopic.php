@@ -3,6 +3,8 @@
 namespace App\Livewire;
 
 use App\Models\SuggestedTopic;
+use App\Models\User;
+use App\Notifications\SuggestedTopicNotificationService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -53,8 +55,8 @@ class ShowSuggestedTopic extends Component
         $user = Auth::user();
         
         if ($this->topic->requestTopic($user)) {
-            // Recargar el tema para obtener los datos actualizados
             $this->topic->refresh();
+            SuggestedTopicNotificationService::notifyAssigneeTopicRequested($this->topic, $user);
             session()->flash('message', 'Solicitud de tema enviada exitosamente.');
         } else {
             session()->flash('error', 'No se pudo solicitar el tema.');
@@ -177,6 +179,9 @@ class ShowSuggestedTopic extends Component
         if ($this->topic->assignToRequester($user, $userIdToAssign)) {
             $this->topic->refresh();
             $this->topic->load(['creator', 'assignedUser', 'requester', 'topicRequests.user']);
+            if ($requester && $requester->email) {
+                \App\Notifications\SuggestedTopicNotificationService::notifyUserAssignedToTopic($this->topic, $requester);
+            }
             session()->flash('message', 'Tema asignado exitosamente a ' . $requesterName . '.');
         } else {
             session()->flash('error', 'No se pudo asignar el tema.');
@@ -202,6 +207,10 @@ class ShowSuggestedTopic extends Component
         }
 
         if ($this->topic->rejectRequest($user, $userIdToReject)) {
+            $rejectedUser = User::find($userIdToReject);
+            if ($rejectedUser) {
+                SuggestedTopicNotificationService::notifyUserRequestRejected($this->topic, $rejectedUser);
+            }
             $this->topic->refresh();
             $this->topic->load(['creator', 'assignedUser', 'requester', 'topicRequests.user']);
             session()->flash('message', 'Solicitud rechazada.');

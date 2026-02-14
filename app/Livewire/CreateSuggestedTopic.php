@@ -226,7 +226,7 @@ class CreateSuggestedTopic extends Component
             }
 
             // Crear el tema sugerido
-            SuggestedTopic::create([
+            $topic = SuggestedTopic::create([
                 'title' => $this->title,
                 'section' => $this->section,
                 'description' => $this->description,
@@ -236,6 +236,13 @@ class CreateSuggestedTopic extends Component
                 'taken_at' => $takenAt,
                 'created_by' => Auth::user()->id,
             ]);
+
+            if ($assignedTo) {
+                $assignedUser = User::find($assignedTo);
+                if ($assignedUser) {
+                    \App\Notifications\SuggestedTopicNotificationService::notifyUserTopicAssigned($topic, $assignedUser);
+                }
+            }
 
             // Determinar mensaje según la acción realizada
             $message = 'Tema sugerido creado exitosamente.';

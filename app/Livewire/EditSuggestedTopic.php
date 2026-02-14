@@ -303,8 +303,8 @@ class EditSuggestedTopic extends Component
     {
         $user = Auth::user();
 
-        // Solo el creador puede eliminar
-        if ($this->topic->created_by !== $user->id) {
+        // Creador o editor_chief/moderator/administrator pueden eliminar
+        if ($this->topic->created_by !== $user->id && ! in_array($user->rol, ['editor_chief', 'moderator', 'administrator'])) {
             session()->flash('error', 'No tienes permisos para eliminar este tema.');
             $this->closeDeleteModal();
             return;
@@ -321,10 +321,18 @@ class EditSuggestedTopic extends Component
         return $this->topic->created_by === $user->id;
     }
 
+    /** Creador o editor_chief/moderator/administrator pueden eliminar. */
+    public function getCanDeleteProperty()
+    {
+        $user = Auth::user();
+        return $this->topic->created_by === $user->id || in_array($user->rol, ['editor_chief', 'moderator', 'administrator']);
+    }
+
     public function render()
     {
         return view('livewire.edit-suggested-topic', [
             'isOwner' => $this->isOwner,
+            'canDelete' => $this->canDelete,
         ]);
     }
 }
