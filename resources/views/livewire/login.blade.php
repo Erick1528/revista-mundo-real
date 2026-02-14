@@ -1,7 +1,7 @@
 <div>
     @if ($showModal)
         <div class="fixed inset-0 bg-[rgba(0,0,0,0.5)] z-50 flex items-center justify-center p-4" wire:click="closeModal">
-            <div class="bg-white shadow-xl max-w-md w-full p-8" wire:click.stop>
+            <div class="bg-white shadow-xl max-w-md w-full p-8" @click.stop>
                 {{-- Botón de cerrar --}}
                 <div class="flex justify-end mb-4">
                     <button wire:click="closeModal"
