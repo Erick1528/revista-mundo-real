@@ -26,6 +26,8 @@ Artisan::command('articles:purge-trash', function () {
 
 Schedule::command('articles:purge-trash')->daily();
 
-// En hosting compartido (ej. Hostinger): procesar la cola de correos cada minuto.
-// No hace falta un worker 24/7: el cron que ejecuta schedule:run lanzará esto cada vez.
-Schedule::command('queue:work --stop-when-empty')->everyMinute()->withoutOverlapping(2);
+// Cola de correos: cada minuto (si el cron ejecuta schedule:run cada minuto).
+// En algunos hostings compartidos este comando no llega a ejecutarse desde el scheduler.
+// Si los jobs no se procesan, añade un segundo cron que ejecute directamente:
+//   cd /ruta/al/proyecto && php artisan queue:work --stop-when-empty >> /dev/null 2>&1
+Schedule::command('queue:work --stop-when-empty')->everyMinute();
