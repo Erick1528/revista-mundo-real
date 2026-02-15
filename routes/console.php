@@ -25,3 +25,7 @@ Artisan::command('articles:purge-trash', function () {
 })->purpose('Elimina artículos que llevan más de 30 días en la papelera');
 
 Schedule::command('articles:purge-trash')->daily();
+
+// En hosting compartido (ej. Hostinger): procesar la cola de correos cada minuto.
+// No hace falta un worker 24/7: el cron que ejecuta schedule:run lanzará esto cada vez.
+Schedule::command('queue:work --stop-when-empty')->everyMinute()->withoutOverlapping(2);
