@@ -115,4 +115,28 @@ return [
         'name' => env('MAIL_FROM_NAME', 'Example'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Logo en correos
+    |--------------------------------------------------------------------------
+    | URL absoluta de la imagen del logo que se muestra en la cabecera de los
+    | correos. Si está vacío se usa APP_URL + /build/assets/logosquare.svg
+    | (en public/build/assets). Usar PNG o JPG para mejor compatibilidad; SVG
+    | puede no verse en algunos clientes de correo.
+    */
+    'logo_url' => env('MAIL_LOGO_URL') ?: (rtrim(config('app.url'), '/').'/build/assets/logosquare.svg'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Notificación de inicio de sesión (IP y ubicación)
+    |--------------------------------------------------------------------------
+    | Por normativas (GDPR, CCPA, Honduras, etc.) la IP es dato personal.
+    | - login_notify_ip: si false, el correo de login no incluye IP ni ubicación.
+    | - login_geolocation: si false, se incluye solo la IP (sin enviar a terceros).
+    | Si activas geolocation, la IP se envía a ip-api.com para obtener ciudad/país;
+    | indícalo en tu política de privacidad.
+    */
+    'login_notify_ip' => env('MAIL_LOGIN_NOTIFY_IP', true),
+    'login_geolocation' => env('MAIL_LOGIN_GEOLOCATION', true),
+
 ];
