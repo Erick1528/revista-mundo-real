@@ -19,14 +19,19 @@ class CoverNotificationService
         $editors = User::whereIn('rol', self::EDITOR_ROLES)->get();
         $parentName = $pendingCover->parent ? ($pendingCover->parent->name ?: 'portada activa') : 'portada';
         $title = 'Cambios pendientes en la portada';
+        $submitterName = $pendingCover->creator?->name ?? 'Un usuario';
+        $link = url()->route('cover.index');
+        $fecha = now()->translatedFormat('d/m/Y \a \l\a\s H:i');
         $body = sprintf(
-            "Hay cambios pendientes de revisión para la %s.\n\nPuedes aprobar o rechazar los cambios desde el panel de portadas.",
-            $parentName
+            "Hay cambios pendientes de revisión para la %s.\n\nEnviado por: %s\nFecha: %s",
+            $parentName,
+            $submitterName,
+            $fecha
         );
 
         foreach ($editors as $user) {
             if ($user->email) {
-                Mail::to($user->email)->send(new SimpleMessageMail($title, $body));
+                Mail::to($user->email)->send(new SimpleMessageMail($title, $body, $link, 'Ir al panel de portadas'));
             }
         }
     }
@@ -43,9 +48,16 @@ class CoverNotificationService
 
         $name = $cover->name ?: 'Sin nombre';
         $title = 'Portada activada';
-        $body = "Hola {$creator->name},\n\nTu portada «{$name}» ha sido activada y ya es la portada visible en el sitio.";
+        $link = url()->route('cover.index');
+        $fecha = now()->translatedFormat('d/m/Y \a \l\a\s H:i');
+        $body = sprintf(
+            "Hola %s,\n\nTu portada «%s» ha sido activada y ya es la portada visible en el sitio.\n\nFecha de activación: %s",
+            $creator->name,
+            $name,
+            $fecha
+        );
 
-        Mail::to($creator->email)->send(new SimpleMessageMail($title, $body));
+        Mail::to($creator->email)->send(new SimpleMessageMail($title, $body, $link, 'Panel de portadas'));
     }
 
     /**
@@ -59,9 +71,17 @@ class CoverNotificationService
         }
 
         $title = 'Cambios de portada aprobados';
-        $body = "Hola {$editor->name},\n\nLos cambios que enviaste para la portada han sido aprobados y ya están publicados.";
+        $coverName = $pendingCover->parent?->name ?: 'la portada';
+        $link = url()->route('cover.index');
+        $fecha = now()->translatedFormat('d/m/Y \a \l\a\s H:i');
+        $body = sprintf(
+            "Hola %s,\n\nLos cambios que enviaste para %s han sido aprobados y ya están publicados.\n\nFecha: %s",
+            $editor->name,
+            $coverName,
+            $fecha
+        );
 
-        Mail::to($editor->email)->send(new SimpleMessageMail($title, $body));
+        Mail::to($editor->email)->send(new SimpleMessageMail($title, $body, $link, 'Panel de portadas'));
     }
 
     /**
@@ -75,8 +95,16 @@ class CoverNotificationService
         }
 
         $title = 'Cambios de portada no aplicados';
-        $body = "Hola {$editor->name},\n\nLos cambios que enviaste para la portada no han sido aceptados.";
+        $coverName = $pendingCover->parent?->name ?: 'la portada';
+        $link = url()->route('cover.index');
+        $fecha = now()->translatedFormat('d/m/Y \a \l\a\s H:i');
+        $body = sprintf(
+            "Hola %s,\n\nLos cambios que enviaste para %s no han sido aceptados.\n\nFecha: %s",
+            $editor->name,
+            $coverName,
+            $fecha
+        );
 
-        Mail::to($editor->email)->send(new SimpleMessageMail($title, $body));
+        Mail::to($editor->email)->send(new SimpleMessageMail($title, $body, $link, 'Ver panel de portadas'));
     }
 }
