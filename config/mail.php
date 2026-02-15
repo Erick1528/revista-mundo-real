@@ -119,12 +119,11 @@ return [
     |--------------------------------------------------------------------------
     | Logo en correos
     |--------------------------------------------------------------------------
-    | URL absoluta de la imagen del logo que se muestra en la cabecera de los
-    | correos. Si está vacío se usa APP_URL + /build/assets/logosquare.svg
-    | (en public/build/assets). Usar PNG o JPG para mejor compatibilidad; SVG
-    | puede no verse en algunos clientes de correo.
+    | URL absoluta del logo en cabecera. Si está vacío se usa APP_URL + ruta abajo.
+    | Usar PNG o JPG (no SVG: muchos clientes de correo no lo soportan).
+    | Ruta por defecto: public/build/assets/logo.png
     */
-    'logo_url' => env('MAIL_LOGO_URL') ?: (rtrim(config('app.url'), '/').'/build/assets/logosquare.svg'),
+    'logo_url' => env('MAIL_LOGO_URL') ?: (rtrim(config('app.url'), '/').'/build/assets/logo.png'),
 
     /*
     |--------------------------------------------------------------------------
