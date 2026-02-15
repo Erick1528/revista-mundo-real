@@ -17,9 +17,12 @@
             <td align="center" style="padding: 40px 20px 40px 20px;">
                 <table role="presentation" width="560" cellspacing="0" cellpadding="0" border="0" style="max-width: 560px; width: 100%; background-color: #ffffff; border: 1px solid #d8d8d1;">
 
-                    {{-- Cabecera: marca + línea de acento (dark-sage) --}}
+                    {{-- Cabecera: logo (si existe) + marca + línea de acento (dark-sage). Usar PNG/JPG; WebP/SVG no son fiables en correo. --}}
                     <tr>
                         <td align="center" style="padding: 40px 32px 24px 32px;">
+                            @if(isset($logoUrl) && $logoUrl)
+                            <img src="{{ $logoUrl }}" alt="Revista Mundo Real" width="120" height="auto" style="display: block; max-width: 120px; height: auto; margin: 0 auto 16px auto;" />
+                            @endif
                             <p style="margin: 0; font-family: 'Playfair Display', Georgia, 'Times New Roman', serif; font-size: 28px; color: #22221d; text-align: center; line-height: 1.2;">
                                 Revista Mundo Real
                             </p>
