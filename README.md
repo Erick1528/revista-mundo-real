@@ -288,9 +288,22 @@ Resumen de envíos:
 
 ### Cola de correos
 
-- Con `QUEUE_CONNECTION=database` (o `redis`, etc.) los correos se guardan en la tabla `jobs` y los procesa un worker.
+- Con `QUEUE_CONNECTION=database` (o `redis`, etc.) los correos **no se envían al instante**: se guardan en la tabla `jobs` y quedan pendientes hasta que un **worker** los procese.
 - Tablas: `jobs`, `job_batches`, `failed_jobs` (incluidas en las migraciones por defecto del proyecto).
-- En producción debe estar en marcha un proceso tipo: `php artisan queue:work`.
+
+**Para que los correos se envíen tienes dos opciones:**
+
+1. **Usar cola (recomendado en producción):** tener en marcha un proceso que lea la tabla `jobs` y envíe los correos. Ejecuta en la raíz del proyecto:
+   ```bash
+   php artisan queue:work
+   ```
+   Este comando se queda corriendo: cada pocos segundos mira si hay jobs en la tabla y los ejecuta (envía el correo, y si falla lo reintenta según configuración). En el servidor suele dejarse con Supervisor o systemd para que no se caiga.
+
+2. **Envío inmediato (sin worker):** si no quieres montar un worker, en el `.env` pon:
+   ```env
+   QUEUE_CONNECTION=sync
+   ```
+   Con `sync`, cada correo se envía en el mismo momento de la acción (no se usa la tabla `jobs`). La respuesta de la web puede tardar un poco más y no hay reintentos automáticos si falla el envío.
 
 ### Scheduler (papelera)
 
