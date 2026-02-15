@@ -17,18 +17,15 @@
             <td align="center" style="padding: 40px 20px 40px 20px;">
                 <table role="presentation" width="560" cellspacing="0" cellpadding="0" border="0" style="max-width: 560px; width: 100%; background-color: #ffffff; border: 1px solid #d8d8d1;">
 
-                    {{-- Cabecera: logo (si existe) + marca + línea de acento (dark-sage). Usar PNG/JPG; WebP/SVG no son fiables en correo. --}}
+                    {{-- Cabecera: con logo solo se muestra la imagen (grande), sin ningún texto de marca. Sin logo: texto + tagline. --}}
                     <tr>
                         <td align="center" style="padding: 40px 32px 24px 32px;">
                             @if(isset($logoUrl) && $logoUrl)
-                            <img src="{{ $logoUrl }}" alt="Revista Mundo Real" width="120" height="auto" style="display: block; max-width: 120px; height: auto; margin: 0 auto 16px auto;" />
+                            <img src="{{ $logoUrl }}" alt="Revista Mundo Real" width="360" height="auto" style="display: block; max-width: 360px; width: 100%; height: auto; margin: 0 auto 20px auto;" />
+                            @else
+                            <p style="margin: 0; font-family: 'Playfair Display', Georgia, 'Times New Roman', serif; font-size: 28px; color: #22221d; text-align: center; line-height: 1.2;">Revista Mundo Real</p>
+                            <p style="margin: 10px 0 0 0; font-family: 'Montserrat', Arial, sans-serif; font-size: 11px; color: #72726b; text-align: center; text-transform: uppercase; letter-spacing: 0.08em;">Conectando Culturas · Inspirando Viajes · Celebrando Tradiciones</p>
                             @endif
-                            <p style="margin: 0; font-family: 'Playfair Display', Georgia, 'Times New Roman', serif; font-size: 28px; color: #22221d; text-align: center; line-height: 1.2;">
-                                Revista Mundo Real
-                            </p>
-                            <p style="margin: 10px 0 0 0; font-family: 'Montserrat', Arial, sans-serif; font-size: 11px; color: #72726b; text-align: center; text-transform: uppercase; letter-spacing: 0.08em;">
-                                Conectando Culturas · Inspirando Viajes · Celebrando Tradiciones
-                            </p>
                             <table role="presentation" width="40" cellspacing="0" cellpadding="0" border="0" style="margin: 20px auto 0 auto;">
                                 <tr>
                                     <td style="height: 2px; background-color: #b7b699;"></td>
