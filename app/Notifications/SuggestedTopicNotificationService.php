@@ -19,9 +19,18 @@ class SuggestedTopicNotificationService
         }
 
         $title = 'Tema sugerido asignado';
-        $body = "Hola {$assignedUser->name},\n\nSe te ha asignado el tema sugerido: «{$topic->title}».";
+        $link = url()->route('suggested-topics.show', $topic);
+        $fecha = now()->translatedFormat('d/m/Y \a \l\a\s H:i');
+        $section = $topic->section ? str_replace('_', ' ', $topic->section) : '—';
+        $body = sprintf(
+            "Hola %s,\n\nSe te ha asignado el tema sugerido: «%s».\n\nSección: %s\nFecha: %s",
+            $assignedUser->name,
+            $topic->title,
+            $section,
+            $fecha
+        );
 
-        Mail::to($assignedUser->email)->send(new SimpleMessageMail($title, $body));
+        Mail::to($assignedUser->email)->send(new SimpleMessageMail($title, $body, $link, 'Ver y editar tema'));
     }
 
     /**
@@ -34,9 +43,18 @@ class SuggestedTopicNotificationService
         }
 
         $title = 'Tema sugerido asignado';
-        $body = "Hola {$assignedUser->name},\n\nSe te ha asignado el tema sugerido: «{$topic->title}». Puedes verlo en Temas sugeridos.";
+        $link = url()->route('suggested-topics.show', $topic);
+        $fecha = now()->translatedFormat('d/m/Y \a \l\a\s H:i');
+        $section = $topic->section ? str_replace('_', ' ', $topic->section) : '—';
+        $body = sprintf(
+            "Hola %s,\n\nSe te ha asignado el tema sugerido: «%s».\n\nSección: %s\nFecha: %s",
+            $assignedUser->name,
+            $topic->title,
+            $section,
+            $fecha
+        );
 
-        Mail::to($assignedUser->email)->send(new SimpleMessageMail($title, $body));
+        Mail::to($assignedUser->email)->send(new SimpleMessageMail($title, $body, $link, 'Ver y gestionar tema'));
     }
 
     /**
@@ -50,14 +68,17 @@ class SuggestedTopicNotificationService
         }
 
         $title = 'Solicitud de tema sugerido';
+        $link = url()->route('suggested-topics.show', $topic);
+        $fecha = now()->translatedFormat('d/m/Y \a \l\a\s H:i');
         $body = sprintf(
-            "Hola %s,\n\n%s ha solicitado el tema sugerido «%s». Puedes asignarlo o rechazar la solicitud desde la ficha del tema.",
+            "Hola %s,\n\n%s ha solicitado el tema sugerido «%s».\n\nFecha: %s",
             $assignee->name,
             $requester->name,
-            $topic->title
+            $topic->title,
+            $fecha
         );
 
-        Mail::to($assignee->email)->send(new SimpleMessageMail($title, $body));
+        Mail::to($assignee->email)->send(new SimpleMessageMail($title, $body, $link, 'Ver ficha del tema'));
     }
 
     /**
@@ -70,12 +91,15 @@ class SuggestedTopicNotificationService
         }
 
         $title = 'Solicitud de tema no aceptada';
+        $link = url()->route('suggested-topics.index');
+        $fecha = now()->translatedFormat('d/m/Y \a \l\a\s H:i');
         $body = sprintf(
-            "Hola %s,\n\nTu solicitud para el tema «%s» no ha sido aceptada.",
+            "Hola %s,\n\nTu solicitud para el tema «%s» no ha sido aceptada.\n\nFecha: %s",
             $rejectedUser->name,
-            $topic->title
+            $topic->title,
+            $fecha
         );
 
-        Mail::to($rejectedUser->email)->send(new SimpleMessageMail($title, $body));
+        Mail::to($rejectedUser->email)->send(new SimpleMessageMail($title, $body, $link, 'Ver temas sugeridos'));
     }
 }
