@@ -1,4 +1,4 @@
-<div class="space-y-4">
+<div class="space-y-4" data-content-editor-root>
     <!-- Indicador de carga para subida de imágenes -->
     <div wire:loading.delay wire:target="blocks"
         class="mb-4 p-3 bg-blue-100 border border-blue-400 text-blue-700 flex items-center gap-2 font-opensans text-sm">
@@ -190,14 +190,46 @@
                 </div>
             @endif
         @else
-            <!-- Bloques de contenido -->
-            <div class="p-6 space-y-8">
+            <!-- Bloques de contenido: scroll con rueda/flechas durante arrastre (script nativo más abajo) -->
+            <div class="p-6 space-y-0"
+                x-data="{ draggedIndex: null, dragOverSlot: null, draggedHeight: 0 }"
+                @dragend.window="draggedIndex = null; dragOverSlot = null; draggedHeight = 0">
                 @foreach ($blocks as $index => $block)
+                    <!-- Zona de soltar: altura definida cuando está expandida para que el holder llene todo el espacio -->
+                    <div class="relative flex items-stretch flex-shrink-0 w-full overflow-hidden"
+                        style="transition: min-height 0.22s ease-in-out, height 0.22s ease-in-out, margin-top 0.2s ease-in-out, margin-bottom 0.2s ease-in-out; min-height: 2rem;"
+                        :class="{ 'mt-3 mb-3': dragOverSlot === {{ $index }} && draggedIndex !== null && {{ $index }} !== draggedIndex && {{ $index }} !== draggedIndex + 1 }"
+                        :style="(draggedIndex !== null && {{ $index }} === dragOverSlot && {{ $index }} !== draggedIndex && {{ $index }} !== draggedIndex + 1 && draggedHeight) ? { height: draggedHeight + 'px', minHeight: draggedHeight + 'px' } : { height: 'auto', minHeight: '2rem' }"
+                        @dragover.prevent="dragOverSlot = {{ $index }}"
+                        @drop.prevent="if (draggedIndex !== null && {{ $index }} !== draggedIndex && {{ $index }} !== draggedIndex + 1) { $wire.moveBlockTo(draggedIndex, {{ $index }}); } draggedIndex = null; dragOverSlot = null; draggedHeight = 0;">
+                        <div x-show="dragOverSlot === {{ $index }} && draggedIndex !== null && {{ $index }} !== draggedIndex && {{ $index }} !== draggedIndex + 1"
+                            x-transition:enter="transition ease-out duration-180"
+                            x-transition:enter-start="opacity-0"
+                            x-transition:enter-end="opacity-100"
+                            x-transition:leave="transition ease-in duration-150"
+                            x-transition:leave-start="opacity-100"
+                            x-transition:leave-end="opacity-0"
+                        class="absolute inset-0 w-full border-2 border-dashed border-gray-400 bg-gray-50 flex items-center justify-center rounded-none">
+                            <span class="text-sm font-opensans font-medium text-gray-500">Soltar aquí</span>
+                        </div>
+                    </div>
+
                     <div class="group relative border border-gray-200 hover:border-gray-300 transition-colors">
 
                         <!-- Toolbar del bloque -->
                         <div
                             class="absolute -top-10 left-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity bg-white border border-gray-200 shadow-sm flex items-center gap-1 px-2 py-1">
+                            <span class="cursor-grab active:cursor-grabbing touch-none select-none p-1 text-gray-400 hover:text-primary transition-colors"
+                                title="Arrastrar para reordenar"
+                                draggable="true"
+                                @dragstart="draggedIndex = {{ $index }}; draggedHeight = $event.target.closest('.group').offsetHeight; $event.dataTransfer.effectAllowed = 'move'; $event.dataTransfer.setData('text/plain', '{{ $index }}');">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <circle cx="8" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/>
+                                    <circle cx="8" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>
+                                    <circle cx="8" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/>
+                                </svg>
+                            </span>
+                            <div class="h-4 w-px bg-gray-300"></div>
                             <button type="button" wire:click="moveBlockUp({{ $index }})"
                                 class="p-1 text-gray-500 hover:text-primary transition-colors {{ $index === 0 ? 'opacity-50 cursor-not-allowed' : '' }}"
                                 title="Mover arriba" {{ $index === 0 ? 'disabled' : '' }}>
@@ -1428,6 +1460,25 @@
                         </div>
                     @endif
                 @endforeach
+
+                <!-- Zona de soltar al final -->
+                <div class="relative flex items-stretch flex-shrink-0 w-full overflow-hidden"
+                    style="transition: min-height 0.22s ease-in-out, height 0.22s ease-in-out, margin-top 0.2s ease-in-out, margin-bottom 0.2s ease-in-out; min-height: 2rem;"
+                    :class="{ 'mt-3 mb-3': dragOverSlot === {{ count($blocks) }} && draggedIndex !== null && {{ count($blocks) }} !== draggedIndex + 1 }"
+                    :style="(draggedIndex !== null && {{ count($blocks) }} === dragOverSlot && {{ count($blocks) }} !== draggedIndex + 1 && draggedHeight) ? { height: draggedHeight + 'px', minHeight: draggedHeight + 'px' } : { height: 'auto', minHeight: '2rem' }"
+                    @dragover.prevent="dragOverSlot = {{ count($blocks) }}"
+                    @drop.prevent="if (draggedIndex !== null && {{ count($blocks) }} !== draggedIndex + 1) { $wire.moveBlockTo(draggedIndex, {{ count($blocks) }}); } draggedIndex = null; dragOverSlot = null; draggedHeight = 0;">
+                    <div x-show="dragOverSlot === {{ count($blocks) }} && draggedIndex !== null && {{ count($blocks) }} !== draggedIndex + 1"
+                        x-transition:enter="transition ease-out duration-180"
+                        x-transition:enter-start="opacity-0"
+                        x-transition:enter-end="opacity-100"
+                        x-transition:leave="transition ease-in duration-150"
+                        x-transition:leave-start="opacity-100"
+                        x-transition:leave-end="opacity-0"
+                        class="absolute inset-0 w-full border-2 border-dashed border-gray-400 bg-gray-50 flex items-center justify-center rounded-none">
+                        <span class="text-sm font-opensans font-medium text-gray-500">Soltar aquí</span>
+                    </div>
+                </div>
             </div>
         @endif
 

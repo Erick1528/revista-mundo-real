@@ -368,6 +368,31 @@ class ContentEditor extends Component
         }
     }
 
+    /**
+     * Mueve un bloque desde fromIndex a toIndex (para drag & drop).
+     * toIndex es la posición final deseada (0-based).
+     */
+    public function moveBlockTo($fromIndex, $toIndex)
+    {
+        try {
+            $fromIndex = (int) $fromIndex;
+            $toIndex = (int) $toIndex;
+            $count = count($this->blocks);
+
+            if ($fromIndex === $toIndex || $fromIndex < 0 || $fromIndex >= $count || $toIndex < 0 || $toIndex >= $count) {
+                return;
+            }
+
+            $block = $this->blocks[$fromIndex];
+            array_splice($this->blocks, $fromIndex, 1);
+            $insertAt = $fromIndex < $toIndex ? $toIndex - 1 : $toIndex;
+            $insertAt = max(0, min($insertAt, count($this->blocks)));
+            array_splice($this->blocks, $insertAt, 0, [$block]);
+        } catch (\Exception $e) {
+            session()->flash('debug', 'Error al reordenar bloque: ' . $e->getMessage());
+        }
+    }
+
     public function duplicateBlock($index)
     {
         try {
