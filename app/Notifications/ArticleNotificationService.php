@@ -97,7 +97,7 @@ class ArticleNotificationService
             $title,
             $article,
             $intro,
-            url()->route('article.show', $article),
+            url()->route('article.show', $article->slug),
             'Ver artículo en el sitio',
             $fecha
         ));
