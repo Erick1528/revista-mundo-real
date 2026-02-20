@@ -13,6 +13,10 @@ class Hero extends Component
     public $showCreateTopicView = false;
     public $showEditTopicView = false;
     public $showViewTopicView = false;
+    public $showViewUserView = false;
+    public $showEditUserView = false;
+    public $showUserTrashView = false;
+    public $showCreateUserView = false;
 
     public function mount()
     {
@@ -21,6 +25,10 @@ class Hero extends Component
         $this->showCreateTopicView = request()->is('temas-sugeridos/crear');
         $this->showEditTopicView = request()->is('temas-sugeridos/*/editar');
         $this->showViewTopicView = request()->is('temas-sugeridos/*') && !request()->is('temas-sugeridos') && !request()->is('temas-sugeridos/crear') && !request()->is('temas-sugeridos/*/editar');
+        $this->showCreateUserView = request()->is('usuarios/crear');
+        $this->showUserTrashView = request()->is('usuarios/eliminados');
+        $this->showEditUserView = request()->is('usuarios/*/editar');
+        $this->showViewUserView = request()->is('usuarios/*') && !request()->is('usuarios') && !request()->is('usuarios/crear') && !request()->is('usuarios/eliminados') && !request()->is('usuarios/*/editar');
     }
 
     public function cancelCreateArticle()
@@ -45,8 +53,27 @@ class Hero extends Component
 
     public function cancelViewTopic()
     {
-        // Redirigir al listado
         return redirect()->route('suggested-topics.index');
+    }
+
+    public function cancelViewUser()
+    {
+        return redirect()->route('users.index');
+    }
+
+    public function cancelEditUser()
+    {
+        return redirect()->route('users.index');
+    }
+
+    public function cancelUserTrash()
+    {
+        return redirect()->route('users.index');
+    }
+
+    public function cancelCreateUser()
+    {
+        return redirect()->route('users.index');
     }
 
     public function render()

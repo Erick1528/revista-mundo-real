@@ -42,7 +42,7 @@
 
     {{-- Navegación del panel (dashboard, papelera, portadas, temas sugeridos, perfil) --}}
     @auth
-        @if(request()->routeIs('dashboard*', 'profile', 'cover.*', 'suggested-topics.*', 'articles.create', 'articles.edit'))
+        @if(request()->routeIs('dashboard*', 'profile', 'cover.*', 'suggested-topics.*', 'users.*', 'articles.create', 'articles.edit'))
             <x-dashboard-nav />
         @endif
     @endauth

@@ -102,6 +102,20 @@
                 <h4 class="mt-4 mb-2 font-serif text-xl text-primary">Gestionar portada</h4>
                 <p class="text-gray-light text-sm">Ver portadas y montar la de la revista</p>
             </a>
+            @if(Auth::user()?->rol === 'administrator')
+            <a href="{{ route('users.index') }}"
+                class="border border-dark-sage p-8 text-dark-sage w-full hover:bg-dark-sage/9 transition-all duration-200 cursor-pointer block">
+                <svg xmlns="http://www.w3.org/2000/svg" height="32px" width="32px" viewBox="0 0 24 24" stroke="#b7b699"
+                    stroke-width="2" fill="none">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+                <h4 class="mt-4 mb-2 font-serif text-xl text-primary">Gestionar usuarios</h4>
+                <p class="text-gray-light text-sm">Ver, editar y administrar usuarios del sistema</p>
+            </a>
+            @endif
             <button type="button" wire:click="showInDevelopment('estadísticas')"
                 class="border border-dark-sage p-8 text-dark-sage w-full hover:bg-dark-sage/9 transition-all duration-200 cursor-pointer block text-left">
                 <svg xmlns="http://www.w3.org/2000/svg" height="32px" width="32px" viewBox="0 0 24 24" stroke="#b7b699"

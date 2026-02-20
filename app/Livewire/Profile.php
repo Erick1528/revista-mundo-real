@@ -70,6 +70,10 @@ class Profile extends Component
         $this->updatedAt = $user->updated_at;
         $this->loadLastSession();
         $this->loadArticles();
+
+        if (request()->boolean('editar')) {
+            $this->editingMode = true;
+        }
     }
 
     public function loadLastSession()

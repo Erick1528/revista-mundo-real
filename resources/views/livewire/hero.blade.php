@@ -86,6 +86,54 @@
             </h1>
             <p class=" text-[12px] sm:text-sm font-montserrat text-left mt-3 text-gray-light uppercase">Información
                 detallada del tema sugerido</p>
+        @elseif ($showViewUserView)
+            <button wire:click="cancelViewUser"
+                class="inline-flex items-center gap-2 text-primary hover:text-dark-sage transition-colors mb-8">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                <p class=" text-sm font-montserrat">Volver al listado</p>
+            </button>
+            <h1 class=" text-4xl sm:text-5xl font-serif text-left text-primary text-balance font-normal">Perfil de Usuario</h1>
+            <p class=" text-[12px] sm:text-sm font-montserrat text-left mt-3 text-gray-light uppercase">Información del usuario</p>
+        @elseif ($showEditUserView)
+            <button wire:click="cancelEditUser"
+                class="inline-flex items-center gap-2 text-primary hover:text-dark-sage transition-colors mb-8">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                <p class=" text-sm font-montserrat">Volver al listado</p>
+            </button>
+            <h1 class=" text-4xl sm:text-5xl font-serif text-left text-primary text-balance font-normal">Editar Usuario</h1>
+            <p class=" text-[12px] sm:text-sm font-montserrat text-left mt-3 text-gray-light uppercase">Modifica el nombre y el rol del usuario</p>
+        @elseif ($showCreateUserView)
+            <button wire:click="cancelCreateUser"
+                class="inline-flex items-center gap-2 text-primary hover:text-dark-sage transition-colors mb-8">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                <p class=" text-sm font-montserrat">Volver al listado</p>
+            </button>
+            <h1 class=" text-4xl sm:text-5xl font-serif text-left text-primary text-balance font-normal">Crear Usuario</h1>
+            <p class=" text-[12px] sm:text-sm font-montserrat text-left mt-3 text-gray-light uppercase">Añade un nuevo usuario al sistema</p>
+        @elseif ($showUserTrashView)
+            <button wire:click="cancelUserTrash"
+                class="inline-flex items-center gap-2 text-primary hover:text-dark-sage transition-colors mb-8">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                <p class=" text-sm font-montserrat">Volver al listado</p>
+            </button>
+            <h1 class=" text-4xl sm:text-5xl font-serif text-left text-primary text-balance font-normal">Usuarios eliminados</h1>
+            <p class=" text-[12px] sm:text-sm font-montserrat text-left mt-3 text-gray-light uppercase">Restaura usuarios dados de baja</p>
         @else
             <h1
                 class=" text-6xl sm:text-7xl font-serif text-center text-primary px-6 sm:px-10 lg:px-4 text-balance font-normal">
