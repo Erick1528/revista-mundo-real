@@ -6,6 +6,7 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\CoverController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SuggestedTopicController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -50,6 +51,23 @@ Route::get('temas-sugeridos/{topic}/editar', [SuggestedTopicController::class, '
     ->name('suggested-topics.edit')
     ->middleware('auth');
 
+// Usuarios (solo administradores)
+Route::get('usuarios', [UserController::class, 'index'])
+    ->name('users.index')
+    ->middleware('auth');
+Route::get('usuarios/crear', [UserController::class, 'create'])
+    ->name('users.create')
+    ->middleware('auth');
+Route::get('usuarios/eliminados', [UserController::class, 'trash'])
+    ->name('users.trash')
+    ->middleware('auth');
+Route::get('usuarios/{user}/editar', [UserController::class, 'edit'])
+    ->name('users.edit')
+    ->middleware('auth');
+Route::get('usuarios/{user}', [UserController::class, 'show'])
+    ->name('users.show')
+    ->middleware('auth');
+
 // Content Creation and Management
     Route::get('articles/create', [ArticleController::class, 'create'])->name('articles.create')->middleware('auth');
     Route::get('articles/{article:slug}/edit', [ArticleController::class, 'edit'])->name('articles.edit')->middleware('auth');
@@ -66,7 +84,6 @@ Route::get('article/{article:slug}', [ArticleController::class, 'show'])->name('
 // Mirar como hacer la funcionalidad de programar la publicación de un artículo a cierta hora y fecha
 
 // Hacer funcionalidad de los botones de compartir en redes sociales
-// Crear CRUD para nuevos editores o usuarios con permisos especiales
 
 // Agregar campo de alt para imagen y credito para el bloque de galeria y que sean esos dos campos para cada foto no solo uno.
 
