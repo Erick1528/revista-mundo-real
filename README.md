@@ -8,10 +8,11 @@ Aplicación web para la gestión de una revista digital: artículos, portadas, t
 
 **Revista Mundo Real** es un panel de redacción que permite:
 
-- **Crear y publicar artículos** con editor de bloques (texto, imágenes, galerías, reseñas), secciones, etiquetas y flujo de revisión (borrador → en revisión → publicado / rechazado).
+- **Crear y publicar artículos** con editor de bloques (texto, imágenes, galerías, reseñas, **anuncios incrustados**), secciones, etiquetas y flujo de revisión (borrador → en revisión → publicado / rechazado).
 - **Gestionar la portada** del sitio: crear versiones, activar una portada, y someter cambios pendientes que editores jefe/moderadores/administradores pueden aprobar o rechazar.
 - **Gestionar temas sugeridos** para artículos: proponer temas, asignar responsables, solicitar un tema y aprobar/rechazar solicitudes.
-- **Papelera de artículos**: eliminar artículos con soft delete, restaurarlos o borrarlos de forma permanente; los que llevan más de 30 días en papelera se purgan automáticamente.
+- **Anunciantes y anuncios**: CRUD de anunciantes (con logo) y de anuncios (contenido por bloques, estado, URL de destino). Solo editores y administradores gestionan anuncios; los anuncios publicados y públicos se pueden incrustar como bloque en artículos. Papelera para anuncios y anunciantes.
+- **Papelera de artículos**: eliminar artículos con soft delete, restaurarlos o borrarlos de forma permanente; los que llevan más de 30 días en papelera se purgan automáticamente. No se puede mover a papelera un artículo que esté en la **portada activa** (el modal informa y solo permite cerrar).
 - **Notificaciones por email** (portadas, temas sugeridos, artículos, perfil) enviadas en cola cuando está configurado el driver de cola.
 
 El acceso es por **login**; la portada pública y la lectura de artículos publicados son visibles sin autenticación.
@@ -34,12 +35,16 @@ graph TB
     Art[Articulos]
     Port[Portadas]
     Temas[Temas sugeridos]
+    Anunciantes[Anunciantes]
+    Anuncios[Anuncios]
     Papelera[Papelera]
     Perfil[Perfil]
     Login --> Dashboard
     Dashboard --> Art
     Dashboard --> Port
     Dashboard --> Temas
+    Dashboard --> Anunciantes
+    Dashboard --> Anuncios
     Dashboard --> Papelera
     Dashboard --> Perfil
   end
@@ -220,8 +225,9 @@ Los usuarios tienen un campo `rol` con los siguientes valores:
 | **administrator**| Administrador      |
 | (resto)           | Autor/colaborador  |
 
-- **Artículos**: el autor ve y gestiona los suyos; `editor_chief`, `moderator` y `administrator` ven todos y pueden publicar, rechazar, eliminar a papelera y eliminar permanentemente en papelera.
+- **Artículos**: el autor ve y gestiona los suyos; `editor_chief`, `moderator` y `administrator` ven todos y pueden publicar, rechazar, eliminar a papelera y eliminar permanentemente en papelera. No se puede mover a papelera un artículo que esté en la portada activa.
 - **Portadas**: cualquier usuario autenticado puede crear y editar; solo los tres roles anteriores pueden **activar** una portada y **aprobar o rechazar** cambios pendientes. Eliminar portada: creador o quien pueda activar.
+- **Anunciantes y anuncios**: solo `editor_chief`, `moderator` y `administrator` acceden al listado y CRUD. Los anuncios publicados y con visibilidad pública pueden incrustarse como bloque en artículos.
 - **Temas sugeridos**: crear, editar, asignar, solicitar y rechazar según permisos; eliminar: creador del tema o uno de los tres roles anteriores.
 
 ---
@@ -230,14 +236,14 @@ Los usuarios tienen un campo `rol` con los siguientes valores:
 
 ### Artículos
 
-- Creación con editor de contenido por bloques (texto, imagen, galería, reseña), imagen principal, sección, etiquetas, resumen, meta.
+- Creación con editor de contenido por bloques (texto, imagen, galería, reseña, **anuncio**), imagen principal, sección, etiquetas, resumen, meta. El bloque «Anuncio» permite incrustar un anuncio publicado y público desde un selector tipo anunciantes.
 - Estados: borrador, en revisión, publicado, rechazado.
 - Envío a revisión → notificación a editores. Publicación o rechazo → notificación al autor.
-- Eliminación a papelera (soft delete) con notificación al autor; desde papelera se puede restaurar o eliminar permanentemente (borrando también imágenes en disco).
+- Eliminación a papelera (soft delete) con notificación al autor; desde papelera se puede restaurar o eliminar permanentemente (borrando también imágenes en disco). **No se puede mover a papelera** un artículo que esté en la portada activa (el modal lo indica y solo permite cerrar).
 
 ### Portadas
 
-- Listado de portadas; creación de nueva portada o edición de una existente.
+- Listado de portadas; creación de nueva portada o edición de una existente. En el panel de artículos para la portada solo se listan artículos **publicados** y con **visibilidad pública**.
 - Una portada puede estar **activa** (la que se muestra en la web). Los cambios se pueden guardar como **versión pendiente** para que un editor los apruebe o rechace.
 - Al crear/guardar una versión pendiente se notifica a editores. Al activar una portada se notifica al creador.
 - Eliminación solo para portadas no activas y no pendientes; modal de confirmación.
@@ -248,10 +254,18 @@ Los usuarios tienen un campo `rol` con los siguientes valores:
 - Notificaciones: tema asignado, solicitud recibida (al asignado), solicitud rechazada (al solicitante).
 - Eliminación por creador o por editor_chief/moderator/administrator con modal de confirmación.
 
+### Anunciantes
+
+- Listado, creación y edición de anunciantes (nombre, logo). Papelera para restaurar o eliminar permanentemente. Solo accesible para editor_chief, moderator y administrator.
+
+### Anuncios
+
+- Listado, creación y edición de anuncios: nombre, slug, contenido por bloques (mismo editor que artículos), URL de destino, estado (borrador, en revisión, publicado, rechazado), visibilidad (pública/privada) y anunciante opcional. Vista previa del anuncio y cambio de estado (editores). Papelera para restaurar o eliminar. Solo editores y administradores. Los anuncios **publicados y públicos** pueden incrustarse como bloque en artículos; al hacer clic en el bloque se abre la URL de destino en nueva pestaña con parámetros UTM.
+
 ### Dashboard
 
-- Acciones rápidas: crear artículo, temas sugeridos, portadas, papelera, estadísticas.
-- Listado de artículos recientes del usuario (o de todos para editores) con opciones de editar y eliminar a papelera según permisos.
+- Acciones rápidas: crear artículo, temas sugeridos, portadas, anunciantes, anuncios, papelera, estadísticas.
+- Listado de artículos recientes del usuario (o de todos para editores) con opciones de editar y eliminar a papelera según permisos. Si un artículo está en la portada activa, el botón de papelera abre un modal informativo en lugar de confirmar eliminación.
 
 ### Papelera
 
@@ -368,6 +382,7 @@ npm run dev
 
 - **Purga de papelera (manual):** `php artisan articles:purge-trash`
 - **Listar tareas programadas:** `php artisan schedule:list`
+- **Commits por grupos:** ver `COMMITS.md` para una propuesta de commits atómicos por funcionalidad.
 
 ---
 
@@ -404,13 +419,18 @@ app/
 │   └── SimpleMessageMail.php      # Correo título + cuerpo
 ├── Models/
 │   ├── Article.php                 # SoftDeletes, secciones, contenido por bloques
+│   ├── Ad.php                      # Anuncios (contenido por bloques, status, visibility)
+│   ├── Advertiser.php              # Anunciantes (logo)
 │   ├── CoverArticle.php            # Portadas y versiones pendientes
 │   ├── SuggestedTopic.php
 │   └── User.php                    # rol (editor_chief, moderator, administrator)
 ├── Livewire/
 │   ├── Dashboard.php, ArticleTrash.php
 │   ├── CreateArticle.php, UpdateArticle.php, ShowArticle.php
-│   ├── CoverList.php, EditCover.php, ManageCover.php
+│   ├── CreateAd.php, EditAd.php, ShowAd.php, AdList.php, AdTrash.php
+│   ├── CreateAdvertiser.php, EditAdvertiser.php, AdvertiserList.php, AdvertiserTrash.php
+│   ├── ContentEditor.php, ContentView.php   # Editor de bloques y vista; bloque tipo ad
+│   ├── CoverList.php, EditCover.php, ManageCover.php, CoverArticlesPanel.php
 │   ├── SuggestedTopicList.php, ShowSuggestedTopic.php, EditSuggestedTopic.php
 │   ├── Profile.php, Login.php
 │   └── Hero, LatestArticles, MainArticles, NavBar, Footer, etc.
