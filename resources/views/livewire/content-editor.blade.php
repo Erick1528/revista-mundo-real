@@ -1,4 +1,5 @@
 <div class="space-y-4" data-content-editor-root>
+
     <!-- Indicador de carga para subida de imágenes -->
     <div wire:loading.delay wire:target="blocks"
         class="mb-4 p-3 bg-blue-100 border border-blue-400 text-blue-700 flex items-center gap-2 font-opensans text-sm">
@@ -162,6 +163,21 @@
                                     <div class="font-opensans text-xs text-gray-500">Testimonios con foto</div>
                                 </div>
                             </button>
+
+                            @if (!$isAdCreator)
+                                <button type="button" wire:click="addBlock('ad', null)"
+                                    class="flex items-center gap-3 p-3 sm:p-4 text-left hover:bg-gray-50 border border-gray-200 transition-colors">
+                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <div>
+                                        <div class="font-opensans font-medium text-sm">Anuncio</div>
+                                        <div class="font-opensans text-xs text-gray-500">Incrustar anuncio publicado</div>
+                                    </div>
+                                </button>
+                            @endif
                         </div>
                     @endif
 
@@ -183,7 +199,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M19 9l-7 7-7-7" />
                                 </svg>
-                                Ver más opciones (3)
+                                Ver más opciones ({{ $this->moreBlockTypesCount }})
                             </button>
                         @endif
                     </div>
@@ -593,10 +609,10 @@
                                                             wire:model="blocks.{{ $index }}.image_file">
                                                         <p class="text-xs text-gray-500 mt-1 font-opensans">Tamaño máximo:
                                                             10MB. Se convertirá automáticamente a WebP</p>
-                                                        @if (session()->has('error'))
+                                                        @if (!empty($blockErrors[$index] ?? null))
                                                             <div
                                                                 class="mt-2 p-3 bg-red-50 border border-red-500 text-red-500 font-opensans text-sm">
-                                                                {{ session('error') }}
+                                                                {{ $blockErrors[$index] }}
                                                             </div>
                                                         @endif
                                                     </div>
@@ -624,10 +640,10 @@
                                                         wire:model="blocks.{{ $index }}.image_file">
                                                     <p class="text-xs text-gray-500 mt-1 font-opensans">Tamaño máximo: 10MB.
                                                         Se convertirá automáticamente a WebP</p>
-                                                    @if (session()->has('error'))
+                                                    @if (!empty($blockErrors[$index] ?? null))
                                                         <div
                                                             class="mt-2 p-3 bg-red-50 border border-red-500 text-red-500 font-opensans text-sm">
-                                                            {{ session('error') }}
+                                                            {{ $blockErrors[$index] }}
                                                         </div>
                                                     @endif
                                                 </div>
@@ -824,6 +840,11 @@
 
                                         <!-- Contenedor principal (ocultar durante carga) -->
                                         <div wire:loading.remove wire:target="galleryFiles.{{ $index }}">
+                                            @if (!empty($blockErrors[$index] ?? null))
+                                                <div class="mb-3 p-3 bg-red-50 border border-red-500 text-red-500 font-opensans text-sm">
+                                                    {{ $blockErrors[$index] }}
+                                                </div>
+                                            @endif
 
                                             <!-- Imagen principal -->
                                             @if (!empty($images))
@@ -1151,6 +1172,12 @@
                                                                 wire:model="reviewFiles.{{ $index }}.{{ $currentReview }}">
                                                             <p class="text-xs text-gray-500 mt-2 font-opensans h-auto">Tamaño
                                                                 máximo: 10MB. Se convertirá a WebP</p>
+                                                            @php $reviewErrorKey = 'review.'.$index.'.'.$currentReview; @endphp
+                                                            @if (!empty($blockErrors[$reviewErrorKey] ?? null))
+                                                                <div class="mt-2 p-3 bg-red-50 border border-red-500 text-red-500 font-opensans text-sm">
+                                                                    {{ $blockErrors[$reviewErrorKey] }}
+                                                                </div>
+                                                            @endif
                                                         </div>
                                                     </div>
 
@@ -1281,6 +1308,102 @@
                                                 </div>
                                             </div>
                                         @endif
+                                    </div>
+                                @break
+
+                                @case('ad')
+                                    @php
+                                        $adBlockIndex = $index;
+                                        $selectedAdForBlock = !empty($block['ad_id']) ? $this->adsForBlockSelect->firstWhere('id', (int) $block['ad_id']) : null;
+                                    @endphp
+                                    <div class="space-y-4">
+                                        <div class="flex items-center justify-between mb-3">
+                                            <div class="flex items-center gap-2">
+                                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                                <span class="text-xs text-gray-500 font-opensans font-medium">ANUNCIO</span>
+                                            </div>
+                                        </div>
+                                        <div class="space-y-2" x-data="{ open: false }">
+                                            <label class="block text-sm font-montserrat font-medium text-primary">Anuncio a mostrar</label>
+                                            <div class="relative">
+                                                <button type="button"
+                                                    @click="open = !open"
+                                                    class="w-full px-4 py-3 border border-gray-300 bg-gray-50 focus:outline-none focus:border-dark-sage focus:shadow-[0_0_0_2px_rgba(183,182,153,0.5)] font-opensans text-sm text-left flex items-center gap-3 justify-between">
+                                                    @if ($selectedAdForBlock)
+                                                        <span class="flex items-center gap-3 min-w-0">
+                                                            @php
+                                                                $blocks = is_string($selectedAdForBlock->content ?? '') ? json_decode($selectedAdForBlock->content, true) : ($selectedAdForBlock->content ?? []);
+                                                                $blocks = is_array($blocks) ? $blocks : [];
+                                                                $previewImg = null;
+                                                                $previewTxt = null;
+                                                                foreach ($blocks as $b) {
+                                                                    if (($b['type'] ?? '') === 'image' && !empty($b['url'])) { $previewImg = $b['url']; break; }
+                                                                    if (($b['type'] ?? '') === 'paragraph' && isset($b['content'])) { $previewTxt = \Illuminate\Support\Str::limit(strip_tags($b['content']), 40); break; }
+                                                                    if (($b['type'] ?? '') === 'gallery' && !empty($b['images'][0])) { $img = $b['images'][0]; $previewImg = is_array($img) ? ($img['url'] ?? $img) : $img; break; }
+                                                                }
+                                                            @endphp
+                                                            @if ($previewImg)
+                                                                <img src="{{ asset($previewImg) }}" alt="" class="h-8 w-auto object-cover shrink-0 max-w-12">
+                                                            @else
+                                                                <span class="w-8 h-8 shrink-0 bg-gray-100 flex items-center justify-center text-gray-400 text-xs font-opensans">A</span>
+                                                            @endif
+                                                            <span class="truncate">{{ $selectedAdForBlock->name }}</span>
+                                                            @if ($previewTxt && !$previewImg)
+                                                                <span class="text-gray-500 truncate hidden sm:inline text-xs">· {{ $previewTxt }}</span>
+                                                            @endif
+                                                        </span>
+                                                    @else
+                                                        <span class="text-gray-500">Seleccionar anuncio</span>
+                                                    @endif
+                                                    <svg class="w-4 h-4 text-gray-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                                    </svg>
+                                                </button>
+                                                <div x-show="open"
+                                                    x-transition
+                                                    @click.away="open = false"
+                                                    class="absolute z-10 w-full mt-1 bg-white border border-gray-200 shadow-lg max-h-64 overflow-y-auto">
+                                                    <button type="button"
+                                                        wire:click="setBlockAdId({{ $adBlockIndex }}, 0)"
+                                                        @click="open = false"
+                                                        class="w-full px-4 py-3 text-left flex items-center gap-3 hover:bg-gray-50 border-b border-gray-100 font-opensans text-sm text-gray-500">
+                                                        <span class="w-8 h-8 shrink-0 bg-gray-100 flex items-center justify-center text-gray-400 text-xs">—</span>
+                                                        Sin anuncio
+                                                    </button>
+                                                    @foreach ($this->adsForBlockSelect as $adOption)
+                                                        @php
+                                                            $optBlocks = is_string($adOption->content ?? '') ? json_decode($adOption->content, true) : ($adOption->content ?? []);
+                                                            $optBlocks = is_array($optBlocks) ? $optBlocks : [];
+                                                            $optImg = null;
+                                                            $optTxt = null;
+                                                            foreach ($optBlocks as $ob) {
+                                                                if (($ob['type'] ?? '') === 'image' && !empty($ob['url'])) { $optImg = $ob['url']; break; }
+                                                                if (($ob['type'] ?? '') === 'paragraph' && isset($ob['content'])) { $optTxt = \Illuminate\Support\Str::limit(strip_tags($ob['content']), 40); break; }
+                                                                if (($ob['type'] ?? '') === 'gallery' && !empty($ob['images'][0])) { $oi = $ob['images'][0]; $optImg = is_array($oi) ? ($oi['url'] ?? $oi) : $oi; break; }
+                                                            }
+                                                        @endphp
+                                                        <button type="button"
+                                                            wire:click="setBlockAdId({{ $adBlockIndex }}, {{ $adOption->id }})"
+                                                            @click="open = false"
+                                                            class="w-full px-4 py-3 text-left flex items-center gap-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 font-opensans text-sm">
+                                                            @if ($optImg)
+                                                                <img src="{{ asset($optImg) }}" alt="" class="h-8 w-auto object-cover shrink-0 max-w-12">
+                                                            @else
+                                                                <span class="w-8 h-8 shrink-0 bg-gray-100 flex items-center justify-center text-gray-400 text-xs font-opensans">A</span>
+                                                            @endif
+                                                            <span class="truncate">{{ $adOption->name }}</span>
+                                                            @if ($optTxt && !$optImg)
+                                                                <span class="text-gray-500 truncate text-xs">· {{ $optTxt }}</span>
+                                                            @endif
+                                                        </button>
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 @break
 
@@ -1430,6 +1553,21 @@
                                             <div class="font-opensans text-xs text-gray-500">Testimonios con foto</div>
                                         </div>
                                     </button>
+
+                                    @if (!$isAdCreator)
+                                        <button type="button" wire:click="addBlock('ad', {{ $index }})"
+                                            class="flex items-center gap-3 p-3 sm:p-4 text-left hover:bg-white border border-gray-200 transition-colors">
+                                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            <div>
+                                                <div class="font-opensans font-medium text-sm">Anuncio</div>
+                                                <div class="font-opensans text-xs text-gray-500">Incrustar anuncio publicado</div>
+                                            </div>
+                                        </button>
+                                    @endif
                                 </div>
                             @endif
 
@@ -1453,7 +1591,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M19 9l-7 7-7-7" />
                                         </svg>
-                                        Ver más opciones (3)
+                                        Ver más opciones ({{ $this->moreBlockTypesCount }})
                                     </button>
                                 @endif
                             </div>
@@ -1483,6 +1621,7 @@
         @endif
 
     </div>
+    
 </div>
 
 <script>

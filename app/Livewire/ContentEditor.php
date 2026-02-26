@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Models\Ad;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Log;
@@ -17,11 +18,17 @@ class ContentEditor extends Component
     public $reviewFiles = [];
     public $isUpdateMode = false;
     public $initialBlocks = []; // Copia inicial de bloques en modo de actualización
-    
+
+    /** Modo creador de anuncios: oculta el bloque "Anuncio" en el selector (cuando se implemente). */
+    public $isAdCreator = false;
+
     // Mensajes de notificación
     public $errorMessage = null;
     public $successMessage = null;
     public $debugMessage = null;
+
+    /** Errores por bloque: clave = índice de bloque o "review.{blockIndex}.{reviewIndex}" */
+    public $blockErrors = [];
 
     protected $listeners = [
         'requestContentData' => 'provideContentData',
@@ -67,6 +74,29 @@ class ContentEditor extends Component
         $this->debugMessage = null;
     }
 
+    /**
+     * Número de tipos de bloque en la sección "Ver más opciones" (depende de si es creador de anuncios).
+     */
+    public function getMoreBlockTypesCountProperty(): int
+    {
+        $count = 4; // list, video, gallery, review
+        if (! $this->isAdCreator) {
+            $count += 1; // ad
+        }
+        return $count;
+    }
+
+    /**
+     * Lista de anuncios publicados para el selector del bloque tipo "ad" (con content para preview inline).
+     */
+    public function getAdsForBlockSelectProperty()
+    {
+        return Ad::where('status', 'published')
+            ->where('visibility', 'public')
+            ->orderBy('name')
+            ->get(['id', 'name', 'slug', 'content']);
+    }
+
     public function provideContentData()
     {
         // Enviar los bloques actuales al componente padre
@@ -75,7 +105,7 @@ class ContentEditor extends Component
             'word_count' => $this->calculateWordCount(),
             'blocks_count' => count($this->blocks)
         ];
-        
+
         // En Livewire 3, los eventos se propagan automáticamente a los componentes padre
         // Usar dispatch sin especificar destino para que se propague a todos los componentes padre
         $this->dispatch('contentDataResponse', $data);
@@ -215,6 +245,9 @@ class ContentEditor extends Component
                     $totalWords += str_word_count(strip_tags($content));
                     break;
 
+                case 'ad':
+                    break;
+
                 case 'list':
                     if (isset($block['items']) && is_array($block['items'])) {
                         foreach ($block['items'] as $item) {
@@ -280,6 +313,19 @@ class ContentEditor extends Component
     {
         $this->showBlockSelector = false;
         $this->blockSelectorIndex = null;
+    }
+
+    /**
+     * Asigna el ad_id a un bloque tipo "ad" (para el dropdown tipo anunciantes).
+     * @param int $blockIndex
+     * @param int|null $adId null o vacío para "Sin anuncio"
+     */
+    public function setBlockAdId(int $blockIndex, $adId): void
+    {
+        if (!isset($this->blocks[$blockIndex]) || ($this->blocks[$blockIndex]['type'] ?? '') !== 'ad') {
+            return;
+        }
+        $this->blocks[$blockIndex]['ad_id'] = $adId ?: null;
     }
 
     public function toggleMoreBlocks()
@@ -462,6 +508,10 @@ class ContentEditor extends Component
                         $duplicatedBlock['currentReview'] = 0;
                         break;
 
+                    case 'ad':
+                        $duplicatedBlock['ad_id'] = $blockToDuplicate['ad_id'] ?? null;
+                        break;
+
                     default:
                         $duplicatedBlock['content'] = $blockToDuplicate['content'] ?? '';
                         break;
@@ -589,6 +639,11 @@ class ContentEditor extends Component
                     'currentReview' => 0,
                 ]);
 
+            case 'ad':
+                return array_merge($baseBlock, [
+                    'ad_id' => null,
+                ]);
+
             default:
                 return array_merge($baseBlock, [
                     'content' => '',
@@ -606,23 +661,19 @@ class ContentEditor extends Component
                 $file = $this->blocks[$blockIndex]['image_file'];
 
                 try {
-                    // Si ya había una imagen, eliminar la anterior
+                    unset($this->blockErrors[$blockIndex]);
+                    // Procesar la nueva imagen primero; solo si tiene éxito eliminamos la anterior
+                    $imagePath = $this->processImageUpload($file);
                     if (!empty($this->blocks[$blockIndex]['url'])) {
                         $this->deleteImageFromStorage($this->blocks[$blockIndex]['url']);
                     }
 
-                    // Procesar y optimizar la nueva imagen
-                    $imagePath = $this->processImageUpload($file);
-
-                    // Actualizar la URL del bloque (solo ruta relativa)
                     $this->blocks[$blockIndex]['url'] = '/storage/' . $imagePath;
-
-                    // Limpiar el campo temporal
                     $this->blocks[$blockIndex]['image_file'] = null;
 
                     session()->flash('message', 'Imagen subida y optimizada correctamente');
                 } catch (\Exception $e) {
-                    session()->flash('error', 'Error al procesar la imagen: ' . $e->getMessage());
+                    $this->blockErrors[$blockIndex] = $e->getMessage();
                     $this->blocks[$blockIndex]['image_file'] = null;
                 }
             }
@@ -645,9 +696,10 @@ class ContentEditor extends Component
                 $this->blocks[$blockIndex]['credits'] = '';
 
                 session()->flash('message', 'Imagen eliminada correctamente');
+                unset($this->blockErrors[$blockIndex]);
             }
         } catch (\Exception $e) {
-            session()->flash('error', 'Error al eliminar imagen: ' . $e->getMessage());
+            $this->blockErrors[$blockIndex] = $e->getMessage();
         }
     }
 
@@ -721,8 +773,8 @@ class ContentEditor extends Component
 
     private function optimizeImage($sourcePath, $destinationPath, $originalExtension)
     {
-        // Obtener dimensiones originales
-        list($width, $height) = getimagesize($sourcePath);
+        // Validar dimensiones antes de cargar en memoria (evita agotar memoria con GD)
+        [$width, $height] = get_validated_image_dimensions($sourcePath);
 
         // Calcular nuevas dimensiones (máximo 1200px de ancho)
         $maxWidth = 1200;
@@ -866,7 +918,7 @@ class ContentEditor extends Component
             $maxImages = 15;
 
             if ($currentImageCount >= $maxImages) {
-                session()->flash('error', "Máximo {$maxImages} imágenes permitidas por galería");
+                $this->blockErrors[$blockIndex] = "Máximo {$maxImages} imágenes permitidas por galería";
                 $this->galleryFiles[$blockIndex] = [];
                 return;
             }
@@ -874,12 +926,13 @@ class ContentEditor extends Component
             foreach ($value as $file) {
                 // Verificar límite antes de procesar cada imagen
                 if ($currentImageCount >= $maxImages) {
-                    session()->flash('error', "Máximo {$maxImages} imágenes permitidas. Solo se procesaron las primeras imágenes.");
+                    $this->blockErrors[$blockIndex] = "Máximo {$maxImages} imágenes permitidas. Solo se procesaron las primeras imágenes.";
                     break;
                 }
 
                 if ($file && $file->isValid()) {
                     try {
+                        unset($this->blockErrors[$blockIndex]);
                         // Usar el mismo método que las imágenes normales
                         $imagePath = $this->processImageUpload($file);
 
@@ -891,7 +944,7 @@ class ContentEditor extends Component
                         $this->blocks[$blockIndex]['images'][] = $imageUrl;
                         $currentImageCount++;
                     } catch (\Exception $e) {
-                        session()->flash('error', 'Error al subir imagen: ' . $e->getMessage());
+                        $this->blockErrors[$blockIndex] = $e->getMessage();
                     }
                 }
             }
@@ -921,9 +974,10 @@ class ContentEditor extends Component
                 }
 
                 session()->flash('message', 'Imagen eliminada correctamente');
+                unset($this->blockErrors[$blockIndex]);
             }
         } catch (\Exception $e) {
-            session()->flash('error', 'Error al eliminar imagen: ' . $e->getMessage());
+            $this->blockErrors[$blockIndex] = $e->getMessage();
         }
     }
 
@@ -958,17 +1012,16 @@ class ContentEditor extends Component
         if (count($parts) >= 2 && isset($value) && $value) {
             $blockIndex = (int) $parts[0];
             $reviewIndex = (int) $parts[1];
-            
+
+            $reviewErrorKey = "review.{$blockIndex}.{$reviewIndex}";
             try {
-                // Si ya había una foto, eliminar la anterior
+                unset($this->blockErrors[$reviewErrorKey]);
+                // Procesar la nueva imagen primero; solo si tiene éxito eliminamos la anterior
+                $imagePath = $this->processImageUpload($value);
                 if (!empty($this->blocks[$blockIndex]['reviews'][$reviewIndex]['photo'])) {
                     $this->deleteImageFromStorage($this->blocks[$blockIndex]['reviews'][$reviewIndex]['photo']);
                 }
 
-                // Procesar y optimizar la nueva imagen usando la función existente
-                $imagePath = $this->processImageUpload($value);
-
-                // Asegurar que existe la estructura de reseña
                 if (!isset($this->blocks[$blockIndex]['reviews'][$reviewIndex])) {
                     $this->blocks[$blockIndex]['reviews'][$reviewIndex] = [
                         'name' => '',
@@ -978,13 +1031,11 @@ class ContentEditor extends Component
                         'photo' => '',
                     ];
                 }
-                
-                // Actualizar la URL en la reseña
                 $this->blocks[$blockIndex]['reviews'][$reviewIndex]['photo'] = '/storage/' . $imagePath;
 
                 session()->flash('message', 'Foto de reseña subida correctamente');
             } catch (\Exception $e) {
-                session()->flash('error', 'Error al procesar la foto: ' . $e->getMessage());
+                $this->blockErrors[$reviewErrorKey] = $e->getMessage();
             }
         }
     }
@@ -998,14 +1049,14 @@ class ContentEditor extends Component
                 $this->setError("No existe bloque en índice $blockIndex");
                 return;
             }
-            
+
             // Verificar que es de tipo review
             $blockType = $this->blocks[$blockIndex]['type'] ?? 'sin tipo';
             if ($blockType !== 'review') {
                 $this->setError("Este bloque es de tipo '$blockType', no 'review'. Necesitas un bloque de reseñas.");
                 return;
             }
-            
+
             // Crear nueva reseña
             $newReview = [
                 'name' => '',
@@ -1014,24 +1065,23 @@ class ContentEditor extends Component
                 'rating' => 5,
                 'photo' => '',
             ];
-            
+
             // Inicializar array de reseñas si no existe
             if (!isset($this->blocks[$blockIndex]['reviews'])) {
                 $this->blocks[$blockIndex]['reviews'] = [];
             }
-            
+
             // Verificar límite: solo una reseña por ahora
             if (count($this->blocks[$blockIndex]['reviews']) >= 5) {
                 $this->setError("Ya existe una reseña en este bloque. Solo se permite una reseña por bloque por ahora.");
                 return;
             }
-            
+
             // Agregar la nueva reseña
             $this->blocks[$blockIndex]['reviews'][] = $newReview;
             $this->blocks[$blockIndex]['currentReview'] = 0;
-            
+
             $this->setSuccess("Reseña agregada correctamente en bloque $blockIndex");
-            
         } catch (\Exception $e) {
             $this->setError('Error al agregar reseña: ' . $e->getMessage());
         }
@@ -1063,10 +1113,10 @@ class ContentEditor extends Component
                 if (!empty($review['photo'])) {
                     $this->deleteImageFromStorage($review['photo']);
                 }
-                
+
                 // Eliminar reseña del array
                 array_splice($this->blocks[$blockIndex]['reviews'], $reviewIndex, 1);
-                
+
                 // Ajustar currentReview si es necesario
                 $reviewCount = count($this->blocks[$blockIndex]['reviews']);
                 if ($this->blocks[$blockIndex]['currentReview'] >= $reviewCount && $reviewCount > 0) {
@@ -1074,7 +1124,7 @@ class ContentEditor extends Component
                 } elseif ($reviewCount === 0) {
                     $this->blocks[$blockIndex]['currentReview'] = 0;
                 }
-                
+
                 session()->flash('debug', 'Reseña eliminada');
             }
         } catch (\Exception $e) {
