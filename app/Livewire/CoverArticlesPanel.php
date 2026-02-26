@@ -71,12 +71,14 @@ class CoverArticlesPanel extends Component
     }
 
     /**
-     * Get articles for the current user.
+     * Get articles for the current user. solo los que sean status published y visibility public, lo mismo para el getAllArticles.
      */
     public function getMyArticles()
     {
         $query = Article::with('user')
             ->where('user_id', Auth::id())
+            ->where('status', 'published')
+            ->where('visibility', 'public')
             ->orderBy('updated_at', 'desc')
             ->limit(50);
 
@@ -87,7 +89,11 @@ class CoverArticlesPanel extends Component
     public function getAllArticles()
     {
         $user = Auth::user();
-        $query = Article::with('user')->orderBy('updated_at', 'desc')->limit(50);
+        $query = Article::with('user')
+            ->where('status', 'published')
+            ->where('visibility', 'public')
+            ->orderBy('updated_at', 'desc')
+            ->limit(50);
 
         if (! in_array($user->rol, ['editor_chief', 'moderator', 'administrator'], true)) {
             $query->where('user_id', $user->id);
