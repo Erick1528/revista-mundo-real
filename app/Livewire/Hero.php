@@ -17,6 +17,14 @@ class Hero extends Component
     public $showEditUserView = false;
     public $showUserTrashView = false;
     public $showCreateUserView = false;
+    public $showCreateAdvertiserView = false;
+    public $showEditAdvertiserView = false;
+    public $showCreateAdView = false;
+    public $showEditAdView = false;
+    public $showAdView = false;
+    public $showAdTrashView = false;
+    public $showArticleTrashView = false;
+    public $showAdvertiserTrashView = false;
 
     public function mount()
     {
@@ -29,6 +37,24 @@ class Hero extends Component
         $this->showUserTrashView = request()->is('usuarios/eliminados');
         $this->showEditUserView = request()->is('usuarios/*/editar');
         $this->showViewUserView = request()->is('usuarios/*') && !request()->is('usuarios') && !request()->is('usuarios/crear') && !request()->is('usuarios/eliminados') && !request()->is('usuarios/*/editar');
+        $this->showCreateAdvertiserView = request()->is('anunciantes/crear');
+        $this->showEditAdvertiserView = request()->is('anunciantes/*/editar');
+        $this->showCreateAdView = request()->is('anuncios/crear');
+        $this->showEditAdView = request()->is('anuncios/*/editar');
+        $this->showAdView = request()->routeIs('ads.show');
+        $this->showAdTrashView = request()->is('anuncios/eliminados');
+        $this->showArticleTrashView = request()->is('dashboard/papelera');
+        $this->showAdvertiserTrashView = request()->is('anunciantes/eliminados');
+    }
+
+    public function cancelArticleTrash()
+    {
+        return redirect()->route('dashboard');
+    }
+
+    public function cancelAdvertiserTrash()
+    {
+        return redirect()->route('advertisers.index');
     }
 
     public function cancelCreateArticle()
@@ -74,6 +100,31 @@ class Hero extends Component
     public function cancelCreateUser()
     {
         return redirect()->route('users.index');
+    }
+
+    public function cancelCreateAdvertiser()
+    {
+        return redirect()->route('advertisers.index');
+    }
+
+    public function cancelEditAdvertiser()
+    {
+        return redirect()->route('advertisers.index');
+    }
+
+    public function cancelCreateAd()
+    {
+        $this->dispatch('cancelCreateAd', ['redirectUrl' => route('ads.index')]);
+    }
+
+    public function cancelEditAd()
+    {
+        $this->dispatch('cancelEditAd', ['redirectUrl' => route('ads.index')]);
+    }
+
+    public function cancelAdTrash()
+    {
+        return redirect()->route('ads.index');
     }
 
     public function render()

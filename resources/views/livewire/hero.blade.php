@@ -122,6 +122,18 @@
             </button>
             <h1 class=" text-4xl sm:text-5xl font-serif text-left text-primary text-balance font-normal">Crear Usuario</h1>
             <p class=" text-[12px] sm:text-sm font-montserrat text-left mt-3 text-gray-light uppercase">Añade un nuevo usuario al sistema</p>
+        @elseif ($showArticleTrashView)
+            <a href="{{ route('dashboard') }}"
+                class="inline-flex items-center gap-2 text-primary hover:text-dark-sage transition-colors mb-8">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                <p class=" text-sm font-montserrat">Volver al Dashboard</p>
+            </a>
+            <h1 class=" text-4xl sm:text-5xl font-serif text-left text-primary text-balance font-normal">Papelera de artículos</h1>
+            <p class=" text-[12px] sm:text-sm font-montserrat text-left mt-3 text-gray-light uppercase">Restaura artículos movidos a la papelera o elimínalos permanentemente</p>
         @elseif ($showUserTrashView)
             <button wire:click="cancelUserTrash"
                 class="inline-flex items-center gap-2 text-primary hover:text-dark-sage transition-colors mb-8">
@@ -132,8 +144,92 @@
                 </svg>
                 <p class=" text-sm font-montserrat">Volver al listado</p>
             </button>
-            <h1 class=" text-4xl sm:text-5xl font-serif text-left text-primary text-balance font-normal">Usuarios eliminados</h1>
+            <h1 class=" text-4xl sm:text-5xl font-serif text-left text-primary text-balance font-normal">Papelera de usuarios</h1>
             <p class=" text-[12px] sm:text-sm font-montserrat text-left mt-3 text-gray-light uppercase">Restaura usuarios dados de baja</p>
+        @elseif ($showCreateAdvertiserView)
+            <a href="{{ route('advertisers.index') }}"
+                class="inline-flex items-center gap-2 text-primary hover:text-dark-sage transition-colors mb-8">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                <p class=" text-sm font-montserrat">Volver al listado</p>
+            </a>
+            <h1 class=" text-4xl sm:text-5xl font-serif text-left text-primary text-balance font-normal">Crear Anunciante</h1>
+            <p class=" text-[12px] sm:text-sm font-montserrat text-left mt-3 text-gray-light uppercase">Añade una empresa o anunciante para usarlo en artículos y anuncios</p>
+        @elseif ($showEditAdvertiserView)
+            <a href="{{ route('advertisers.index') }}"
+                class="inline-flex items-center gap-2 text-primary hover:text-dark-sage transition-colors mb-8">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                <p class=" text-sm font-montserrat">Volver al listado</p>
+            </a>
+            <h1 class=" text-4xl sm:text-5xl font-serif text-left text-primary text-balance font-normal">Editar Anunciante</h1>
+            <p class=" text-[12px] sm:text-sm font-montserrat text-left mt-3 text-gray-light uppercase">Modifica el nombre y el logo del anunciante</p>
+        @elseif ($showAdvertiserTrashView)
+            <a href="{{ route('advertisers.index') }}"
+                class="inline-flex items-center gap-2 text-primary hover:text-dark-sage transition-colors mb-8">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                <p class=" text-sm font-montserrat">Volver al listado</p>
+            </a>
+            <h1 class=" text-4xl sm:text-5xl font-serif text-left text-primary text-balance font-normal">Papelera de anunciantes</h1>
+            <p class=" text-[12px] sm:text-sm font-montserrat text-left mt-3 text-gray-light uppercase">Restaura anunciantes eliminados para que vuelvan al listado</p>
+        @elseif ($showCreateAdView)
+            <button type="button" wire:click="cancelCreateAd"
+                class="inline-flex items-center gap-2 text-primary hover:text-dark-sage transition-colors mb-8">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                <p class=" text-sm font-montserrat">Volver al listado</p>
+            </button>
+            <h1 class=" text-4xl sm:text-5xl font-serif text-left text-primary text-balance font-normal">Crear Anuncio</h1>
+            <p class=" text-[12px] sm:text-sm font-montserrat text-left mt-3 text-gray-light uppercase">Completa el contenido del anuncio reutilizable</p>
+        @elseif ($showEditAdView)
+            <button type="button" wire:click="cancelEditAd"
+                class="inline-flex items-center gap-2 text-primary hover:text-dark-sage transition-colors mb-8">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                <p class=" text-sm font-montserrat">Volver al listado</p>
+            </button>
+            <h1 class=" text-4xl sm:text-5xl font-serif text-left text-primary text-balance font-normal">Editar Anuncio</h1>
+            <p class=" text-[12px] sm:text-sm font-montserrat text-left mt-3 text-gray-light uppercase">Modifica el contenido del anuncio</p>
+        @elseif ($showAdView)
+            <a href="{{ route('ads.index') }}"
+                class="inline-flex items-center gap-2 text-primary hover:text-dark-sage transition-colors mb-8">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                <p class=" text-sm font-montserrat">Volver al listado</p>
+            </a>
+            <h1 class=" text-4xl sm:text-5xl font-serif text-left text-primary text-balance font-normal">Vista previa del anuncio</h1>
+            <p class=" text-[12px] sm:text-sm font-montserrat text-left mt-3 text-gray-light uppercase">Así se verá el anuncio · Cambia el estado si tienes permiso</p>
+        @elseif ($showAdTrashView)
+            <a href="{{ route('ads.index') }}"
+                class="inline-flex items-center gap-2 text-primary hover:text-dark-sage transition-colors mb-8">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                <p class=" text-sm font-montserrat">Volver al listado</p>
+            </a>
+            <h1 class=" text-4xl sm:text-5xl font-serif text-left text-primary text-balance font-normal">Papelera de anuncios</h1>
+            <p class=" text-[12px] sm:text-sm font-montserrat text-left mt-3 text-gray-light uppercase">Restaura anuncios movidos a la papelera</p>
         @else
             <h1
                 class=" text-6xl sm:text-7xl font-serif text-center text-primary px-6 sm:px-10 lg:px-4 text-balance font-normal">
@@ -147,12 +243,16 @@
 </div>
 
 <script>
+(function() {
+    'use strict';
     let historyPushed = false;
     let isInCreateArticleView = @js($showCreateArticleView);
     let isInEditArticleView = @js($showEditArticleView);
     let isInCreateTopicView = @js($showCreateTopicView);
     let isInEditTopicView = @js($showEditTopicView);
     let isInViewTopicView = @js($showViewTopicView);
+    let isInCreateAdView = @js($showCreateAdView);
+    let isInEditAdView = @js($showEditAdView);
 
     // Detectar cuando el usuario presiona el botón atrás del navegador o gestos en móvil
     document.addEventListener('DOMContentLoaded', function() {
@@ -184,15 +284,24 @@
             }, '', window.location.href);
             historyPushed = true;
         }
+        if (isInCreateAdView && !historyPushed) {
+            history.pushState({
+                createAd: true
+            }, '', window.location.href);
+            historyPushed = true;
+        }
+        if (isInEditAdView && !historyPushed) {
+            history.pushState({
+                editAd: true
+            }, '', window.location.href);
+            historyPushed = true;
+        }
     });
 
     // Detectar navegación hacia atrás
     window.addEventListener('popstate', function(event) {
-        console.log('Popstate triggered, isInCreateArticleView:', isInCreateArticleView, 'isInEditArticleView:', isInEditArticleView, 'isInCreateTopicView:', isInCreateTopicView, 'isInEditTopicView:', isInEditTopicView);
-
         // Si estamos en la vista de crear artículo
         if (isInCreateArticleView) {
-            console.log('Calling cancelCreateArticle');
             event.preventDefault();
             @this.call('cancelCreateArticle');
             return false;
@@ -200,7 +309,6 @@
 
         // Si estamos en la vista de editar artículo
         if (isInEditArticleView) {
-            console.log('Calling cancelEditArticle');
             event.preventDefault();
             @this.call('cancelEditArticle');
             return false;
@@ -208,7 +316,6 @@
 
         // Si estamos en la vista de crear tema
         if (isInCreateTopicView) {
-            console.log('Calling cancelCreateTopic');
             event.preventDefault();
             @this.call('cancelCreateTopic');
             return false;
@@ -216,9 +323,22 @@
 
         // Si estamos en la vista de editar tema
         if (isInEditTopicView) {
-            console.log('Calling cancelEditTopic');
             event.preventDefault();
             @this.call('cancelEditTopic');
+            return false;
+        }
+
+        // Si estamos en la vista de crear anuncio
+        if (isInCreateAdView) {
+            event.preventDefault();
+            @this.call('cancelCreateAd');
+            return false;
+        }
+
+        // Si estamos en la vista de editar anuncio
+        if (isInEditAdView) {
+            event.preventDefault();
+            @this.call('cancelEditAd');
             return false;
         }
     });
@@ -229,6 +349,8 @@
         const newEditArticleState = @js($showEditArticleView);
         const newCreateTopicState = @js($showCreateTopicView);
         const newEditTopicState = @js($showEditTopicView);
+        const newCreateAdState = @js($showCreateAdView);
+        const newEditAdState = @js($showEditAdView);
 
         if (newCreateArticleState && !historyPushed) {
             history.pushState({
@@ -254,15 +376,27 @@
             }, '', window.location.href);
             historyPushed = true;
             isInEditTopicView = true;
-        } else if (!newCreateArticleState && !newEditArticleState && !newCreateTopicState && !newEditTopicState) {
+        } else if (newCreateAdState && !historyPushed) {
+            history.pushState({
+                createAd: true
+            }, '', window.location.href);
+            historyPushed = true;
+            isInCreateAdView = true;
+        } else if (newEditAdState && !historyPushed) {
+            history.pushState({
+                editAd: true
+            }, '', window.location.href);
+            historyPushed = true;
+            isInEditAdView = true;
+        } else if (!newCreateArticleState && !newEditArticleState && !newCreateTopicState && !newEditTopicState && !newCreateAdState && !newEditAdState) {
             historyPushed = false;
             isInCreateArticleView = false;
             isInEditArticleView = false;
             isInCreateTopicView = false;
             isInEditTopicView = false;
+            isInCreateAdView = false;
+            isInEditAdView = false;
         }
-
-        console.log('Livewire updated, new create article state:', newCreateArticleState, 'new edit article state:', newEditArticleState, 'new create topic state:', newCreateTopicState, 'new edit topic state:', newEditTopicState);
     });
 
     // Escuchar cambios específicos de Livewire para el componente Hero
@@ -273,8 +407,10 @@
                 isInEditArticleView = component.data.showEditArticleView || false;
                 isInCreateTopicView = component.data.showCreateTopicView || false;
                 isInEditTopicView = component.data.showEditTopicView || false;
-                console.log('Hero component updated, createArticleView:', isInCreateArticleView, 'editArticleView:', isInEditArticleView, 'createTopicView:', isInCreateTopicView, 'editTopicView:', isInEditTopicView);
+                isInCreateAdView = component.data.showCreateAdView || false;
+                isInEditAdView = component.data.showEditAdView || false;
             }
         });
     });
+})();
 </script>
