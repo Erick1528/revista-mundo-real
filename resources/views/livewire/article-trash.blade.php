@@ -1,8 +1,4 @@
 <div class="px-4 sm:px-10 lg:px-[120px] py-12 max-w-[1200px] mx-auto w-full">
-    <div class="mb-6">
-        <h2 class="font-serif text-3xl text-primary">Papelera</h2>
-    </div>
-
     @if (session('message'))
         <div class="w-full p-4 bg-green-50 border border-green-200 text-green-800 mb-6">
             <div class="flex items-center justify-between">

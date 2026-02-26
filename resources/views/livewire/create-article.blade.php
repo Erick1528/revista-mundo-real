@@ -85,6 +85,11 @@
             </button>
             <div id="section-image"
                 class="accordion-content px-6 py-6 space-y-6 border-t border-gray-lighter @if (!$openSections['image']) hidden @endif">
+                @if ($errors->has('image'))
+                    <div class="p-4 bg-red-50 border border-red-200 text-red-800 font-opensans text-sm">
+                        {{ $errors->first('image') }}
+                    </div>
+                @endif
                 <div class="space-y-2 grid grid-cols-1 gap-3">
                     @if ($image)
                         <div class="relative w-full h-auto flex items-center justify-center">
@@ -326,6 +331,81 @@
                         <p class="text-red-500 text-xs font-opensans">{{ $message }}</p>
                     @enderror
                 </div>
+
+                <div class="space-y-2">
+                    <label class="block text-sm font-montserrat font-medium text-primary mb-2">
+                        Tipo de contenido
+                    </label>
+                    <div class="flex border border-gray-300 bg-gray-50 overflow-hidden">
+                        <button type="button"
+                            wire:click="setIsAnnouncement(false)"
+                            class="flex-1 px-4 py-3 font-opensans text-sm font-medium transition-colors {{ !$is_announcement ? 'bg-primary text-white' : 'text-primary hover:bg-gray-100' }}">
+                            Artículo
+                        </button>
+                        <button type="button"
+                            wire:click="setIsAnnouncement(true)"
+                            class="flex-1 px-4 py-3 font-opensans text-sm font-medium transition-colors {{ $is_announcement ? 'bg-primary text-white' : 'text-primary hover:bg-gray-100' }}">
+                            Anuncio
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-500">Elige «Anuncio» si es contenido patrocinado o un reportaje pagado.</p>
+                </div>
+                @if ($is_announcement)
+                    @php
+                        $selectedAdvertiser = $advertiser_id ? $this->advertisers->firstWhere('id', (int) $advertiser_id) : null;
+                    @endphp
+                    <div class="space-y-2" x-data="{ open: false }">
+                        <label class="block text-sm font-montserrat font-medium text-primary">
+                            Anunciante (Opcional)
+                        </label>
+                        <div class="relative">
+                            <button type="button"
+                                @click="open = !open"
+                                class="w-full px-4 py-3 border @error('advertiser_id') border-red-500 @else border-gray-300 @enderror bg-gray-50 focus:outline-none focus:border-dark-sage focus:shadow-[0_0_0_2px_rgba(183,182,153,0.5)] font-opensans text-sm text-left flex items-center gap-3 justify-between">
+                                @if ($selectedAdvertiser)
+                                    <span class="flex items-center gap-3 min-w-0">
+                                        @if ($selectedAdvertiser->logo_path)
+                                            <img src="{{ $selectedAdvertiser->logo_url }}" alt="" class="h-6 w-auto object-contain shrink-0">
+                                        @endif
+                                        <span class="truncate">{{ $selectedAdvertiser->name }}</span>
+                                    </span>
+                                @else
+                                    <span class="text-gray-500">Sin anunciante</span>
+                                @endif
+                                <svg class="w-4 h-4 text-gray-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                            <div x-show="open"
+                                x-transition
+                                @click.away="open = false"
+                                class="absolute z-10 w-full mt-1 bg-white border border-gray-200 shadow-lg max-h-64 overflow-y-auto">
+                                <button type="button"
+                                    wire:click="$set('advertiser_id', null)"
+                                    @click="open = false"
+                                    class="w-full px-4 py-3 text-left flex items-center gap-3 hover:bg-gray-50 border-b border-gray-100 font-opensans text-sm text-gray-500">
+                                    Sin anunciante
+                                </button>
+                                @foreach ($this->advertisers as $adv)
+                                    <button type="button"
+                                        wire:click="$set('advertiser_id', {{ $adv->id }})"
+                                        @click="open = false"
+                                        class="w-full px-4 py-3 text-left flex items-center gap-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 font-opensans text-sm">
+                                        @if ($adv->logo_path)
+                                            <img src="{{ $adv->logo_url }}" alt="" class="h-8 w-auto object-contain shrink-0">
+                                        @else
+                                            <span class="w-8 h-8 shrink-0 bg-gray-100 flex items-center justify-center text-gray-400 text-xs">—</span>
+                                        @endif
+                                        <span class="truncate">{{ $adv->name }}</span>
+                                    </button>
+                                @endforeach
+                            </div>
+                        </div>
+                        @error('advertiser_id')
+                            <p class="text-red-500 text-xs font-opensans">{{ $message }}</p>
+                        @enderror
+                    </div>
+                @endif
 
                 <div class="space-y-2">
                     <label for="tags" class="block text-sm font-montserrat font-medium text-primary">
