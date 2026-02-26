@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Article;
+use App\Models\CoverArticle;
 use App\Notifications\ArticleNotificationService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -25,6 +26,8 @@ class Dashboard extends Component
     public bool $showDeleteModal = false;
     public ?int $selectedArticleId = null;
     public string $selectedArticleTitle = '';
+    /** Se establece al abrir el modal; no se limpia al cerrar para evitar parpadeo del contenido. */
+    public bool $deleteModalBlockedByCover = false;
 
     public function updatingSearch()
     {
@@ -112,6 +115,7 @@ class Dashboard extends Component
         }
         $this->selectedArticleId = $articleId;
         $this->selectedArticleTitle = $article->title;
+        $this->deleteModalBlockedByCover = $this->isArticleInActiveCover($article);
         $this->showDeleteModal = true;
     }
 
@@ -143,10 +147,34 @@ class Dashboard extends Component
 
             return;
         }
+        if ($this->isArticleInActiveCover($article)) {
+            session()->flash('error', 'No se puede mover a la papelera: el artículo está en la portada activa.');
+            $this->closeDeleteModal();
+
+            return;
+        }
         ArticleNotificationService::notifyAuthorArticleDeleted($article);
         $article->delete();
         session()->flash('message', 'Artículo movido a la papelera. Puedes restaurarlo desde Papelera.');
         $this->closeDeleteModal();
+    }
+
+    /**
+     * Comprueba si el artículo está en alguna sección de la portada activa.
+     */
+    public function isArticleInActiveCover(Article $article): bool
+    {
+        $cover = CoverArticle::getActive();
+        if (! $cover) {
+            return false;
+        }
+        $ids = array_merge(
+            $cover->main_articles ?? [],
+            $cover->mid_articles ?? [],
+            $cover->latest_articles ?? []
+        );
+
+        return in_array((int) $article->id, array_map('intval', $ids), true);
     }
 
     public function canDeleteArticle(Article $article): bool
@@ -154,6 +182,19 @@ class Dashboard extends Component
         $user = Auth::user();
 
         return $article->user_id === $user->id || in_array($user->rol, ['editor_chief', 'moderator', 'administrator']);
+    }
+
+    /**
+     * True si el artículo actualmente seleccionado en el modal está en la portada activa.
+     */
+    public function getSelectedArticleInActiveCoverProperty(): bool
+    {
+        if (! $this->selectedArticleId) {
+            return false;
+        }
+        $article = Article::find($this->selectedArticleId);
+
+        return $article ? $this->isArticleInActiveCover($article) : false;
     }
 
     public function render()
