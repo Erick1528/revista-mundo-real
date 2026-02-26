@@ -1,4 +1,8 @@
-<div class="content-view space-y-6">
+<div class="content-view space-y-6 {{ $isAd ? 'content-view--ad border border-gray-lighter bg-[rgba(183,182,153,0.12)] py-6 px-4 sm:px-6 transition-colors duration-200 hover:border-dark-sage/50 hover:bg-[rgba(183,182,153,0.18)] cursor-pointer' : '' }}"
+    @if($isAd && $adUrl) wire:click="clickAd('{{ $adUrl }}')" @endif>
+    @if($isAd)
+        <span class="inline-block px-2 py-1 text-xs font-semibold uppercase font-montserrat tracking-wider bg-gray-lighter text-gray-light mb-4 -mt-2">Publicidad</span>
+    @endif
 
     <style>
         .content-view p {
@@ -324,7 +328,7 @@
                     @elseif($layout === 'text-right')
                         @if (!empty($captionFormatted))
                             <!-- Imagen izquierda, texto derecha -->
-                            <div class="mb-6 flex flex-col md:flex-row gap-4 md:items-stretch">
+                            <div class="flex flex-col md:flex-row gap-4 md:items-stretch">
                                 <div class="@if ($size === 'small') md:flex-[0_0_25%] @elseif($size === 'medium') md:flex-[0_0_35%] @else md:flex-[0_0_45%] @endif flex flex-col space-y-1 md:space-y-2 min-w-0">
                                     <div class="flex-1 flex items-center justify-center md:h-auto">
                                         <img src="{{ asset($imageUrl) }}"
@@ -343,7 +347,7 @@
                             </div>
                         @else
                             <!-- Sin caption: mostrar como full -->
-                            <div class="mb-6 text-center space-y-1 md:space-y-2">
+                            <div class="text-center space-y-1 md:space-y-2">
                                 <img src="{{ asset($imageUrl) }}" alt="{{ $block['alt_text'] ?? '' }}"
                                     class="@if ($size === 'small') max-w-xs @elseif($size === 'medium') max-w-md @else max-w-full @endif mx-auto h-auto max-h-96 object-contain">
                                 @if (!empty($creditsFormatted))
@@ -356,7 +360,7 @@
                     @elseif($layout === 'text-left')
                         @if (!empty($captionFormatted))
                             <!-- Texto izquierda, imagen derecha -->
-                            <div class="mb-6 flex flex-col md:flex-row gap-4 md:items-stretch">
+                            <div class="flex flex-col md:flex-row gap-4 md:items-stretch">
                                 <div class="flex-1 min-w-0 text-primary/90 leading-relaxed font-montserrat text-base lg:text-[18px] prose -mb-6">
                                     {!! $captionFormatted !!}
                                 </div>
@@ -375,7 +379,7 @@
                             </div>
                         @else
                             <!-- Sin caption: mostrar como full -->
-                            <div class="mb-6 text-center space-y-1 md:space-y-2">
+                            <div class=" text-center space-y-1 md:space-y-2">
                                 <img src="{{ asset($imageUrl) }}" alt="{{ $block['alt_text'] ?? '' }}"
                                     class="@if ($size === 'small') max-w-xs @elseif($size === 'medium') max-w-md @else max-w-full @endif mx-auto h-auto max-h-96 object-contain">
                                 @if (!empty($creditsFormatted))
@@ -408,6 +412,15 @@
                 @endif
             @break
 
+            @case('ad')
+                @php
+                    $adBlock = \App\Models\Ad::find($block['ad_id'] ?? 0);
+                @endphp
+                @if ($adBlock && $adBlock->status === 'published')
+                    <livewire:content-view :is-ad="true" :ad-id="$adBlock->id" />
+                @endif
+            @break
+
             @default
         @endswitch
 
@@ -436,5 +449,13 @@
                 applyExternalLinks();
             }
             document.addEventListener('livewire:navigated', applyExternalLinks);
+
+            document.addEventListener('livewire:init', function() {
+                Livewire.on('open-ad-new-tab', function(event) {
+                    if (event.url) {
+                        window.open(event.url, '_blank', 'noopener');
+                    }
+                });
+            });
         })();
     </script>

@@ -2,6 +2,8 @@
 
 namespace App\Livewire;
 
+use App\Models\Ad;
+use App\Models\Advertiser;
 use App\Models\Article;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -45,6 +47,8 @@ class UpdateArticle extends Component
 
     // Classification
     public $section;
+    public $is_announcement = false;
+    public $advertiser_id = null;
     public $tags = [];
     public $tagInput = ''; // Campo temporal para escribir nuevos tags
     public $related_articles = [];
@@ -104,6 +108,8 @@ class UpdateArticle extends Component
         'image_caption' => 'nullable|string',
         'content' => 'required|array|min:1',
         'section' => 'required|in:destinations,inspiring_stories,social_events,health_wellness,gastronomy,living_culture',
+        'is_announcement' => 'boolean',
+        'advertiser_id' => 'nullable|exists:advertisers,id',
         'tags' => 'required|array|min:5|max:10',
         'tags.*' => 'string|max:50',
         'related_articles' => 'nullable|array|max:5',
@@ -231,6 +237,8 @@ class UpdateArticle extends Component
         $this->dispatch('setContentBlocks', $article->content);
 
         $this->section = $article->section;
+        $this->is_announcement = (bool) $article->is_announcement;
+        $this->advertiser_id = $article->advertiser_id;
         $this->tags = $article->tags;
         $this->related_articles = $article->related_articles;
         $this->visibility = $article->visibility;
@@ -293,6 +301,11 @@ class UpdateArticle extends Component
             unset($this->tags[$index]);
             $this->tags = array_values($this->tags); // Reindexar el array
         }
+    }
+
+    public function setIsAnnouncement($value): void
+    {
+        $this->is_announcement = (bool) $value;
     }
 
     public function addRelatedArticle($articleId, $articleTitle, $articleSection = null, $articleAttribution = null, $articleSummary = null)
@@ -550,6 +563,15 @@ class UpdateArticle extends Component
                     }
                     break;
 
+                case 'ad':
+                    $adId = $block['ad_id'] ?? null;
+                    if (empty($adId)) {
+                        $errors[] = "Bloque #$blockNumber (Anuncio): Debe seleccionar un anuncio";
+                    } elseif (! Ad::where('id', $adId)->where('status', 'published')->exists()) {
+                        $errors[] = "Bloque #$blockNumber (Anuncio): El anuncio seleccionado no es válido o no está publicado";
+                    }
+                    break;
+
                 case 'separator':
                     // Los separadores no necesitan validación de contenido
                     break;
@@ -623,6 +645,8 @@ class UpdateArticle extends Component
                 'summary' => $this->summary,
                 'content' => $this->content,
                 'section' => $this->section,
+                'is_announcement' => (bool) $this->is_announcement,
+                'advertiser_id' => $this->is_announcement ? $this->advertiser_id : null,
                 'tags' => $this->tags,
                 'related_articles' => array_column($this->related_articles, 'id'),
                 'visibility' => $this->visibility,
@@ -648,22 +672,19 @@ class UpdateArticle extends Component
             // Procesar imagen si existe y es nueva
             if ($this->image && is_object($this->image)) {
                 try {
-                    // Eliminar imagen anterior si existe
+                    $imagePath = $this->processImageUpload($this->image);
+                    // Eliminar imagen anterior solo después de subir correctamente la nueva
                     if ($this->article->image_path) {
-                        // La ruta en la BD ya tiene /storage/, solo necesitamos quitar /storage/ para obtener la ruta relativa
                         $relativePath = ltrim($this->article->image_path, '/storage/');
                         $oldImagePath = storage_path('app/public/' . $relativePath);
-                        
                         if (file_exists($oldImagePath)) {
                             unlink($oldImagePath);
                         }
                     }
-                    
-                    $imagePath = $this->processImageUpload($this->image);
                     $articleData['image_path'] = $imagePath;
                 } catch (\Exception $e) {
-                    session()->flash('error', 'Error al procesar la imagen: ' . $e->getMessage());
                     $this->openSections['image'] = true;
+                    $this->addError('image', $e->getMessage());
                     return;
                 }
             }
@@ -698,7 +719,7 @@ class UpdateArticle extends Component
             'basic' => ['title', 'subtitle', 'attribution', 'summary'],
             'image' => ['image'],
             'content' => ['content'],
-            'classification' => ['section', 'tags', 'tags.*', 'tagInput', 'related_articles', 'related_articles.*', 'relatedArticleSearch'],
+            'classification' => ['section', 'tags', 'tags.*', 'tagInput', 'related_articles', 'related_articles.*', 'relatedArticleSearch', 'is_announcement', 'advertiser_id'],
             'publication' => ['visibility', 'published_at'],
             'seo' => ['meta_description', 'reading_time'],
             'metrics' => [],
@@ -753,10 +774,8 @@ class UpdateArticle extends Component
 
     private function optimizeImage($sourcePath, $destinationPath, $originalExtension)
     {
-        // Obtener dimensiones originales
-        $imageInfo = getimagesize($sourcePath);
-        $width = $imageInfo[0];
-        $height = $imageInfo[1];
+        // Obtener dimensiones originales (valida megapíxeles para no agotar memoria con GD)
+        [$width, $height] = get_validated_image_dimensions($sourcePath);
 
         // Calcular nuevas dimensiones (máximo 1200px de ancho)
         $maxWidth = 1200;
@@ -851,6 +870,17 @@ class UpdateArticle extends Component
 
             imagedestroy($image);
         }
+    }
+
+    public function getAdvertisersProperty()
+    {
+        return Advertiser::query()->orderBy('name')->get();
+    }
+
+    public function getCanManageAdvertisersProperty(): bool
+    {
+        $user = Auth::user();
+        return $user && in_array($user->rol, ['editor_chief', 'administrator', 'moderator'], true);
     }
 
     public function render()

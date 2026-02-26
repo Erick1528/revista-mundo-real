@@ -2,6 +2,8 @@
 
 namespace App\Livewire;
 
+use App\Models\Ad;
+use App\Models\Advertiser;
 use App\Models\Article;
 use App\Notifications\ArticleNotificationService;
 use Illuminate\Support\Facades\Auth;
@@ -40,6 +42,8 @@ class CreateArticle extends Component
 
     // Classification
     public $section;
+    public $is_announcement = false;
+    public $advertiser_id = null;
     public $tags = [];
     public $tagInput = ''; // Campo temporal para escribir nuevos tags
     public $related_articles = [];
@@ -117,6 +121,8 @@ class CreateArticle extends Component
         'content' => 'required|array|min:1',
 
         'section' => 'required|in:destinations,inspiring_stories,social_events,health_wellness,gastronomy,living_culture',
+        'is_announcement' => 'boolean',
+        'advertiser_id' => 'nullable|exists:advertisers,id',
 
         'tags' => 'required|array|min:5|max:10',
         'tags.*' => 'string|max:50',
@@ -254,6 +260,11 @@ class CreateArticle extends Component
             unset($this->tags[$index]);
             $this->tags = array_values($this->tags); // Reindexar el array
         }
+    }
+
+    public function setIsAnnouncement($value): void
+    {
+        $this->is_announcement = (bool) $value;
     }
 
     public function addRelatedArticle($articleId, $articleTitle, $articleSection = null, $articleAttribution = null, $articleSummary = null)
@@ -484,6 +495,15 @@ class CreateArticle extends Component
                     }
                     break;
 
+                case 'ad':
+                    $adId = $block['ad_id'] ?? null;
+                    if (empty($adId)) {
+                        $errors[] = "Bloque #$blockNumber (Anuncio): Debe seleccionar un anuncio";
+                    } elseif (! Ad::where('id', $adId)->where('status', 'published')->exists()) {
+                        $errors[] = "Bloque #$blockNumber (Anuncio): El anuncio seleccionado no es válido o no está publicado";
+                    }
+                    break;
+
                 case 'separator':
                     // Los separadores no necesitan validación de contenido
                     break;
@@ -537,6 +557,8 @@ class CreateArticle extends Component
                 'summary' => $this->summary,
                 'content' => $this->content,
                 'section' => $this->section,
+                'is_announcement' => (bool) $this->is_announcement,
+                'advertiser_id' => $this->is_announcement ? $this->advertiser_id : null,
                 'tags' => $this->tags,
                 'related_articles' => array_column($this->related_articles, 'id'),
                 'visibility' => $this->visibility,
@@ -556,11 +578,9 @@ class CreateArticle extends Component
                     $imagePath = $this->processImageUpload($this->image);
                     $articleData['image_path'] = '/storage/' . $imagePath;
                 } catch (\Exception $e) {
-                    // Mostrar error específico para debugging
-                    session()->flash('error', 'Error al procesar la imagen: ' . $e->getMessage());
-                    // También abrir la sección de imagen para mostrar el error
                     $this->openSections['image'] = true;
-                    return; // No continuar si hay error en la imagen
+                    $this->addError('image', $e->getMessage());
+                    return;
                 }
             }
 
@@ -590,7 +610,7 @@ class CreateArticle extends Component
             'basic' => ['title', 'subtitle', 'attribution', 'summary'],
             'image' => ['image'],
             'content' => ['content'],
-            'classification' => ['section', 'tags', 'tags.*', 'tagInput', 'related_articles', 'related_articles.*', 'relatedArticleSearch'],
+            'classification' => ['section', 'tags', 'tags.*', 'tagInput', 'related_articles', 'related_articles.*', 'relatedArticleSearch', 'is_announcement', 'advertiser_id'],
             'publication' => ['visibility', 'published_at'],
             'seo' => ['meta_description', 'reading_time'],
             'metrics' => [],
@@ -668,6 +688,8 @@ class CreateArticle extends Component
 
         // Resetear clasificación
         $this->section = '';
+        $this->is_announcement = false;
+        $this->advertiser_id = null;
         $this->tags = [];
         $this->tagInput = '';
         $this->related_articles = [];
@@ -749,14 +771,8 @@ class CreateArticle extends Component
 
     private function optimizeImage($sourcePath, $destinationPath, $originalExtension)
     {
-        // Obtener dimensiones originales
-        $imageInfo = getimagesize($sourcePath);
-
-        if ($imageInfo === false) {
-            throw new \Exception('No se puede leer la información de la imagen');
-        }
-
-        list($width, $height) = $imageInfo;
+        // Obtener dimensiones originales (valida megapíxeles para no agotar memoria con GD)
+        [$width, $height] = get_validated_image_dimensions($sourcePath);
 
         // Calcular nuevas dimensiones (máximo 1920px de ancho para imagen principal)
         $maxWidth = 1920;
@@ -853,6 +869,17 @@ class CreateArticle extends Component
 
             imagedestroy($image);
         }
+    }
+
+    public function getAdvertisersProperty()
+    {
+        return Advertiser::query()->orderBy('name')->get();
+    }
+
+    public function getCanManageAdvertisersProperty(): bool
+    {
+        $user = Auth::user();
+        return $user && in_array($user->rol, ['editor_chief', 'administrator', 'moderator'], true);
     }
 
     public function render()
