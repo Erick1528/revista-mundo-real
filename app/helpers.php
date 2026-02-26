@@ -55,6 +55,31 @@ if (!function_exists('fixStrongSpacing')) {
     }
 }
 
+if (!function_exists('get_validated_image_dimensions')) {
+    /**
+     * Lee las dimensiones de una imagen sin cargarla en memoria y valida que no supere
+     * el límite de megapíxeles (evita agotar memoria al procesar con GD).
+     *
+     * @param string $sourcePath Ruta absoluta al archivo de imagen
+     * @param int $maxPixels Máximo de píxeles (ancho × alto). Por defecto 12 Mpx (4000×3000 aprox.)
+     * @return array{0: int, 1: int} [width, height]
+     * @throws \Exception Si no se puede leer la imagen o supera el límite
+     */
+    function get_validated_image_dimensions(string $sourcePath, int $maxPixels = 12000000): array
+    {
+        $imageInfo = @getimagesize($sourcePath);
+        if ($imageInfo === false) {
+            throw new \Exception('No se puede leer la información de la imagen.');
+        }
+        $width = (int) $imageInfo[0];
+        $height = (int) $imageInfo[1];
+        if ($width * $height > $maxPixels) {
+            throw new \Exception('La imagen tiene demasiados megapíxeles. Redúcela (máx. recomendado 4000×3000) o usa un tamaño menor.');
+        }
+        return [$width, $height];
+    }
+}
+
 if (!function_exists('generateUniqueSlug')) {
     /**
      * Genera un slug único basado en título y subtítulo
@@ -100,6 +125,37 @@ if (!function_exists('generateUniqueSlug')) {
             $counter++;
         }
 
+        return $slug;
+    }
+}
+
+if (!function_exists('generateUniqueSlugForAd')) {
+    /**
+     * Genera un slug único para un anuncio (tabla ads).
+     *
+     * @param string $name Nombre del anuncio
+     * @param int|null $excludeAdId ID del anuncio a excluir (útil para update)
+     * @return string
+     */
+    function generateUniqueSlugForAd(string $name, ?int $excludeAdId = null): string
+    {
+        $baseSlug = \Illuminate\Support\Str::slug(trim($name));
+        if ($baseSlug === '') {
+            $baseSlug = 'anuncio';
+        }
+        $slug = $baseSlug;
+        $counter = 1;
+        while (true) {
+            $query = \App\Models\Ad::where('slug', $slug);
+            if ($excludeAdId !== null) {
+                $query->where('id', '!=', $excludeAdId);
+            }
+            if (!$query->exists()) {
+                break;
+            }
+            $slug = $baseSlug . '-' . $counter;
+            $counter++;
+        }
         return $slug;
     }
 }
