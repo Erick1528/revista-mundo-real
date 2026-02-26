@@ -24,6 +24,8 @@ class Article extends Model
         'status',
         'published_at',
         'section',
+        'is_announcement',
+        'advertiser_id',
         'tags',
         'related_articles',
         'content',
@@ -40,12 +42,18 @@ class Article extends Model
         'published_at' => 'datetime',
         'view_count' => 'integer',
         'reading_time' => 'integer',
+        'is_announcement' => 'boolean',
     ];
 
     // Relaciones
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function advertiser()
+    {
+        return $this->belongsTo(Advertiser::class);
     }
 
     // Helper methods
