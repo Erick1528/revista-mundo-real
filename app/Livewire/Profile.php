@@ -194,14 +194,20 @@ class Profile extends Component
 
             // Procesar avatar si existe y es nuevo
             if ($this->avatar && is_object($this->avatar)) {
-                // Eliminar avatar anterior si existe
-                if ($user->avatar && Storage::disk('public')->exists(str_replace('/storage/', '', $user->avatar))) {
-                    Storage::disk('public')->delete(str_replace('/storage/', '', $user->avatar));
+                try {
+                    $avatarPath = $this->processAvatarUpload($this->avatar);
+                    // Eliminar avatar anterior solo después de subir correctamente la nueva
+                    if ($user->avatar && Storage::disk('public')->exists(str_replace('/storage/', '', $user->avatar))) {
+                        Storage::disk('public')->delete(str_replace('/storage/', '', $user->avatar));
+                    }
+                    $updateData['avatar'] = $avatarPath;
+                    $this->currentAvatar = $avatarPath;
+                } catch (\Exception $e) {
+                    $this->openSections['avatar'] = true;
+                    $this->addError('avatar', $e->getMessage());
+                    $this->avatar = null;
+                    return;
                 }
-
-                $avatarPath = $this->processAvatarUpload($this->avatar);
-                $updateData['avatar'] = $avatarPath;
-                $this->currentAvatar = $avatarPath;
             }
 
             // Actualizar contraseña si se proporcionó una nueva
@@ -231,6 +237,8 @@ class Profile extends Component
             // Salir del modo edición después de guardar
             $this->editingMode = false;
             $this->loadArticles();
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
         } catch (\Exception $e) {
             session()->flash('error', 'Error al actualizar el perfil: ' . $e->getMessage());
         }
@@ -273,10 +281,8 @@ class Profile extends Component
 
     private function optimizeImage($sourcePath, $destinationPath, $originalExtension)
     {
-        // Obtener dimensiones originales
-        $imageInfo = getimagesize($sourcePath);
-        $width = $imageInfo[0];
-        $height = $imageInfo[1];
+        // Validar dimensiones antes de cargar en memoria (evita agotar memoria con GD)
+        [$width, $height] = get_validated_image_dimensions($sourcePath);
 
         // Calcular nuevas dimensiones (máximo 400x400px para avatar)
         $maxWidth = 400;

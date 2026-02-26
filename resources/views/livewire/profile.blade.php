@@ -328,6 +328,11 @@
 
                 <div id="section-avatar"
                     class="accordion-content px-6 py-6 space-y-6 border-t border-gray-lighter @if (!$openSections['avatar']) hidden @endif">
+                    @if ($errors->has('avatar'))
+                        <div class="p-4 bg-red-50 border border-red-200 text-red-800 font-opensans text-sm">
+                            {{ $errors->first('avatar') }}
+                        </div>
+                    @endif
 
                     <div class="space-y-4">
                         <!-- Avatar actual o vista previa de nueva imagen -->
@@ -381,7 +386,7 @@
                                 Nueva Foto de Perfil
                             </label>
                             <input type="file" id="avatar" wire:model="avatar" accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
-                                class="w-full px-4 py-3 border @error('avatar') border-red-500 @else border-gray-300 @enderror bg-gray-50 focus:outline-none focus:border-dark-sage focus:shadow-[0_0_0_2px_rgba(183,182,153,0.5)] font-opensans text-sm">
+                                class="w-full px-4 py-3 border @error('avatar') border-red-500 @else border-gray-300 @enderror bg-gray-50 focus:outline-none focus:border-dark-sage focus:shadow-[0_0_0_2px_rgba(183,182,153,0.5)] font-opensans text-sm file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-medium file:bg-primary file:text-white hover:file:bg-dark-sage">
 
                             @error('avatar')
                                 <p class="text-red-500 text-xs font-opensans">{{ $message }}</p>
