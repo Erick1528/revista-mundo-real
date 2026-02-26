@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\AdController;
+use App\Http\Controllers\AdvertiserController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LoginController;
@@ -68,13 +70,44 @@ Route::get('usuarios/{user}', [UserController::class, 'show'])
     ->name('users.show')
     ->middleware('auth');
 
-// Content Creation and Management
-    Route::get('articles/create', [ArticleController::class, 'create'])->name('articles.create')->middleware('auth');
-    Route::get('articles/{article:slug}/edit', [ArticleController::class, 'edit'])->name('articles.edit')->middleware('auth');
+// Anunciantes (solo editor_chief y administrator)
+Route::get('anunciantes', [AdvertiserController::class, 'index'])
+    ->name('advertisers.index')
+    ->middleware('auth');
+Route::get('anunciantes/crear', [AdvertiserController::class, 'create'])
+    ->name('advertisers.create')
+    ->middleware('auth');
+Route::get('anunciantes/eliminados', [AdvertiserController::class, 'trash'])
+    ->name('advertisers.trash')
+    ->middleware('auth');
+Route::get('anunciantes/{advertiser}/editar', [AdvertiserController::class, 'edit'])
+    ->name('advertisers.edit')
+    ->middleware('auth');
 
-    // Profile Management
-    Route::get('profile', [ProfileController::class, 'index'])->name('profile')->middleware('auth');
-    Route::post('logout', [LoginController::class, 'logout'])->name('logout')->middleware('auth');
+// Anuncios (bloques reutilizables; editor_chief, administrator, moderator)
+Route::get('anuncios', [AdController::class, 'index'])
+    ->name('ads.index')
+    ->middleware('auth');
+Route::get('anuncios/crear', [AdController::class, 'create'])
+    ->name('ads.create')
+    ->middleware('auth');
+Route::get('anuncios/eliminados', [AdController::class, 'trash'])
+    ->name('ads.trash')
+    ->middleware('auth');
+Route::get('anuncios/{ad:slug}', [AdController::class, 'show'])
+    ->name('ads.show')
+    ->middleware('auth');
+Route::get('anuncios/{ad:slug}/editar', [AdController::class, 'edit'])
+    ->name('ads.edit')
+    ->middleware('auth');
+
+// Content Creation and Management
+Route::get('articles/create', [ArticleController::class, 'create'])->name('articles.create')->middleware('auth');
+Route::get('articles/{article:slug}/edit', [ArticleController::class, 'edit'])->name('articles.edit')->middleware('auth');
+
+// Profile Management
+Route::get('profile', [ProfileController::class, 'index'])->name('profile')->middleware('auth');
+Route::post('logout', [LoginController::class, 'logout'])->name('logout')->middleware('auth');
 
 // Article View
 Route::get('article/{article:slug}', [ArticleController::class, 'show'])->name('article.show'); // Agregar comprobación de permisos antes de mostrar, si no es status published no se debe de mostrar.
@@ -91,6 +124,4 @@ Route::get('article/{article:slug}', [ArticleController::class, 'show'])->name('
 
 // Hacer funcion de contador de vistas y guardando la url que se visita y un id unico generado de la ip para que no se pueda repetir y se pueda hacer un analisis de las visitas a los articulos o guardar Ip y pedir cookies para estandarizar el contador de vistas.
 
-// Muy Importante:
-// Agregar bloque de anuncio en el editor de contenido
-// Agregar en el select de sección la opción de "Anuncio" y que sea valida en la DB
+// Generar versión jpg de la imagen destacada del articulo que se este creando o editando para poder usarla a la hora de compartir en redes sociales.
