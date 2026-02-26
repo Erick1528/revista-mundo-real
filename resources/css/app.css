@@ -50,6 +50,17 @@
     background: transparent;
 }
 
+/* Scrollbar siempre oculto, scroll funcional (p. ej. dashboard nav) */
+.scrollbar-hide {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+}
+
 /* En móvil/tablet mostrar el scrollbar cuando hay scroll */
 @media (max-width: 1023px) {
     .scrollbar-auto-hide {
