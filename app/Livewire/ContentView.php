@@ -14,15 +14,22 @@ class ContentView extends Component
     public $isAd = false;
     public $adId = null;
     public $adUrl = null;
+    public $adAdvertiserName = null;
+    public $adAdvertiserLogoUrl = null;
 
     public function mount()
     {
         if ($this->isAd && $this->adId) {
             $ad = Ad::find((int) $this->adId);
             if ($ad) {
+                $ad->load('advertiser');
                 $this->content = $ad->content;
                 if ($ad->redirect_url) {
                     $this->adUrl = $ad->redirect_url;
+                }
+                if ($ad->advertiser) {
+                    $this->adAdvertiserName = $ad->advertiser->name;
+                    $this->adAdvertiserLogoUrl = $ad->advertiser->logo_url;
                 }
             }
         }

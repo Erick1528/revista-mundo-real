@@ -1,7 +1,23 @@
 <div class="content-view space-y-6 {{ $isAd ? 'content-view--ad border border-gray-lighter bg-[rgba(183,182,153,0.12)] py-6 px-4 sm:px-6 transition-colors duration-200 hover:border-dark-sage/50 hover:bg-[rgba(183,182,153,0.18)] cursor-pointer' : '' }}"
     @if($isAd && $adUrl) wire:click="clickAd('{{ $adUrl }}')" @endif>
     @if($isAd)
-        <span class="inline-block px-2 py-1 text-xs font-semibold uppercase font-montserrat tracking-wider bg-gray-lighter text-gray-light mb-4 -mt-2">Publicidad</span>
+        <div class="flex items-center gap-2 mb-4 -mt-2">
+            {{-- <span class="inline-block px-2 py-1 text-xs font-semibold uppercase font-montserrat tracking-wider bg-gray-lighter text-gray-light">
+                Publicidad
+            </span> --}}
+            @if($adAdvertiserName)
+                <div class="flex items-center gap-1 text-[10px] sm:text-xs text-gray-500">
+                    <span class="font-opensans italic">patrocinado por</span>
+                    @if($adAdvertiserLogoUrl)
+                        <img src="{{ $adAdvertiserLogoUrl }}" alt="Logo {{ $adAdvertiserName }}" class="h-4 sm:h-5 w-auto">
+                    @else
+                        <span class="font-montserrat font-semibold not-italic text-[10px] sm:text-xs text-gray-500">
+                            {{ $adAdvertiserName }}
+                        </span>
+                    @endif
+                </div>
+            @endif
+        </div>
     @endif
 
     <style>
