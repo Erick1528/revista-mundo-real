@@ -1,45 +1,44 @@
 @extends('layouts.index')
 
-@push('head')
-    @php
-        $shareImagePath = $article->image_jpg_path ?? $article->image_path;
-        $shareImageUrl = $shareImagePath ? url($shareImagePath) : null;
-        $shareDescription = $article->share_description;
-        $canonicalUrl = url()->current();
-    @endphp
-    {{-- Metatags dinámicos para SEO --}}
-    @if($article->meta_description)
-        <meta name="description" content="{{ $article->meta_description }}">
-    @endif
-    @if($article->tags && is_array($article->tags) && count($article->tags) > 0)
-        <meta name="keywords" content="{{ implode(', ', $article->tags) }}">
-    @endif
-    {{-- Open Graph / Facebook --}}
-    <meta property="og:url" content="{{ $canonicalUrl }}">
-    <meta property="og:title" content="{{ $article->title }}">
-    @if($shareDescription)
-        <meta property="og:description" content="{{ $shareDescription }}">
-    @endif
-    <meta property="og:type" content="article">
-    @if($shareImageUrl)
-        <meta property="og:image" content="{{ $shareImageUrl }}">
-        <meta property="og:image:width" content="1200">
-        <meta property="og:image:height" content="630">
-    @endif
-    {{-- Twitter Card --}}
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="{{ $article->title }}">
-    @if($shareDescription)
-        <meta name="twitter:description" content="{{ $shareDescription }}">
-    @endif
-    @if($shareImageUrl)
-        <meta name="twitter:image" content="{{ $shareImageUrl }}">
-    @endif
-    {{-- Canonical URL --}}
-    <link rel="canonical" href="{{ $canonicalUrl }}">
-@endpush
+@php
+    $shareImagePath = $article->image_jpg_path ?? $article->image_path;
+    $shareImageUrl = $shareImagePath ? rtrim(config('app.url'), '/') . '/' . ltrim($shareImagePath, '/') : null;
+    $shareDescription = $article->share_description;
+    $shareTitle = e($article->title);
+    $shareDescriptionEscaped = e($shareDescription);
+@endphp
 
 @section('title', $article->title)
+
+@section('description', $article->meta_description ?: $shareDescription)
+
+@section('keywords', $article->tags && is_array($article->tags) && count($article->tags) > 0 ? implode(', ', $article->tags) : 'revista, mundo real, internacional, Honduras, España, Estados Unidos, cultura, destinos, gastronomía')
+
+@section('og_type', 'article')
+
+@section('og_title', $shareTitle)
+
+@section('og_description', $shareDescriptionEscaped)
+
+@if($shareImageUrl)
+@section('og_image', $shareImageUrl)
+@if(str_starts_with($shareImageUrl, 'https'))
+@section('og_image_secure_url', $shareImageUrl)
+@endif
+@section('og_image_width', '1200')
+@section('og_image_height', '630')
+@section('og_image_type', $article->image_jpg_path ? 'image/jpeg' : 'image/webp')
+@section('og_image_alt', e($article->image_alt_text ?? $article->title))
+@endif
+
+@section('twitter_title', $shareTitle)
+
+@section('twitter_description', $shareDescriptionEscaped)
+
+@if($shareImageUrl)
+@section('twitter_image', $shareImageUrl)
+@section('twitter_image_alt', e($article->image_alt_text ?? $article->title))
+@endif
 
 @section('hero')
     <livewire:hero />

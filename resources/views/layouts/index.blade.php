@@ -25,7 +25,48 @@
 
     <title>Revista Mundo Real - @yield('title')</title>
 
-    @stack('head')
+    {{-- SEO Meta Tags --}}
+    <meta name="description" content="@yield('description', 'Revista Mundo Real - Revista internacional con presencia en Honduras, España y Estados Unidos. Información, cultura y estilo de vida.')">
+    <meta name="keywords" content="@yield('keywords', 'revista, mundo real, internacional, Honduras, España, Estados Unidos, cultura, destinos, gastronomía')">
+    <meta name="author" content="Revista Mundo Real">
+    <meta name="robots" content="index, follow">
+
+    {{-- Open Graph / Facebook --}}
+    <meta property="og:type" content="@yield('og_type', 'website')">
+    <meta property="og:url" content="{{ request()->url() }}">
+    <meta property="og:title" content="@yield('og_title', 'Revista Mundo Real')">
+    <meta property="og:description" content="@yield('og_description', 'Revista internacional con presencia en Honduras, España y Estados Unidos. Información, cultura y estilo de vida.')">
+    <meta property="og:image" content="@yield('og_image', asset('build/assets/logo.svg'))">
+    @hasSection('og_image_width')
+    <meta property="og:image:width" content="@yield('og_image_width')">
+    @endif
+    @hasSection('og_image_height')
+    <meta property="og:image:height" content="@yield('og_image_height')">
+    @endif
+    @hasSection('og_image_type')
+    <meta property="og:image:type" content="@yield('og_image_type')">
+    @endif
+    @hasSection('og_image_alt')
+    <meta property="og:image:alt" content="@yield('og_image_alt')">
+    @endif
+    @hasSection('og_image_secure_url')
+    <meta property="og:image:secure_url" content="@yield('og_image_secure_url')">
+    @endif
+    <meta property="og:site_name" content="Revista Mundo Real">
+    <meta property="og:locale" content="es_ES">
+
+    {{-- Twitter Card --}}
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="{{ request()->url() }}">
+    <meta name="twitter:title" content="@yield('twitter_title', 'Revista Mundo Real')">
+    <meta name="twitter:description" content="@yield('twitter_description', 'Revista internacional con presencia en Honduras, España y Estados Unidos. Información, cultura y estilo de vida.')">
+    <meta name="twitter:image" content="@yield('twitter_image', asset('build/assets/logo.svg'))">
+    @hasSection('twitter_image_alt')
+    <meta name="twitter:image:alt" content="@yield('twitter_image_alt')">
+    @endif
+
+    {{-- Canonical URL (sin query string) --}}
+    <link rel="canonical" href="{{ request()->url() }}">
 
     @livewireStyles
     @vite(['resources/css/app.css', 'resources/js/app.js'])
