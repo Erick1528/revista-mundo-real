@@ -95,6 +95,32 @@ class Article extends Model
     }
 
     /**
+     * Descripción para compartir (og:description, twitter:description).
+     * Usa summary si existe; si no, el texto del primer bloque de tipo paragraph del content.
+     */
+    public function getShareDescriptionAttribute(): string
+    {
+        if (! empty(trim((string) $this->summary))) {
+            return \Illuminate\Support\Str::limit(trim($this->summary), 200);
+        }
+
+        $content = $this->content;
+        if (! is_array($content)) {
+            return '';
+        }
+
+        foreach ($content as $block) {
+            if (($block['type'] ?? '') === 'paragraph' && ! empty($block['content'])) {
+                $text = strip_tags((string) $block['content']);
+
+                return \Illuminate\Support\Str::limit(trim($text), 200);
+            }
+        }
+
+        return '';
+    }
+
+    /**
      * Elimina del disco la imagen principal del artículo (solo si está en storage público).
      * Útil antes de forceDelete() para no dejar archivos huérfanos.
      */

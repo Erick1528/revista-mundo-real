@@ -1,6 +1,12 @@
 @extends('layouts.index')
 
 @push('head')
+    @php
+        $shareImagePath = $article->image_jpg_path ?? $article->image_path;
+        $shareImageUrl = $shareImagePath ? url($shareImagePath) : null;
+        $shareDescription = $article->share_description;
+        $canonicalUrl = url()->current();
+    @endphp
     {{-- Metatags dinámicos para SEO --}}
     @if($article->meta_description)
         <meta name="description" content="{{ $article->meta_description }}">
@@ -9,25 +15,28 @@
         <meta name="keywords" content="{{ implode(', ', $article->tags) }}">
     @endif
     {{-- Open Graph / Facebook --}}
+    <meta property="og:url" content="{{ $canonicalUrl }}">
     <meta property="og:title" content="{{ $article->title }}">
-    @if($article->summary)
-        <meta property="og:description" content="{{ $article->summary }}">
+    @if($shareDescription)
+        <meta property="og:description" content="{{ $shareDescription }}">
     @endif
     <meta property="og:type" content="article">
-    @if($article->image_jpg_path ?? $article->image_path)
-        <meta property="og:image" content="{{ asset($article->image_jpg_path ?? $article->image_path) }}">
+    @if($shareImageUrl)
+        <meta property="og:image" content="{{ $shareImageUrl }}">
+        <meta property="og:image:width" content="1200">
+        <meta property="og:image:height" content="630">
     @endif
     {{-- Twitter Card --}}
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="{{ $article->title }}">
-    @if($article->summary)
-        <meta name="twitter:description" content="{{ $article->summary }}">
+    @if($shareDescription)
+        <meta name="twitter:description" content="{{ $shareDescription }}">
     @endif
-    @if($article->image_jpg_path ?? $article->image_path)
-        <meta name="twitter:image" content="{{ asset($article->image_jpg_path ?? $article->image_path) }}">
+    @if($shareImageUrl)
+        <meta name="twitter:image" content="{{ $shareImageUrl }}">
     @endif
     {{-- Canonical URL --}}
-    <link rel="canonical" href="{{ url()->current() }}">
+    <link rel="canonical" href="{{ $canonicalUrl }}">
 @endpush
 
 @section('title', $article->title)
