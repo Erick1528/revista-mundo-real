@@ -18,19 +18,22 @@ class UserList extends Component
     }
 
     public $search = '';
+
     public $rolFilter = '';
 
     public function mount(): void
     {
         $currentUser = Auth::user();
-        if (!$currentUser || $currentUser->rol !== 'administrator') {
+        if (! $currentUser || $currentUser->rol !== 'administrator') {
             abort(404);
         }
     }
 
     // Modal de confirmación para eliminar
     public $showDeleteModal = false;
+
     public $selectedUserId = null;
+
     public $selectedUserName = '';
 
     public function updatingSearch()
@@ -57,8 +60,8 @@ class UserList extends Component
         // Búsqueda por nombre o email
         if ($this->search) {
             $query->where(function ($q) {
-                $q->where('name', 'like', '%' . $this->search . '%')
-                    ->orWhere('email', 'like', '%' . $this->search . '%');
+                $q->where('name', 'like', '%'.$this->search.'%')
+                    ->orWhere('email', 'like', '%'.$this->search.'%');
             });
         }
 
@@ -73,15 +76,16 @@ class UserList extends Component
     public function openDeleteModal($userId)
     {
         $user = User::find($userId);
-        if (!$user) {
+        if (! $user) {
             return;
         }
 
         $currentUser = Auth::user();
-        
+
         // No permitir eliminar a sí mismo
         if ($user->id === $currentUser->id) {
             session()->flash('error', 'No puedes eliminar tu propia cuenta.');
+
             return;
         }
 
@@ -99,17 +103,19 @@ class UserList extends Component
 
     public function confirmDeleteUser()
     {
-        if (!$this->selectedUserId) {
+        if (! $this->selectedUserId) {
             $this->closeDeleteModal();
+
             return;
         }
 
         $user = User::find($this->selectedUserId);
         $currentUser = Auth::user();
 
-        if (!$user) {
+        if (! $user) {
             session()->flash('error', 'Usuario no encontrado.');
             $this->closeDeleteModal();
+
             return;
         }
 
@@ -117,6 +123,7 @@ class UserList extends Component
         if ($user->id === $currentUser->id) {
             session()->flash('error', 'No puedes eliminar tu propia cuenta.');
             $this->closeDeleteModal();
+
             return;
         }
 
@@ -124,7 +131,7 @@ class UserList extends Component
         UserNotificationService::notifyUserDeleted($user);
         $user->delete();
 
-        session()->flash('message', "Usuario {$userName} eliminado correctamente.");
+        session()->flash('message', "Usuario {$userName} movido a la papelera.");
         $this->closeDeleteModal();
     }
 
@@ -136,7 +143,7 @@ class UserList extends Component
     public function render()
     {
         $hasActiveFilters = $this->search || $this->rolFilter;
-        
+
         $roles = [
             'writer_junior' => 'Escritor Junior',
             'writer_senior' => 'Escritor Senior',

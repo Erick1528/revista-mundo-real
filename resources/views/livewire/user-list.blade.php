@@ -164,7 +164,7 @@
         </div>
     @endif
 
-    {{-- Modal de confirmación para eliminar usuario --}}
+    {{-- Modal de confirmación para mover a papelera --}}
     <div x-show="$wire.showDeleteModal"
         x-transition:enter="transition ease-out duration-200"
         x-transition:enter-start="opacity-0"
@@ -184,12 +184,9 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </div>
-                <h2 class="text-xl sm:text-2xl font-serif text-primary mb-3 sm:mb-4">¿Eliminar este usuario?</h2>
+                <h2 class="text-xl sm:text-2xl font-serif text-primary mb-3 sm:mb-4">¿Mover a la papelera?</h2>
                 <p class="text-xs sm:text-sm font-opensans text-gray-light leading-relaxed mb-3">
-                    El usuario <strong class="font-semibold text-primary">{{ $selectedUserName }}</strong> será eliminado permanentemente.
-                </p>
-                <p class="text-xs sm:text-sm font-opensans text-gray-light leading-relaxed">
-                    Esta acción <strong class="font-semibold text-red-500">no se puede deshacer</strong>.
+                    El usuario <strong class="font-semibold text-primary">{{ $selectedUserName }}</strong> se moverá a la papelera. No se elimina permanentemente; podrás restaurarlo o eliminarlo para siempre desde la papelera.
                 </p>
             </div>
             <div class="flex flex-col sm:flex-row gap-2 sm:gap-3">
@@ -199,7 +196,7 @@
                 </button>
                 <button type="button" wire:click="confirmDeleteUser"
                     class="w-full sm:flex-1 bg-red-500 text-white py-3 px-4 font-montserrat font-medium text-xs sm:text-sm hover:bg-red-600 transition-colors">
-                    Sí, eliminar
+                    Sí, mover a papelera
                 </button>
             </div>
         </div>
