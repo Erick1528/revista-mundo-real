@@ -3,10 +3,17 @@
     <div class="mb-8 space-y-4">
         <div class="flex items-center justify-between">
             <span class="text-sm text-gray-light font-opensans">Filtrar portadas</span>
-            <button type="button" wire:click="clearFilters"
-                class="hidden sm:block text-sm text-gray-light hover:text-primary transition-colors font-opensans">
-                Ver Todos
-            </button>
+            <div class="flex items-center gap-2 sm:gap-3">
+                <button type="button" wire:click="clearFilters"
+                    class="hidden sm:block text-sm text-gray-light hover:text-primary transition-colors font-opensans">
+                    Ver Todos
+                </button>
+                <span class="hidden sm:inline text-gray-light font-opensans">|</span>
+                <a href="{{ route('cover.trash') }}"
+                    class="text-sm text-gray-light hover:text-primary transition-colors font-opensans">
+                    Ver papelera
+                </a>
+            </div>
         </div>
 
         {{-- Buscador --}}
@@ -220,12 +227,9 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </div>
-                <h2 class="text-xl sm:text-2xl font-serif text-primary mb-3 sm:mb-4">¿Eliminar esta portada?</h2>
+                <h2 class="text-xl sm:text-2xl font-serif text-primary mb-3 sm:mb-4">¿Mover a la papelera?</h2>
                 <p class="text-xs sm:text-sm font-opensans text-gray-light leading-relaxed mb-3">
-                    La portada <strong class="font-semibold text-primary">{{ $selectedCoverName }}</strong> se eliminará.
-                </p>
-                <p class="text-xs sm:text-sm font-opensans text-gray-light leading-relaxed">
-                    Esta acción <strong class="font-semibold text-red-500">no se puede deshacer</strong>.
+                    La portada <strong class="font-semibold text-primary">{{ $selectedCoverName }}</strong> se moverá a la papelera. No se elimina permanentemente; podrás restaurarla o eliminarla para siempre desde la papelera.
                 </p>
             </div>
             <div class="flex flex-col sm:flex-row gap-2 sm:gap-3">
@@ -235,7 +239,7 @@
                 </button>
                 <button type="button" wire:click="confirmDeleteCover"
                     class="w-full sm:flex-1 bg-red-500 text-white py-3 px-4 font-montserrat font-medium text-xs sm:text-sm hover:bg-red-600 transition-colors">
-                    Sí, eliminar
+                    Sí, mover a papelera
                 </button>
             </div>
         </div>

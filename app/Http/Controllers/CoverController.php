@@ -35,6 +35,14 @@ class CoverController extends Controller
     }
 
     /**
+     * Display the trash (soft-deleted covers).
+     */
+    public function trash()
+    {
+        return view('cover.trash');
+    }
+
+    /**
      * Show the form for editing an existing cover.
      * Portada activa: cualquiera puede editar (cambios como versión pendiente).
      * Portada no activa: solo el dueño (creador) puede ver y editar.
