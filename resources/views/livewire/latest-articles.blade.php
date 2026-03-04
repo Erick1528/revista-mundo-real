@@ -5,7 +5,21 @@
         {{-- Dynamic content from active cover --}}
         <div class="flex flex-col sm:grid sm:grid-cols-2 sm:grid-rows-2 gap-x-8 gap-y-12">
             @foreach($articles as $article)
-                <a href="{{ route('article.show', $article->slug) }}" class="group cursor-pointer h-fit">
+                <a href="{{ route('article.show', $article->slug) }}" class="group cursor-pointer h-fit block {{ $article->is_announcement ? 'bg-[rgba(183,182,153,0.1)] p-4' : '' }}">
+                    @if($article->is_announcement)
+                        <div class="flex items-center gap-1 text-[10px] sm:text-xs text-gray-500 mb-2">
+                            @if($article->advertiser)
+                                <span class="font-opensans italic">patrocinado por</span>
+                                @if($article->advertiser->logo_path)
+                                    <img src="{{ $article->advertiser->logo_url }}" alt="Logo {{ $article->advertiser->name }}" class="h-4 sm:h-5 w-auto">
+                                @else
+                                    <span class="font-montserrat font-semibold not-italic text-[10px] sm:text-xs text-gray-500">{{ $article->advertiser->name }}</span>
+                                @endif
+                            @else
+                                <span class="font-opensans italic">patrocinado</span>
+                            @endif
+                        </div>
+                    @endif
                     <div class="max-h-80 h-full w-full overflow-hidden mb-4">
                         @if($article->image_path)
                             <img src="{{ asset($article->image_path) }}" alt="{{ $article->image_alt_text ?? $article->title }}"

@@ -119,6 +119,7 @@ class CoverArticle extends Model
         }
 
         $items = Article::query()
+            ->with(['advertiser', 'user'])
             ->whereIn('id', $ids)
             ->get()
             ->keyBy('id');

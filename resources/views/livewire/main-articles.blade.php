@@ -5,7 +5,21 @@
             {{-- Main article --}}
             @if(isset($articles[0]))
                 @php $article = $articles[0]; @endphp
-                <a href="{{ route('article.show', $article->slug) }}" class="group cursor-pointer h-fit">
+                <a href="{{ route('article.show', $article->slug) }}" class="group cursor-pointer h-fit block {{ $article->is_announcement ? 'bg-[rgba(183,182,153,0.1)] p-4 sm:p-5' : '' }}">
+                    @if($article->is_announcement)
+                        <div class="flex items-center gap-1 text-[10px] sm:text-xs text-gray-500 mb-2">
+                            @if($article->advertiser)
+                                <span class="font-opensans italic">patrocinado por</span>
+                                @if($article->advertiser->logo_path)
+                                    <img src="{{ $article->advertiser->logo_url }}" alt="Logo {{ $article->advertiser->name }}" class="h-4 sm:h-5 w-auto">
+                                @else
+                                    <span class="font-montserrat font-semibold not-italic text-[10px] sm:text-xs text-gray-500">{{ $article->advertiser->name }}</span>
+                                @endif
+                            @else
+                                <span class="font-opensans italic">patrocinado</span>
+                            @endif
+                        </div>
+                    @endif
                     <div class="w-full mb-4 overflow-hidden">
                         @if($article->image_path)
                             <img src="{{ asset($article->image_path) }}" alt="{{ $article->image_alt_text ?? $article->title }}"
@@ -29,7 +43,7 @@
                 @for($i = 1; $i < 4; $i++)
                     @if(isset($articles[$i]))
                         @php $article = $articles[$i]; @endphp
-                        <a href="{{ route('article.show', $article->slug) }}" class="flex gap-x-4 group cursor-pointer">
+                        <a href="{{ route('article.show', $article->slug) }}" class="flex gap-x-4 group cursor-pointer {{ $article->is_announcement ? 'bg-[rgba(183,182,153,0.1)] p-3' : '' }}">
                             <div class="w-32 h-32 overflow-hidden shrink-0">
                                 @if($article->image_path)
                                     <img src="{{ asset($article->image_path) }}" alt="{{ $article->image_alt_text ?? $article->title }}"
@@ -41,6 +55,20 @@
                                 @endif
                             </div>
                             <div class="space-y-2">
+                                @if($article->is_announcement)
+                                    <div class="flex items-center gap-1 text-[10px] text-gray-500">
+                                        @if($article->advertiser)
+                                            <span class="font-opensans italic">patrocinado por</span>
+                                            @if($article->advertiser->logo_path)
+                                                <img src="{{ $article->advertiser->logo_url }}" alt="Logo {{ $article->advertiser->name }}" class="h-4 w-auto">
+                                            @else
+                                                <span class="font-montserrat font-semibold not-italic text-[10px] text-gray-500">{{ $article->advertiser->name }}</span>
+                                            @endif
+                                        @else
+                                            <span class="font-opensans italic">patrocinado</span>
+                                        @endif
+                                    </div>
+                                @endif
                                 <p class="text-[10px] sm:text-xs font-semibold uppercase font-montserrat text-gray-light tracking-wider">{{ $article->section_name }}</p>
                                 <h3 class="text-[18px] sm:text-xl font-serif text-primary group-hover:text-dark-sage transition-all duration-200 line-clamp-2">{{ $article->title }}</h3>
                                 <p class="text-gray-light text-[10px] sm:text-xs font-opensans">Por {{ $article->user->name ?? 'Autor' }}</p>
