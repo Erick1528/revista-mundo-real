@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AboutController;
 use App\Http\Controllers\AdController;
 use App\Http\Controllers\AdvertiserController;
 use App\Http\Controllers\ArticleController;
@@ -14,6 +15,8 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('index');
 });
+
+Route::get('sobre-nosotros', [AboutController::class, 'index'])->name('about');
 
 // Dashboard
 Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard')->middleware('auth');

@@ -45,7 +45,7 @@
                 <ul class=" list-none text-sm text-gray-light font-montserrat flex flex-col gap-y-2" style="list-style-type: none;">
 
                     <li>
-                        <a href="#" class="hover:text-primary">Sobre Nosotros</a>
+                        <a href="{{ route('about') }}" class="hover:text-primary">Sobre Nosotros</a>
                     </li>
 
                     <li>
