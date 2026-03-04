@@ -8,34 +8,37 @@ use App\Models\Article;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Log;
 
 class UpdateArticle extends Component
 {
-
     use WithFileUploads;
 
     public $article;
 
     // Basic information
     public $title;
+
     public $subtitle;
+
     public $attribution;
+
     public $summary;
 
     // Media
     public $image;
+
     public $image_credits;
+
     public $image_alt_text;
+
     public $image_caption;
 
     // Content
     public $content = [];
-    
+
     // Flag para controlar el flujo de validación
     public $waitingForContentData = false;
-    
+
     // Errores específicos de validación de contenido
     public $contentErrors = [];
 
@@ -47,21 +50,28 @@ class UpdateArticle extends Component
 
     // Classification
     public $section;
+
     public $is_announcement = false;
+
     public $advertiser_id = null;
+
     public $tags = [];
+
     public $tagInput = ''; // Campo temporal para escribir nuevos tags
+
     public $related_articles = [];
+
     public $relatedArticleSearch = ''; // Campo para buscar artículos relacionados
 
     // Publication & Visibility
     public $visibility;
+
     public $published_at;
 
     // SEO & Metadata
     public $meta_description;
-    public $reading_time;
 
+    public $reading_time;
 
     // Accordion state
     public $openSections = [
@@ -81,9 +91,10 @@ class UpdateArticle extends Component
             $extension = strtolower($this->image->getClientOriginalExtension());
             $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
 
-            if (!in_array($extension, $allowedExtensions)) {
+            if (! in_array($extension, $allowedExtensions)) {
                 $this->image = $this->article->image_path ?? null;
                 $this->addError('image', 'Extensión no soportada. Solo se permiten: JPG, PNG, GIF, WebP');
+
                 return;
             }
         }
@@ -96,7 +107,7 @@ class UpdateArticle extends Component
         'contentDataResponse' => 'receiveContentData',
         'cancelEditArticle' => 'cancel',
     ];
-    
+
     protected $rules = [
         'title' => 'required|string|max:255',
         'subtitle' => 'required|string|max:255',
@@ -189,12 +200,12 @@ class UpdateArticle extends Component
     {
         // Validar que los datos tengan bloques válidos
         $blocks = $data['blocks'] ?? [];
-        
+
         // Si no es un array válido, usar array vacío
-        if (!is_array($blocks)) {
+        if (! is_array($blocks)) {
             $blocks = [];
         }
-        
+
         // Actualizar la propiedad content con los datos recibidos del editor
         // Incluso si está vacío, necesitamos actualizarlo para que la validación funcione
         $this->content = $blocks;
@@ -217,7 +228,7 @@ class UpdateArticle extends Component
         $isAdministrator = $user->rol === 'administrator';
         $isModerator = $user->rol === 'moderator';
 
-        if (!$isOwner && !$isEditorChief && !$isAdministrator && !$isModerator) {
+        if (! $isOwner && ! $isEditorChief && ! $isAdministrator && ! $isModerator) {
             abort(403, 'Acceso denegado.');
         }
 
@@ -231,7 +242,7 @@ class UpdateArticle extends Component
         $this->image_credits = $article->image_credits;
         $this->image_alt_text = $article->image_alt_text;
         $this->image_caption = $article->image_caption;
-        
+
         // Pasar contenido a componente de editor de contenido
         $this->content = $article->content;
         $this->dispatch('setContentBlocks', $article->content);
@@ -249,7 +260,7 @@ class UpdateArticle extends Component
 
     public function toggleSection($section)
     {
-        $this->openSections[$section] = !$this->openSections[$section];
+        $this->openSections[$section] = ! $this->openSections[$section];
     }
 
     public function removeImage()
@@ -272,18 +283,21 @@ class UpdateArticle extends Component
         // Verificar si el tag ya existe
         if (in_array($tag, $this->tags)) {
             $this->addError('tagInput', 'Este tag ya ha sido agregado.');
+
             return;
         }
 
         // Verificar límite máximo de tags
         if (count($this->tags) >= 10) {
             $this->addError('tagInput', 'Máximo 10 tags permitidos.');
+
             return;
         }
 
         // Verificar longitud del tag
         if (strlen($tag) > 50) {
             $this->addError('tagInput', 'El tag no puede tener más de 50 caracteres.');
+
             return;
         }
 
@@ -314,6 +328,7 @@ class UpdateArticle extends Component
         foreach ($this->related_articles as $article) {
             if ($article['id'] == $articleId) {
                 $this->addError('relatedArticleSearch', 'Este artículo ya ha sido agregado.');
+
                 return;
             }
         }
@@ -321,6 +336,7 @@ class UpdateArticle extends Component
         // Verificar límite máximo de artículos relacionados
         if (count($this->related_articles) >= 5) {
             $this->addError('relatedArticleSearch', 'Máximo 5 artículos relacionados permitidos.');
+
             return;
         }
 
@@ -330,7 +346,7 @@ class UpdateArticle extends Component
             'title' => $articleTitle,
             'section' => $articleSection,
             'attribution' => $articleAttribution,
-            'summary' => $articleSummary
+            'summary' => $articleSummary,
         ];
 
         // Limpiar el input y errores
@@ -404,12 +420,12 @@ class UpdateArticle extends Component
         return Article::where('status', 'published')
             ->where('visibility', 'public')
             ->where(function ($query) use ($matchingSections) {
-                $query->where('title', 'like', '%' . $this->relatedArticleSearch . '%')
-                    ->orWhere('subtitle', 'like', '%' . $this->relatedArticleSearch . '%')
-                    ->orWhere('summary', 'like', '%' . $this->relatedArticleSearch . '%');
+                $query->where('title', 'like', '%'.$this->relatedArticleSearch.'%')
+                    ->orWhere('subtitle', 'like', '%'.$this->relatedArticleSearch.'%')
+                    ->orWhere('summary', 'like', '%'.$this->relatedArticleSearch.'%');
 
                 // Si hay secciones que coinciden, también buscar por sección
-                if (!empty($matchingSections)) {
+                if (! empty($matchingSections)) {
                     $query->orWhereIn('section', $matchingSections);
                 }
             })
@@ -423,8 +439,8 @@ class UpdateArticle extends Component
                     'title' => $article->title,
                     'section' => $article->section,
                     'attribution' => $article->attribution,
-                    'summary' => $article->summary ? substr($article->summary, 0, 80) . '...' : null,
-                    'published_at' => $article->published_at ? $article->published_at->format('d M Y') : null
+                    'summary' => $article->summary ? substr($article->summary, 0, 80).'...' : null,
+                    'published_at' => $article->published_at ? $article->published_at->format('d M Y') : null,
                 ];
             })->toArray();
     }
@@ -463,6 +479,7 @@ class UpdateArticle extends Component
         $url = $this->cancelRedirectUrl;
         $this->cancelRedirectUrl = null;
         session()->flash('message', 'Actualización de artículo cancelada');
+
         return $url ? redirect()->to($url) : redirect()->route('dashboard');
     }
 
@@ -480,8 +497,9 @@ class UpdateArticle extends Component
             $blockNumber = $i + 1;
 
             // Verificar que el bloque tenga tipo
-            if (!isset($block['type'])) {
+            if (! isset($block['type'])) {
                 $errors[] = "Bloque #$blockNumber: Tipo de bloque no válido";
+
                 continue;
             }
 
@@ -506,17 +524,17 @@ class UpdateArticle extends Component
                     break;
 
                 case 'list':
-                    if (empty($block['items']) || !is_array($block['items'])) {
+                    if (empty($block['items']) || ! is_array($block['items'])) {
                         $errors[] = "Bloque #$blockNumber (Lista): Debe tener al menos un elemento";
                     } else {
                         $hasContent = false;
                         foreach ($block['items'] as $item) {
-                            if (!empty(trim($item))) {
+                            if (! empty(trim($item))) {
                                 $hasContent = true;
                                 break;
                             }
                         }
-                        if (!$hasContent) {
+                        if (! $hasContent) {
                             $errors[] = "Bloque #$blockNumber (Lista): Debe tener al menos un elemento con contenido";
                         }
                     }
@@ -535,20 +553,20 @@ class UpdateArticle extends Component
                     break;
 
                 case 'gallery':
-                    if (empty($block['images']) || !is_array($block['images']) || count($block['images']) === 0) {
+                    if (empty($block['images']) || ! is_array($block['images']) || count($block['images']) === 0) {
                         $errors[] = "Bloque #$blockNumber (Galería): Debe tener al menos una imagen";
                     } else {
                         // Validar que las URLs de imágenes sean válidas
                         foreach ($block['images'] as $index => $imageUrl) {
                             if (empty(trim($imageUrl))) {
-                                $errors[] = "Bloque #$blockNumber (Galería): Imagen #" . ($index + 1) . " tiene una URL vacía";
+                                $errors[] = "Bloque #$blockNumber (Galería): Imagen #".($index + 1).' tiene una URL vacía';
                             }
                         }
                     }
                     break;
 
                 case 'review':
-                    if (empty($block['reviews']) || !is_array($block['reviews'])) {
+                    if (empty($block['reviews']) || ! is_array($block['reviews'])) {
                         $errors[] = "Bloque #$blockNumber (Reseña): Debe tener al menos una reseña";
                     } else {
                         foreach ($block['reviews'] as $idx => $review) {
@@ -592,42 +610,43 @@ class UpdateArticle extends Component
             $this->contentErrors = [];
 
             // Si hay bloques, limpiar error de validación de Laravel para content
-            if (!empty($this->content)) {
+            if (! empty($this->content)) {
                 $this->resetErrorBag('content');
             }
 
             // Validar bloques de contenido antes de la validación general
             $blockErrors = $this->validateBlocks();
-            if (!empty($blockErrors)) {
+            if (! empty($blockErrors)) {
                 // Guardar errores en la propiedad específica
                 $this->contentErrors = $blockErrors;
                 // Abrir la sección de contenido para mostrar los errores
                 $this->openSections['content'] = true;
                 session()->flash('error', 'Hay errores en el contenido del artículo. Revisa los bloques vacíos.');
+
                 return;
             }
 
             // Si hay bloques, validar sin las reglas de content para evitar mensaje duplicado
-            if (!empty($this->content)) {
+            if (! empty($this->content)) {
                 $rules = $this->rules;
                 unset($rules['content']);
-                
+
                 // Si la imagen no es un objeto (archivo nuevo), excluir la validación de imagen
-                if (!is_object($this->image)) {
+                if (! is_object($this->image)) {
                     unset($rules['image']);
                 }
-                
+
                 $this->validate($rules);
             } else {
                 // Si content está vacío, validar con todas las reglas (incluyendo content)
                 // Esto hará que Laravel automáticamente agregue el error al error bag
                 $rules = $this->rules;
-                
+
                 // Si la imagen no es un objeto (archivo nuevo), excluir la validación de imagen
-                if (!is_object($this->image)) {
+                if (! is_object($this->image)) {
                     unset($rules['image']);
                 }
-                
+
                 // Abrir la sección de contenido para mostrar el error
                 $this->openSections['content'] = true;
                 $this->validate($rules);
@@ -636,7 +655,7 @@ class UpdateArticle extends Component
             // Verificar si el título o subtítulo cambiaron para actualizar el slug
             $titleChanged = $this->article->title !== $this->title;
             $subtitleChanged = $this->article->subtitle !== $this->subtitle;
-            
+
             // Preparar datos del artículo
             $articleData = [
                 'title' => $this->title,
@@ -672,19 +691,24 @@ class UpdateArticle extends Component
             // Procesar imagen si existe y es nueva
             if ($this->image && is_object($this->image)) {
                 try {
-                    $imagePath = $this->processImageUpload($this->image);
-                    // Eliminar imagen anterior solo después de subir correctamente la nueva
-                    if ($this->article->image_path) {
-                        $relativePath = ltrim($this->article->image_path, '/storage/');
-                        $oldImagePath = storage_path('app/public/' . $relativePath);
-                        if (file_exists($oldImagePath)) {
-                            unlink($oldImagePath);
+                    $paths = $this->processImageUpload($this->image);
+                    // Eliminar imagen anterior (WebP y JPG) solo después de subir correctamente la nueva
+                    foreach (['image_path', 'image_jpg_path'] as $pathField) {
+                        $oldPath = $this->article->{$pathField};
+                        if ($oldPath) {
+                            $relativePath = ltrim($oldPath, '/storage/');
+                            $fullPath = storage_path('app/public/'.$relativePath);
+                            if (file_exists($fullPath)) {
+                                unlink($fullPath);
+                            }
                         }
                     }
-                    $articleData['image_path'] = $imagePath;
+                    $articleData['image_path'] = '/storage/'.$paths['webp'];
+                    $articleData['image_jpg_path'] = '/storage/'.$paths['jpg'];
                 } catch (\Exception $e) {
                     $this->openSections['image'] = true;
                     $this->addError('image', $e->getMessage());
+
                     return;
                 }
             }
@@ -737,39 +761,38 @@ class UpdateArticle extends Component
         }
     }
 
-    private function processImageUpload($file)
+    private function processImageUpload($file): array
     {
-        // Generar nombre único para la imagen (siempre WebP)
         $timestamp = now()->format('Ymd_His');
         $randomString = substr(str_shuffle('0123456789abcdefghijklmnopqrstuvwxyz'), 0, 8);
         $originalExtension = strtolower($file->getClientOriginalExtension());
 
-        // Validar extensión de entrada
-        if (!in_array($originalExtension, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
+        if (! in_array($originalExtension, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
             throw new \Exception('Formato de imagen no soportado. Use JPG, PNG, GIF o WebP.');
         }
 
-        // Siempre generar archivo WebP
-        $fileName = "revista_article_{$timestamp}_{$randomString}.webp";
+        $baseName = "revista_article_{$timestamp}_{$randomString}";
+        $fileNameWebp = $baseName.'.webp';
+        $fileNameJpg = $baseName.'.jpg';
 
-        // Crear directorio si no existe
         $uploadPath = storage_path('app/public/images');
-        if (!file_exists($uploadPath)) {
+        if (! file_exists($uploadPath)) {
             mkdir($uploadPath, 0755, true);
         }
 
-        // Ruta temporal del archivo subido
         $tempPath = $file->getRealPath();
-        $finalPath = $uploadPath . '/' . $fileName;
+        $finalPathWebp = $uploadPath.'/'.$fileNameWebp;
 
         try {
-            // Optimizar imagen y convertir siempre a WebP
-            $this->optimizeImage($tempPath, $finalPath, $originalExtension);
+            $this->optimizeImage($tempPath, $finalPathWebp, $originalExtension);
         } catch (\Exception $e) {
             throw $e;
         }
 
-        return '/storage/images/' . $fileName;
+        return [
+            'webp' => 'images/'.$fileNameWebp,
+            'jpg' => 'images/'.$fileNameJpg,
+        ];
     }
 
     private function optimizeImage($sourcePath, $destinationPath, $originalExtension)
@@ -793,7 +816,7 @@ class UpdateArticle extends Component
         // Crear imagen desde el archivo original
         $sourceImage = $this->createImageFromFile($sourcePath, $originalExtension);
 
-        if (!$sourceImage) {
+        if (! $sourceImage) {
             throw new \Exception('No se pudo procesar la imagen');
         }
 
@@ -814,13 +837,26 @@ class UpdateArticle extends Component
         // Guardar siempre como WebP
         imagewebp($resizedImage, $destinationPath, 85); // Calidad 85%
 
-        // Liberar memoria
-        // Nota: imagedestroy() está deprecado desde PHP 8.5 (desde PHP 8.0 los objetos GdImage se liberan automáticamente)
-        // Nueva forma (si necesitas liberar explícitamente): unset($sourceImage, $resizedImage);
+        // Guardar también JPG con el mismo nombre base
+        $jpgPath = preg_replace('/\.webp$/i', '.jpg', $destinationPath);
+        if ($originalExtension === 'png' || $originalExtension === 'gif') {
+            $white = imagecreatetruecolor($newWidth, $newHeight);
+            if ($white !== false) {
+                $bg = imagecolorallocate($white, 255, 255, 255);
+                imagefill($white, 0, 0, $bg);
+                imagecopy($white, $resizedImage, 0, 0, 0, 0, $newWidth, $newHeight);
+                imagejpeg($white, $jpgPath, 90);
+                imagedestroy($white);
+            } else {
+                imagejpeg($resizedImage, $jpgPath, 90);
+            }
+        } else {
+            imagejpeg($resizedImage, $jpgPath, 90);
+        }
+
         imagedestroy($sourceImage);
         imagedestroy($resizedImage);
 
-        // Verificar tamaño del archivo y recomprimir si es necesario
         $this->adjustFileSize($destinationPath);
     }
 
@@ -837,7 +873,7 @@ class UpdateArticle extends Component
             case 'webp':
                 return imagecreatefromwebp($path);
             default:
-                throw new \Exception('Formato de imagen no reconocido: ' . $extension);
+                throw new \Exception('Formato de imagen no reconocido: '.$extension);
         }
     }
 
@@ -864,6 +900,7 @@ class UpdateArticle extends Component
 
                 if ($newSize <= $maxSize && $newSize >= $minSize) {
                     imagedestroy($image);
+
                     return;
                 }
             }
@@ -880,6 +917,7 @@ class UpdateArticle extends Component
     public function getCanManageAdvertisersProperty(): bool
     {
         $user = Auth::user();
+
         return $user && in_array($user->rol, ['editor_chief', 'administrator', 'moderator'], true);
     }
 

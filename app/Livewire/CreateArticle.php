@@ -7,10 +7,9 @@ use App\Models\Advertiser;
 use App\Models\Article;
 use App\Notifications\ArticleNotificationService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Log;
 
 // TODO:
 // Mejorar el editor de contenido para manejar listas, texto enriquecido, titulos y otras cosas en un mismo bloque
@@ -22,19 +21,24 @@ use Illuminate\Support\Facades\Log;
 
 class CreateArticle extends Component
 {
-
     use WithFileUploads;
 
     // Basic information
     public $title;
+
     public $subtitle;
+
     public $attribution;
+
     public $summary;
 
     // Media
     public $image;
+
     public $image_credits;
+
     public $image_alt_text;
+
     public $image_caption;
 
     // Content
@@ -42,19 +46,27 @@ class CreateArticle extends Component
 
     // Classification
     public $section;
+
     public $is_announcement = false;
+
     public $advertiser_id = null;
+
     public $tags = [];
+
     public $tagInput = ''; // Campo temporal para escribir nuevos tags
+
     public $related_articles = [];
+
     public $relatedArticleSearch = ''; // Campo para buscar artículos relacionados
 
     // Publication & Visibility
     public $visibility;
+
     public $published_at;
 
     // SEO & Metadata
     public $meta_description;
+
     public $reading_time;
 
     // Accordion state
@@ -87,9 +99,10 @@ class CreateArticle extends Component
             $extension = strtolower($this->image->getClientOriginalExtension());
             $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
 
-            if (!in_array($extension, $allowedExtensions)) {
+            if (! in_array($extension, $allowedExtensions)) {
                 $this->image = null;
                 $this->addError('image', 'Extensión no soportada. Solo se permiten: JPG, PNG, GIF, WebP');
+
                 return;
             }
         }
@@ -206,7 +219,7 @@ class CreateArticle extends Component
 
     public function toggleSection($section)
     {
-        $this->openSections[$section] = !$this->openSections[$section];
+        $this->openSections[$section] = ! $this->openSections[$section];
     }
 
     public function removeImage()
@@ -231,18 +244,21 @@ class CreateArticle extends Component
         // Verificar si el tag ya existe
         if (in_array($tag, $this->tags)) {
             $this->addError('tagInput', 'Este tag ya ha sido agregado.');
+
             return;
         }
 
         // Verificar límite máximo de tags
         if (count($this->tags) >= 10) {
             $this->addError('tagInput', 'Máximo 10 tags permitidos.');
+
             return;
         }
 
         // Verificar longitud del tag
         if (strlen($tag) > 50) {
             $this->addError('tagInput', 'El tag no puede tener más de 50 caracteres.');
+
             return;
         }
 
@@ -273,6 +289,7 @@ class CreateArticle extends Component
         foreach ($this->related_articles as $article) {
             if ($article['id'] == $articleId) {
                 $this->addError('relatedArticleSearch', 'Este artículo ya ha sido agregado.');
+
                 return;
             }
         }
@@ -280,6 +297,7 @@ class CreateArticle extends Component
         // Verificar límite máximo de artículos relacionados
         if (count($this->related_articles) >= 5) {
             $this->addError('relatedArticleSearch', 'Máximo 5 artículos relacionados permitidos.');
+
             return;
         }
 
@@ -289,7 +307,7 @@ class CreateArticle extends Component
             'title' => $articleTitle,
             'section' => $articleSection,
             'attribution' => $articleAttribution,
-            'summary' => $articleSummary
+            'summary' => $articleSummary,
         ];
 
         // Limpiar el input y errores
@@ -363,12 +381,12 @@ class CreateArticle extends Component
         return Article::where('status', 'published')
             ->where('visibility', 'public')
             ->where(function ($query) use ($matchingSections) {
-                $query->where('title', 'like', '%' . $this->relatedArticleSearch . '%')
-                    ->orWhere('subtitle', 'like', '%' . $this->relatedArticleSearch . '%')
-                    ->orWhere('summary', 'like', '%' . $this->relatedArticleSearch . '%');
+                $query->where('title', 'like', '%'.$this->relatedArticleSearch.'%')
+                    ->orWhere('subtitle', 'like', '%'.$this->relatedArticleSearch.'%')
+                    ->orWhere('summary', 'like', '%'.$this->relatedArticleSearch.'%');
 
                 // Si hay secciones que coinciden, también buscar por sección
-                if (!empty($matchingSections)) {
+                if (! empty($matchingSections)) {
                     $query->orWhereIn('section', $matchingSections);
                 }
             })
@@ -382,8 +400,8 @@ class CreateArticle extends Component
                     'title' => $article->title,
                     'section' => $article->section,
                     'attribution' => $article->attribution,
-                    'summary' => $article->summary ? substr($article->summary, 0, 80) . '...' : null,
-                    'published_at' => $article->published_at ? $article->published_at->format('d M Y') : null
+                    'summary' => $article->summary ? substr($article->summary, 0, 80).'...' : null,
+                    'published_at' => $article->published_at ? $article->published_at->format('d M Y') : null,
                 ];
             })->toArray();
     }
@@ -409,8 +427,9 @@ class CreateArticle extends Component
             $blockNumber = $i + 1;
 
             // Verificar que el bloque tenga tipo
-            if (!isset($block['type'])) {
+            if (! isset($block['type'])) {
                 $errors[] = "Bloque #$blockNumber: Tipo de bloque no válido";
+
                 continue;
             }
 
@@ -435,17 +454,17 @@ class CreateArticle extends Component
                     break;
 
                 case 'list':
-                    if (empty($block['items']) || !is_array($block['items'])) {
+                    if (empty($block['items']) || ! is_array($block['items'])) {
                         $errors[] = "Bloque #$blockNumber (Lista): Debe tener al menos un elemento";
                     } else {
                         $hasContent = false;
                         foreach ($block['items'] as $item) {
-                            if (!empty(trim($item))) {
+                            if (! empty(trim($item))) {
                                 $hasContent = true;
                                 break;
                             }
                         }
-                        if (!$hasContent) {
+                        if (! $hasContent) {
                             $errors[] = "Bloque #$blockNumber (Lista): Debe tener al menos un elemento con contenido";
                         }
                     }
@@ -464,20 +483,20 @@ class CreateArticle extends Component
                     break;
 
                 case 'gallery':
-                    if (empty($block['images']) || !is_array($block['images']) || count($block['images']) === 0) {
+                    if (empty($block['images']) || ! is_array($block['images']) || count($block['images']) === 0) {
                         $errors[] = "Bloque #$blockNumber (Galería): Debe tener al menos una imagen";
                     } else {
                         // Validar que las URLs de imágenes sean válidas
                         foreach ($block['images'] as $index => $imageUrl) {
                             if (empty(trim($imageUrl))) {
-                                $errors[] = "Bloque #$blockNumber (Galería): Imagen #" . ($index + 1) . " tiene una URL vacía";
+                                $errors[] = "Bloque #$blockNumber (Galería): Imagen #".($index + 1).' tiene una URL vacía';
                             }
                         }
                     }
                     break;
 
                 case 'review':
-                    if (empty($block['reviews']) || !is_array($block['reviews'])) {
+                    if (empty($block['reviews']) || ! is_array($block['reviews'])) {
                         $errors[] = "Bloque #$blockNumber (Reseña): Debe tener al menos una reseña";
                     } else {
                         foreach ($block['reviews'] as $idx => $review) {
@@ -524,23 +543,24 @@ class CreateArticle extends Component
             $this->contentErrors = [];
 
             // Si hay bloques, limpiar error de validación de Laravel para content
-            if (!empty($this->content)) {
+            if (! empty($this->content)) {
                 $this->resetErrorBag('content');
             }
 
             // Validar bloques de contenido antes de la validación general
             $blockErrors = $this->validateBlocks();
-            if (!empty($blockErrors)) {
+            if (! empty($blockErrors)) {
                 // Guardar errores en la propiedad específica
                 $this->contentErrors = $blockErrors;
                 // Abrir la sección de contenido para mostrar los errores
                 $this->openSections['content'] = true;
                 session()->flash('error', 'Hay errores en el contenido del artículo. Revisa los bloques vacíos.');
+
                 return;
             }
 
             // Si hay bloques, validar sin las reglas de content para evitar mensaje duplicado
-            if (!empty($this->content)) {
+            if (! empty($this->content)) {
                 $rules = $this->rules;
                 unset($rules['content']);
                 $this->validate($rules);
@@ -575,11 +595,13 @@ class CreateArticle extends Component
             // Procesar imagen si existe
             if ($this->image) {
                 try {
-                    $imagePath = $this->processImageUpload($this->image);
-                    $articleData['image_path'] = '/storage/' . $imagePath;
+                    $paths = $this->processImageUpload($this->image);
+                    $articleData['image_path'] = '/storage/'.$paths['webp'];
+                    $articleData['image_jpg_path'] = '/storage/'.$paths['jpg'];
                 } catch (\Exception $e) {
                     $this->openSections['image'] = true;
                     $this->addError('image', $e->getMessage());
+
                     return;
                 }
             }
@@ -595,6 +617,7 @@ class CreateArticle extends Component
 
             // Redireccionar al dashboard con mensaje de éxito
             session()->flash('message', 'Artículo creado exitosamente.');
+
             return redirect()->route('dashboard');
         } catch (\Illuminate\Validation\ValidationException $e) {
             $this->handleValidationErrors($e);
@@ -664,6 +687,7 @@ class CreateArticle extends Component
         session()->flash('message', 'Creación de artículo cancelada');
         $url = $this->cancelRedirectUrl;
         $this->cancelRedirectUrl = null;
+
         return $url ? redirect()->to($url) : redirect()->route('dashboard');
     }
 
@@ -723,50 +747,52 @@ class CreateArticle extends Component
         $this->resetErrorBag();
     }
 
-    private function processImageUpload($file)
+    private function processImageUpload($file): array
     {
-        // Generar nombre único para la imagen (siempre WebP)
+        // Generar nombre único para la imagen (WebP + JPG con el mismo nombre base)
         $timestamp = now()->format('Ymd_His');
         $randomString = substr(str_shuffle('0123456789abcdefghijklmnopqrstuvwxyz'), 0, 8);
         $originalExtension = strtolower($file->getClientOriginalExtension());
 
-        Log::info("Procesando imagen", [
+        Log::info('Procesando imagen', [
             'extension' => $originalExtension,
             'size' => $file->getSize(),
-            'mime' => $file->getMimeType()
+            'mime' => $file->getMimeType(),
         ]);
 
         // Validar extensión de entrada
-        if (!in_array($originalExtension, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
+        if (! in_array($originalExtension, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
             throw new \Exception('Formato de imagen no soportado. Use JPG, PNG, GIF o WebP.');
         }
 
-        // Siempre generar archivo WebP
-        $fileName = "revista_article_{$timestamp}_{$randomString}.webp";
+        $baseName = "revista_article_{$timestamp}_{$randomString}";
+        $fileNameWebp = $baseName.'.webp';
+        $fileNameJpg = $baseName.'.jpg';
 
         // Crear directorio si no existe
         $uploadPath = storage_path('app/public/images');
-        if (!file_exists($uploadPath)) {
+        if (! file_exists($uploadPath)) {
             mkdir($uploadPath, 0755, true);
         }
 
-        // Ruta temporal del archivo subido
         $tempPath = $file->getRealPath();
-        $finalPath = $uploadPath . '/' . $fileName;
+        $finalPathWebp = $uploadPath.'/'.$fileNameWebp;
 
         try {
-            // Optimizar imagen y convertir siempre a WebP
-            $this->optimizeImage($tempPath, $finalPath, $originalExtension);
-            Log::info("Imagen procesada exitosamente", ['file' => $fileName]);
+            $this->optimizeImage($tempPath, $finalPathWebp, $originalExtension);
+            Log::info('Imagen procesada exitosamente', ['webp' => $fileNameWebp, 'jpg' => $fileNameJpg]);
         } catch (\Exception $e) {
-            Log::error("Error procesando imagen", [
+            Log::error('Error procesando imagen', [
                 'extension' => $originalExtension,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
             throw $e;
         }
 
-        return 'images/' . $fileName;
+        return [
+            'webp' => 'images/'.$fileNameWebp,
+            'jpg' => 'images/'.$fileNameJpg,
+        ];
     }
 
     private function optimizeImage($sourcePath, $destinationPath, $originalExtension)
@@ -791,11 +817,11 @@ class CreateArticle extends Component
         try {
             $sourceImage = $this->createImageFromFile($sourcePath, $originalExtension);
         } catch (\Exception $e) {
-            throw new \Exception('Error al cargar la imagen (' . $originalExtension . '): ' . $e->getMessage());
+            throw new \Exception('Error al cargar la imagen ('.$originalExtension.'): '.$e->getMessage());
         }
 
-        if (!$sourceImage) {
-            throw new \Exception('No se pudo crear la imagen desde el archivo ' . $originalExtension);
+        if (! $sourceImage) {
+            throw new \Exception('No se pudo crear la imagen desde el archivo '.$originalExtension);
         }
 
         // Crear nueva imagen redimensionada
@@ -814,6 +840,23 @@ class CreateArticle extends Component
 
         // Guardar siempre como WebP con alta calidad
         imagewebp($resizedImage, $destinationPath, 95); // Calidad 95% para portada
+
+        // Guardar también JPG con el mismo nombre base (para redes sociales, etc.)
+        $jpgPath = preg_replace('/\.webp$/i', '.jpg', $destinationPath);
+        if ($originalExtension === 'png' || $originalExtension === 'gif') {
+            $white = imagecreatetruecolor($newWidth, $newHeight);
+            if ($white !== false) {
+                $bg = imagecolorallocate($white, 255, 255, 255);
+                imagefill($white, 0, 0, $bg);
+                imagecopy($white, $resizedImage, 0, 0, 0, 0, $newWidth, $newHeight);
+                imagejpeg($white, $jpgPath, 90);
+                imagedestroy($white);
+            } else {
+                imagejpeg($resizedImage, $jpgPath, 90);
+            }
+        } else {
+            imagejpeg($resizedImage, $jpgPath, 90);
+        }
 
         // Liberar memoria
         imagedestroy($sourceImage);
@@ -836,7 +879,7 @@ class CreateArticle extends Component
             case 'webp':
                 return imagecreatefromwebp($path);
             default:
-                throw new \Exception('Formato de imagen no reconocido: ' . $extension);
+                throw new \Exception('Formato de imagen no reconocido: '.$extension);
         }
     }
 
@@ -879,6 +922,7 @@ class CreateArticle extends Component
     public function getCanManageAdvertisersProperty(): bool
     {
         $user = Auth::user();
+
         return $user && in_array($user->rol, ['editor_chief', 'administrator', 'moderator'], true);
     }
 

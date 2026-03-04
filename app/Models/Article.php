@@ -17,6 +17,7 @@ class Article extends Model
         'summary',
         'slug',
         'image_path',
+        'image_jpg_path',
         'image_credits',
         'image_alt_text',
         'image_caption',
@@ -32,7 +33,7 @@ class Article extends Model
         'view_count',
         'reading_time',
         'meta_description',
-        'user_id'
+        'user_id',
     ];
 
     protected $casts = [
@@ -65,7 +66,7 @@ class Article extends Model
             'social_events' => 'Eventos Sociales',
             'health_wellness' => 'Salud y Bienestar',
             'gastronomy' => 'Gastronomía con Identidad',
-            'living_culture' => 'Cultura Viva'
+            'living_culture' => 'Cultura Viva',
         ];
 
         return $sections[$this->section] ?? $this->section;
@@ -77,7 +78,7 @@ class Article extends Model
             'draft' => 'Borrador',
             'review' => 'En Revisión',
             'published' => 'Publicado',
-            'denied' => 'Rechazado'
+            'denied' => 'Rechazado',
         ];
 
         return $statuses[$this->status] ?? $this->status;
@@ -87,7 +88,7 @@ class Article extends Model
     {
         $visibilities = [
             'public' => 'Público',
-            'private' => 'Privado'
+            'private' => 'Privado',
         ];
 
         return $visibilities[$this->visibility] ?? $this->visibility;
@@ -99,10 +100,12 @@ class Article extends Model
      */
     public function deleteMainImageFromStorage(): void
     {
-        if (! $this->image_path) {
-            return;
+        if ($this->image_path) {
+            $this->deleteStorageFileByUrl($this->image_path);
         }
-        $this->deleteStorageFileByUrl($this->image_path);
+        if ($this->image_jpg_path) {
+            $this->deleteStorageFileByUrl($this->image_jpg_path);
+        }
     }
 
     /**
