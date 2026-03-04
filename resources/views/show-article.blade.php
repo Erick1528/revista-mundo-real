@@ -14,8 +14,8 @@
         <meta property="og:description" content="{{ $article->summary }}">
     @endif
     <meta property="og:type" content="article">
-    @if($article->image_path)
-        <meta property="og:image" content="{{ asset($article->image_path) }}">
+    @if($article->image_jpg_path ?? $article->image_path)
+        <meta property="og:image" content="{{ asset($article->image_jpg_path ?? $article->image_path) }}">
     @endif
     {{-- Twitter Card --}}
     <meta name="twitter:card" content="summary_large_image">
@@ -23,8 +23,8 @@
     @if($article->summary)
         <meta name="twitter:description" content="{{ $article->summary }}">
     @endif
-    @if($article->image_path)
-        <meta name="twitter:image" content="{{ asset($article->image_path) }}">
+    @if($article->image_jpg_path ?? $article->image_path)
+        <meta name="twitter:image" content="{{ asset($article->image_jpg_path ?? $article->image_path) }}">
     @endif
     {{-- Canonical URL --}}
     <link rel="canonical" href="{{ url()->current() }}">
