@@ -9,11 +9,13 @@ use Livewire\WithPagination;
 
 class AdvertiserTrash extends Component
 {
-    use WithPagination;
     use OptimizesAdvertiserLogo;
+    use WithPagination;
 
     public bool $showForceDeleteModal = false;
+
     public ?int $selectedAdvertiserId = null;
+
     public string $selectedAdvertiserName = '';
 
     public function paginationView(): string
@@ -24,7 +26,7 @@ class AdvertiserTrash extends Component
     public function mount(): void
     {
         $user = Auth::user();
-        if (!$user || !in_array($user->rol, ['editor_chief', 'administrator', 'moderator'], true)) {
+        if (! $user || ! in_array($user->rol, ['editor_chief', 'administrator', 'moderator'], true)) {
             abort(404);
         }
     }
@@ -32,8 +34,9 @@ class AdvertiserTrash extends Component
     public function restoreAdvertiser(int $id): void
     {
         $advertiser = Advertiser::onlyTrashed()->find($id);
-        if (!$advertiser) {
+        if (! $advertiser) {
             session()->flash('error', 'Anunciante no encontrado.');
+
             return;
         }
         $advertiser->restore();
@@ -43,7 +46,7 @@ class AdvertiserTrash extends Component
     public function openForceDeleteModal(int $id): void
     {
         $advertiser = Advertiser::onlyTrashed()->find($id);
-        if (!$advertiser) {
+        if (! $advertiser) {
             return;
         }
         $this->selectedAdvertiserId = $id;
@@ -60,14 +63,22 @@ class AdvertiserTrash extends Component
 
     public function confirmForceDelete(): void
     {
-        if (!$this->selectedAdvertiserId) {
+        if (! $this->selectedAdvertiserId) {
             $this->closeForceDeleteModal();
+
             return;
         }
         $advertiser = Advertiser::onlyTrashed()->find($this->selectedAdvertiserId);
-        if (!$advertiser) {
+        if (! $advertiser) {
             session()->flash('error', 'Anunciante no encontrado.');
             $this->closeForceDeleteModal();
+
+            return;
+        }
+        if ($advertiser->isInUse()) {
+            session()->flash('error', 'No se puede eliminar permanentemente: el anunciante está en uso en anuncios o artículos patrocinados.');
+            $this->closeForceDeleteModal();
+
             return;
         }
         $this->deleteLogoFromStorage($advertiser->logo_path);

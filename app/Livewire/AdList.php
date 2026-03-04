@@ -12,9 +12,15 @@ class AdList extends Component
     use WithPagination;
 
     public $search = '';
+
     public $showDeleteModal = false;
+
     public $selectedAdId = null;
+
     public $selectedAdName = '';
+
+    /** Si el anuncio está en uso (en algún artículo), no se puede mover a papelera. */
+    public bool $deleteModalBlockedByUse = false;
 
     public function paginationView(): string
     {
@@ -24,7 +30,7 @@ class AdList extends Component
     public function mount(): void
     {
         $user = Auth::user();
-        if (!$user || !in_array($user->rol, ['editor_chief', 'administrator', 'moderator'], true)) {
+        if (! $user || ! in_array($user->rol, ['editor_chief', 'administrator', 'moderator'], true)) {
             abort(404);
         }
     }
@@ -46,42 +52,51 @@ class AdList extends Component
 
         if ($this->search) {
             $query->where(function ($q) {
-                $q->where('name', 'like', '%' . $this->search . '%')
-                    ->orWhere('slug', 'like', '%' . $this->search . '%');
+                $q->where('name', 'like', '%'.$this->search.'%')
+                    ->orWhere('slug', 'like', '%'.$this->search.'%');
             });
         }
 
         return $query->paginate(10);
     }
 
-    public function openDeleteModal($id)
+    public function openDeleteModal($id): void
     {
         $ad = Ad::find($id);
-        if (!$ad) {
+        if (! $ad) {
             return;
         }
-        $this->selectedAdId = $id;
+        $this->selectedAdId = (int) $id;
         $this->selectedAdName = $ad->name;
+        $this->deleteModalBlockedByUse = $ad->isInUse();
         $this->showDeleteModal = true;
     }
 
-    public function closeDeleteModal()
+    public function closeDeleteModal(): void
     {
         $this->showDeleteModal = false;
         $this->selectedAdId = null;
         $this->selectedAdName = '';
     }
 
-    public function confirmDelete()
+    public function confirmDelete(): void
     {
-        if (!$this->selectedAdId) {
+        if (! $this->selectedAdId) {
             $this->closeDeleteModal();
+
             return;
         }
         $ad = Ad::find($this->selectedAdId);
-        if (!$ad) {
+        if (! $ad) {
             session()->flash('error', 'Anuncio no encontrado.');
             $this->closeDeleteModal();
+
+            return;
+        }
+        if ($ad->isInUse()) {
+            session()->flash('error', 'No se puede mover a la papelera: el anuncio está en uso en uno o más artículos.');
+            $this->closeDeleteModal();
+
             return;
         }
         $name = $ad->name;

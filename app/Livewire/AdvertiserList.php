@@ -12,9 +12,15 @@ class AdvertiserList extends Component
     use WithPagination;
 
     public $search = '';
+
     public $showDeleteModal = false;
+
     public $selectedAdvertiserId = null;
+
     public $selectedAdvertiserName = '';
+
+    /** Si el anunciante está en uso (anuncios o artículos patrocinados), no se puede mover a papelera. */
+    public bool $deleteModalBlockedByUse = false;
 
     public function paginationView(): string
     {
@@ -24,7 +30,7 @@ class AdvertiserList extends Component
     public function mount(): void
     {
         $user = Auth::user();
-        if (!$user || !in_array($user->rol, ['editor_chief', 'administrator', 'moderator'], true)) {
+        if (! $user || ! in_array($user->rol, ['editor_chief', 'administrator', 'moderator'], true)) {
             abort(404);
         }
     }
@@ -45,45 +51,54 @@ class AdvertiserList extends Component
         $query = Advertiser::query()->orderBy('name');
 
         if ($this->search) {
-            $query->where('name', 'like', '%' . $this->search . '%');
+            $query->where('name', 'like', '%'.$this->search.'%');
         }
 
         return $query->paginate(10);
     }
 
-    public function openDeleteModal($id)
+    public function openDeleteModal($id): void
     {
         $advertiser = Advertiser::find($id);
-        if (!$advertiser) {
+        if (! $advertiser) {
             return;
         }
-        $this->selectedAdvertiserId = $id;
+        $this->selectedAdvertiserId = (int) $id;
         $this->selectedAdvertiserName = $advertiser->name;
+        $this->deleteModalBlockedByUse = $advertiser->isInUse();
         $this->showDeleteModal = true;
     }
 
-    public function closeDeleteModal()
+    public function closeDeleteModal(): void
     {
         $this->showDeleteModal = false;
         $this->selectedAdvertiserId = null;
         $this->selectedAdvertiserName = '';
     }
 
-    public function confirmDelete()
+    public function confirmDelete(): void
     {
-        if (!$this->selectedAdvertiserId) {
+        if (! $this->selectedAdvertiserId) {
             $this->closeDeleteModal();
+
             return;
         }
         $advertiser = Advertiser::find($this->selectedAdvertiserId);
-        if (!$advertiser) {
+        if (! $advertiser) {
             session()->flash('error', 'Anunciante no encontrado.');
             $this->closeDeleteModal();
+
+            return;
+        }
+        if ($advertiser->isInUse()) {
+            session()->flash('error', 'No se puede mover a la papelera: el anunciante está en uso (anuncios o artículos patrocinados).');
+            $this->closeDeleteModal();
+
             return;
         }
         $name = $advertiser->name;
         $advertiser->delete();
-        session()->flash('message', "Anunciante \"{$name}\" eliminado correctamente.");
+        session()->flash('message', "Anunciante \"{$name}\" movido a la papelera.");
         $this->closeDeleteModal();
     }
 

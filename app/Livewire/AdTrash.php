@@ -12,7 +12,9 @@ class AdTrash extends Component
     use WithPagination;
 
     public bool $showForceDeleteModal = false;
+
     public ?int $selectedAdId = null;
+
     public string $selectedAdName = '';
 
     public function paginationView(): string
@@ -23,7 +25,7 @@ class AdTrash extends Component
     public function mount(): void
     {
         $user = Auth::user();
-        if (!$user || !in_array($user->rol, ['editor_chief', 'administrator', 'moderator'], true)) {
+        if (! $user || ! in_array($user->rol, ['editor_chief', 'administrator', 'moderator'], true)) {
             abort(404);
         }
     }
@@ -31,8 +33,9 @@ class AdTrash extends Component
     public function restoreAd(int $id): void
     {
         $ad = Ad::onlyTrashed()->find($id);
-        if (!$ad) {
+        if (! $ad) {
             session()->flash('error', 'Anuncio no encontrado.');
+
             return;
         }
         $ad->restore();
@@ -42,7 +45,7 @@ class AdTrash extends Component
     public function openForceDeleteModal(int $id): void
     {
         $ad = Ad::onlyTrashed()->find($id);
-        if (!$ad) {
+        if (! $ad) {
             return;
         }
         $this->selectedAdId = $id;
@@ -59,14 +62,22 @@ class AdTrash extends Component
 
     public function confirmForceDelete(): void
     {
-        if (!$this->selectedAdId) {
+        if (! $this->selectedAdId) {
             $this->closeForceDeleteModal();
+
             return;
         }
         $ad = Ad::onlyTrashed()->find($this->selectedAdId);
-        if (!$ad) {
+        if (! $ad) {
             session()->flash('error', 'Anuncio no encontrado.');
             $this->closeForceDeleteModal();
+
+            return;
+        }
+        if ($ad->isInUse()) {
+            session()->flash('error', 'No se puede eliminar permanentemente: el anuncio está en uso en uno o más artículos.');
+            $this->closeForceDeleteModal();
+
             return;
         }
         $ad->forceDelete();

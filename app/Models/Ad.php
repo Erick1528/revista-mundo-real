@@ -50,6 +50,32 @@ class Ad extends Model
             'published' => 'Publicado',
             'denied' => 'Rechazado',
         ];
+
         return $statuses[$this->status] ?? $this->status;
+    }
+
+    /**
+     * True si algún artículo (no eliminado) usa este anuncio en su contenido (bloque tipo "ad").
+     */
+    public function isInUse(): bool
+    {
+        $adId = $this->id;
+
+        return Article::query()
+            ->whereNotNull('content')
+            ->get()
+            ->contains(function (Article $article) use ($adId) {
+                $blocks = $article->content;
+                if (! is_array($blocks)) {
+                    return false;
+                }
+                foreach ($blocks as $block) {
+                    if (($block['type'] ?? '') === 'ad' && (int) ($block['ad_id'] ?? 0) === $adId) {
+                        return true;
+                    }
+                }
+
+                return false;
+            });
     }
 }
