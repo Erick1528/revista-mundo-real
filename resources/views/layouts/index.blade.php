@@ -33,7 +33,7 @@
 
     {{-- Open Graph / Facebook --}}
     <meta property="og:type" content="@yield('og_type', 'website')">
-    <meta property="og:url" content="{{ request()->url() }}">
+    <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:title" content="@yield('og_title', 'Revista Mundo Real')">
     <meta property="og:description" content="@yield('og_description', 'Revista internacional con presencia en Honduras, España y Estados Unidos. Información, cultura y estilo de vida.')">
     <meta property="og:image" content="@yield('og_image', asset('build/assets/logo.svg'))">
@@ -57,7 +57,7 @@
 
     {{-- Twitter Card --}}
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:url" content="{{ request()->url() }}">
+    <meta name="twitter:url" content="{{ url()->current() }}">
     <meta name="twitter:title" content="@yield('twitter_title', 'Revista Mundo Real')">
     <meta name="twitter:description" content="@yield('twitter_description', 'Revista internacional con presencia en Honduras, España y Estados Unidos. Información, cultura y estilo de vida.')">
     <meta name="twitter:image" content="@yield('twitter_image', asset('build/assets/logo.svg'))">
@@ -66,7 +66,7 @@
     @endif
 
     {{-- Canonical URL (sin query string) --}}
-    <link rel="canonical" href="{{ request()->url() }}">
+    <link rel="canonical" href="{{ url()->current() }}">
 
     @livewireStyles
     @vite(['resources/css/app.css', 'resources/js/app.js'])

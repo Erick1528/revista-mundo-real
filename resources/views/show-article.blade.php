@@ -3,7 +3,11 @@
 @php
     $shareImagePath = $article->image_jpg_path ?? $article->image_path;
     $shareImageUrl = $shareImagePath ? rtrim(config('app.url'), '/') . '/' . ltrim($shareImagePath, '/') : null;
-    $shareDescription = $article->share_description;
+    // Los crawlers (Facebook, WhatsApp, X) exigen HTTPS para la imagen
+    if ($shareImageUrl && str_starts_with($shareImageUrl, 'http://') && request()->secure()) {
+        $shareImageUrl = 'https://' . substr($shareImageUrl, 7);
+    }
+    $shareDescription = \Illuminate\Support\Str::limit($article->share_description, 200);
     $shareTitle = e($article->title);
     $shareDescriptionEscaped = e($shareDescription);
 @endphp
