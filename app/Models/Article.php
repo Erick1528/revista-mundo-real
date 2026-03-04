@@ -101,7 +101,9 @@ class Article extends Model
     public function getShareDescriptionAttribute(): string
     {
         if (! empty(trim((string) $this->summary))) {
-            return \Illuminate\Support\Str::limit(trim($this->summary), 200);
+            $text = str_replace(['**', '*'], '', trim((string) $this->summary));
+
+            return \Illuminate\Support\Str::limit(trim($text), 200);
         }
 
         $content = $this->content;
@@ -112,6 +114,7 @@ class Article extends Model
         foreach ($content as $block) {
             if (($block['type'] ?? '') === 'paragraph' && ! empty($block['content'])) {
                 $text = strip_tags((string) $block['content']);
+                $text = str_replace(['**', '*'], '', $text);
 
                 return \Illuminate\Support\Str::limit(trim($text), 200);
             }
