@@ -18,6 +18,11 @@
     RewriteCond %{REQUEST_URI} (.+)/$
     RewriteRule ^ %1 [L,R=301]
 
+    # Imágenes: si el archivo no existe, servir logo para devolver 200 (evitar 404 en Facebook/crawlers)
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_URI} \.(jpg|jpeg|webp|png|gif|svg)(\?.*)?$ [NC]
+    RewriteRule .* /build/assets/logo.svg [L]
+
     # Send Requests To Front Controller...
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
