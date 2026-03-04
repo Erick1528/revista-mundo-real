@@ -45,7 +45,7 @@ class CoverList extends Component
             ->latest('updated_at');
 
         if ($this->search !== '') {
-            $query->where('name', 'like', '%' . $this->search . '%');
+            $query->where('name', 'like', '%'.$this->search.'%');
         }
 
         if ($this->statusFilter !== '') {
@@ -122,7 +122,7 @@ class CoverList extends Component
             return;
         }
         $cover->delete();
-        session()->flash('message', 'Portada eliminada correctamente.');
+        session()->flash('message', 'Portada movida a la papelera.');
         $this->closeDeleteModal();
     }
 
