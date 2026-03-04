@@ -43,10 +43,17 @@
     <div class="mb-8 space-y-4">
         <div class="flex items-center justify-between">
             <span class="text-sm text-gray-light font-opensans">Filtrar temas sugeridos</span>
-            <button type="button" wire:click="clearFilters"
-                class="hidden sm:block text-sm text-gray-light hover:text-primary transition-colors font-opensans">
-                Ver Todos
-            </button>
+            <div class="flex items-center gap-2 sm:gap-3">
+                <button type="button" wire:click="clearFilters"
+                    class="hidden sm:block text-sm text-gray-light hover:text-primary transition-colors font-opensans">
+                    Ver Todos
+                </button>
+                <span class="hidden sm:inline text-gray-light font-opensans">|</span>
+                <a href="{{ route('suggested-topics.trash') }}"
+                    class="text-sm text-gray-light hover:text-primary transition-colors font-opensans">
+                    Ver papelera
+                </a>
+            </div>
         </div>
 
         {{-- Buscador --}}
@@ -269,7 +276,7 @@
         </div>
     </div>
 
-    {{-- Modal de confirmación para eliminar tema --}}
+    {{-- Modal de confirmación para mover a papelera --}}
     <div x-show="$wire.showDeleteModal"
         x-transition:enter="transition ease-out duration-200"
         x-transition:enter-start="opacity-0"
@@ -289,12 +296,9 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </div>
-                <h2 class="text-xl sm:text-2xl font-serif text-primary mb-3 sm:mb-4">¿Eliminar este tema?</h2>
+                <h2 class="text-xl sm:text-2xl font-serif text-primary mb-3 sm:mb-4">¿Mover a la papelera?</h2>
                 <p class="text-xs sm:text-sm font-opensans text-gray-light leading-relaxed mb-3">
-                    El tema <strong class="font-semibold text-primary">{{ $selectedTopicTitle }}</strong> será eliminado permanentemente.
-                </p>
-                <p class="text-xs sm:text-sm font-opensans text-gray-light leading-relaxed">
-                    Esta acción <strong class="font-semibold text-red-500">no se puede deshacer</strong>.
+                    El tema <strong class="font-semibold text-primary">{{ $selectedTopicTitle }}</strong> se moverá a la papelera. No se elimina permanentemente; podrás restaurarlo o eliminarlo para siempre desde la papelera.
                 </p>
             </div>
 
@@ -305,7 +309,7 @@
                 </button>
                 <button type="button" wire:click="confirmDeleteTopic"
                     class="w-full sm:flex-1 bg-red-500 text-white py-3 px-4 font-montserrat font-medium text-xs sm:text-sm hover:bg-red-600 transition-colors">
-                    Sí, eliminar
+                    Sí, mover a papelera
                 </button>
             </div>
         </div>

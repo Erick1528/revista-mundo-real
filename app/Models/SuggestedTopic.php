@@ -3,9 +3,10 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 class SuggestedTopic extends Model
 {
@@ -122,7 +123,7 @@ class SuggestedTopic extends Model
             'social_events' => 'Eventos Sociales',
             'health_wellness' => 'Salud y Bienestar',
             'gastronomy' => 'Gastronomía con Identidad',
-            'living_culture' => 'Cultura Viva'
+            'living_culture' => 'Cultura Viva',
         ];
 
         return $sections[$this->section] ?? $this->section;
@@ -134,8 +135,8 @@ class SuggestedTopic extends Model
 
     /**
      * Tomar un tema disponible.
-     * 
-     * @param User $user Usuario que toma el tema
+     *
+     * @param  User  $user  Usuario que toma el tema
      * @return bool True si se tomó exitosamente, false si no está disponible
      */
     public function takeTopic(User $user): bool
@@ -155,7 +156,7 @@ class SuggestedTopic extends Model
     /**
      * Solicitar un tema tomado por otro usuario (varios usuarios pueden solicitar).
      *
-     * @param User $user Usuario que solicita el tema
+     * @param  User  $user  Usuario que solicita el tema
      * @return bool True si se solicitó exitosamente
      */
     public function requestTopic(User $user): bool
@@ -189,14 +190,14 @@ class SuggestedTopic extends Model
 
     /**
      * Liberar un tema. Si hay solicitudes, se asigna al primero que solicitó.
-     * 
-     * @param User $user Usuario que libera (debe ser el asignado o admin/editor)
+     *
+     * @param  User  $user  Usuario que libera (debe ser el asignado o admin/editor)
      * @return bool True si se liberó exitosamente
      */
     public function releaseTopic(User $user): bool
     {
         // Solo el usuario asignado o admin/editor puede liberar
-        if ($this->assigned_to !== $user->id && !in_array($user->rol, ['editor_chief', 'moderator', 'administrator'])) {
+        if ($this->assigned_to !== $user->id && ! in_array($user->rol, ['editor_chief', 'moderator', 'administrator'])) {
             return false;
         }
 
@@ -204,6 +205,7 @@ class SuggestedTopic extends Model
         $firstRequest = $this->topicRequests()->orderBy('created_at')->first();
         if ($firstRequest) {
             $this->topicRequests()->delete();
+
             return $this->update([
                 'status' => 'taken',
                 'assigned_to' => $firstRequest->user_id,
@@ -240,8 +242,8 @@ class SuggestedTopic extends Model
     /**
      * Rechazar la solicitud de un usuario (el que tiene el tema o admin puede rechazar).
      *
-     * @param User $user Usuario que rechaza (asignado actual o admin/editor)
-     * @param int $userIdToReject ID del usuario cuya solicitud se rechaza
+     * @param  User  $user  Usuario que rechaza (asignado actual o admin/editor)
+     * @param  int  $userIdToReject  ID del usuario cuya solicitud se rechaza
      * @return bool True si se rechazó exitosamente
      */
     public function rejectRequest(User $user, int $userIdToReject): bool
@@ -249,7 +251,7 @@ class SuggestedTopic extends Model
         $canReject = $this->assigned_to === $user->id
             || in_array($user->rol, ['editor_chief', 'moderator', 'administrator']);
 
-        if (!$canReject) {
+        if (! $canReject) {
             return false;
         }
 
@@ -264,8 +266,8 @@ class SuggestedTopic extends Model
     /**
      * Asignar el tema a un solicitante (quien tiene el tema o admin elige a quién darle).
      *
-     * @param User $user Usuario que asigna (asignado actual o admin/editor)
-     * @param int $userIdToAssign ID del usuario al que se le asigna el tema
+     * @param  User  $user  Usuario que asigna (asignado actual o admin/editor)
+     * @param  int  $userIdToAssign  ID del usuario al que se le asigna el tema
      * @return bool True si se asignó exitosamente
      */
     public function assignToRequester(User $user, int $userIdToAssign): bool
@@ -273,15 +275,16 @@ class SuggestedTopic extends Model
         $canAssign = $this->assigned_to === $user->id
             || in_array($user->rol, ['editor_chief', 'moderator', 'administrator']);
 
-        if (!$canAssign) {
+        if (! $canAssign) {
             return false;
         }
 
-        if (!$this->topicRequests()->where('user_id', $userIdToAssign)->exists()) {
+        if (! $this->topicRequests()->where('user_id', $userIdToAssign)->exists()) {
             return false;
         }
 
         $this->topicRequests()->delete();
+
         return $this->update([
             'status' => 'taken',
             'assigned_to' => $userIdToAssign,
@@ -294,14 +297,14 @@ class SuggestedTopic extends Model
 
     /**
      * Marcar tema como completado.
-     * 
-     * @param User $user Usuario que completa (debe ser el asignado o admin/editor)
+     *
+     * @param  User  $user  Usuario que completa (debe ser el asignado o admin/editor)
      * @return bool True si se completó exitosamente
      */
     public function completeTopic(User $user): bool
     {
         // Solo el usuario asignado o admin/editor puede completar
-        if ($this->assigned_to !== $user->id && !in_array($user->rol, ['editor_chief', 'moderator', 'administrator'])) {
+        if ($this->assigned_to !== $user->id && ! in_array($user->rol, ['editor_chief', 'moderator', 'administrator'])) {
             return false;
         }
 
@@ -314,14 +317,14 @@ class SuggestedTopic extends Model
 
     /**
      * Cancelar un tema.
-     * 
-     * @param User $user Usuario que cancela (debe ser admin/editor o creador)
+     *
+     * @param  User  $user  Usuario que cancela (debe ser admin/editor o creador)
      * @return bool True si se canceló exitosamente
      */
     public function cancelTopic(User $user): bool
     {
         // Solo admin/editor o el creador puede cancelar
-        if ($this->created_by !== $user->id && !in_array($user->rol, ['editor_chief', 'moderator', 'administrator'])) {
+        if ($this->created_by !== $user->id && ! in_array($user->rol, ['editor_chief', 'moderator', 'administrator'])) {
             return false;
         }
 
@@ -329,5 +332,67 @@ class SuggestedTopic extends Model
             'status' => 'cancelled',
             'updated_by' => $user->id,
         ]);
+    }
+
+    /**
+     * Elimina del disco todas las imágenes referenciadas en $this->resources.
+     * Los tipos de bloque vienen de App\Livewire\ContentEditor (createBlock): image, gallery, review.
+     * Se usa al eliminar permanentemente desde la papelera (force delete), para no dejar archivos huérfanos.
+     *
+     * Bloques con imágenes en storage:
+     * - image: block['url']
+     * - gallery: block['images'] (cada elemento puede ser string URL o array con 'url')
+     * - review: block['reviews'][]['photo']
+     * Solo se borran URLs que empiezan por /storage/ (nuestro disco público).
+     */
+    public function deleteResourcesImagesFromStorage(): void
+    {
+        $blocks = $this->resources;
+        if (! is_array($blocks)) {
+            return;
+        }
+
+        foreach ($blocks as $block) {
+            $type = $block['type'] ?? null;
+
+            if ($type === 'image' && ! empty($block['url'])) {
+                $this->deleteStorageFileByUrl($block['url']);
+            }
+
+            if ($type === 'gallery' && ! empty($block['images']) && is_array($block['images'])) {
+                foreach ($block['images'] as $item) {
+                    $url = is_string($item) ? $item : ($item['url'] ?? null);
+                    if ($url !== null && $url !== '') {
+                        $this->deleteStorageFileByUrl($url);
+                    }
+                }
+            }
+
+            if ($type === 'review' && ! empty($block['reviews']) && is_array($block['reviews'])) {
+                foreach ($block['reviews'] as $review) {
+                    if (! empty($review['photo'])) {
+                        $this->deleteStorageFileByUrl($review['photo']);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Borra un archivo del disco público si la URL es de nuestro storage (/storage/...).
+     */
+    protected function deleteStorageFileByUrl(string $url): void
+    {
+        if ($url === '' || ! str_starts_with($url, '/storage/')) {
+            return;
+        }
+        $path = str_replace('/storage/', '', $url);
+        if ($path !== '') {
+            try {
+                Storage::disk('public')->delete($path);
+            } catch (\Throwable) {
+                // Ignorar errores (archivo ya borrado, permisos, etc.)
+            }
+        }
     }
 }

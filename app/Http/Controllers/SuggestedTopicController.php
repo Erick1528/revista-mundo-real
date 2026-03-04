@@ -38,6 +38,15 @@ class SuggestedTopicController extends Controller
     {
         // Cargar relaciones necesarias
         $topic->load(['creator', 'assignedUser', 'requester']);
+
         return view('dashboard.suggested-topics.edit', compact('topic'));
+    }
+
+    /**
+     * Display the trash (soft-deleted suggested topics).
+     */
+    public function trash()
+    {
+        return view('dashboard.suggested-topics.trash');
     }
 }

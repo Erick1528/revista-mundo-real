@@ -6,25 +6,45 @@ use Livewire\Component;
 
 class Hero extends Component
 {
-
     public $cancelButton = false;
+
     public $showCreateArticleView = false;
+
     public $showEditArticleView = false;
+
     public $showCreateTopicView = false;
+
     public $showEditTopicView = false;
+
     public $showViewTopicView = false;
+
     public $showViewUserView = false;
+
     public $showEditUserView = false;
+
     public $showUserTrashView = false;
+
     public $showCreateUserView = false;
+
     public $showCreateAdvertiserView = false;
+
     public $showEditAdvertiserView = false;
+
     public $showCreateAdView = false;
+
     public $showEditAdView = false;
+
     public $showAdView = false;
+
     public $showAdTrashView = false;
+
     public $showArticleTrashView = false;
+
     public $showAdvertiserTrashView = false;
+
+    public $showSuggestedTopicTrashView = false;
+
+    public $showCoverTrashView = false;
 
     public function mount()
     {
@@ -32,11 +52,12 @@ class Hero extends Component
         $this->showEditArticleView = request()->is('articles/*/edit');
         $this->showCreateTopicView = request()->is('temas-sugeridos/crear');
         $this->showEditTopicView = request()->is('temas-sugeridos/*/editar');
-        $this->showViewTopicView = request()->is('temas-sugeridos/*') && !request()->is('temas-sugeridos') && !request()->is('temas-sugeridos/crear') && !request()->is('temas-sugeridos/*/editar');
+        $this->showViewTopicView = request()->is('temas-sugeridos/*') && ! request()->is('temas-sugeridos') && ! request()->is('temas-sugeridos/crear') && ! request()->is('temas-sugeridos/eliminados') && ! request()->is('temas-sugeridos/*/editar');
+        $this->showSuggestedTopicTrashView = request()->is('temas-sugeridos/eliminados');
         $this->showCreateUserView = request()->is('usuarios/crear');
         $this->showUserTrashView = request()->is('usuarios/eliminados');
         $this->showEditUserView = request()->is('usuarios/*/editar');
-        $this->showViewUserView = request()->is('usuarios/*') && !request()->is('usuarios') && !request()->is('usuarios/crear') && !request()->is('usuarios/eliminados') && !request()->is('usuarios/*/editar');
+        $this->showViewUserView = request()->is('usuarios/*') && ! request()->is('usuarios') && ! request()->is('usuarios/crear') && ! request()->is('usuarios/eliminados') && ! request()->is('usuarios/*/editar');
         $this->showCreateAdvertiserView = request()->is('anunciantes/crear');
         $this->showEditAdvertiserView = request()->is('anunciantes/*/editar');
         $this->showCreateAdView = request()->is('anuncios/crear');
@@ -45,6 +66,7 @@ class Hero extends Component
         $this->showAdTrashView = request()->is('anuncios/eliminados');
         $this->showArticleTrashView = request()->is('dashboard/papelera');
         $this->showAdvertiserTrashView = request()->is('anunciantes/eliminados');
+        $this->showCoverTrashView = request()->is('portadas/eliminadas');
     }
 
     public function cancelArticleTrash()
@@ -55,6 +77,16 @@ class Hero extends Component
     public function cancelAdvertiserTrash()
     {
         return redirect()->route('advertisers.index');
+    }
+
+    public function cancelSuggestedTopicTrash()
+    {
+        return redirect()->route('suggested-topics.index');
+    }
+
+    public function cancelCoverTrash()
+    {
+        return redirect()->route('cover.index');
     }
 
     public function cancelCreateArticle()

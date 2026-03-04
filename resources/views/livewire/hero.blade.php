@@ -182,6 +182,30 @@
             </a>
             <h1 class=" text-4xl sm:text-5xl font-serif text-left text-primary text-balance font-normal">Papelera de anunciantes</h1>
             <p class=" text-[12px] sm:text-sm font-montserrat text-left mt-3 text-gray-light uppercase">Restaura anunciantes eliminados para que vuelvan al listado</p>
+        @elseif ($showSuggestedTopicTrashView)
+            <a href="{{ route('suggested-topics.index') }}"
+                class="inline-flex items-center gap-2 text-primary hover:text-dark-sage transition-colors mb-8">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                <p class=" text-sm font-montserrat">Volver al listado</p>
+            </a>
+            <h1 class=" text-4xl sm:text-5xl font-serif text-left text-primary text-balance font-normal">Papelera de temas sugeridos</h1>
+            <p class=" text-[12px] sm:text-sm font-montserrat text-left mt-3 text-gray-light uppercase">Restaura temas sugeridos eliminados o elimínalos permanentemente</p>
+        @elseif ($showCoverTrashView)
+            <a href="{{ route('cover.index') }}"
+                class="inline-flex items-center gap-2 text-primary hover:text-dark-sage transition-colors mb-8">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                <p class=" text-sm font-montserrat">Volver al listado</p>
+            </a>
+            <h1 class=" text-4xl sm:text-5xl font-serif text-left text-primary text-balance font-normal">Papelera de portadas</h1>
+            <p class=" text-[12px] sm:text-sm font-montserrat text-left mt-3 text-gray-light uppercase">Restaura portadas eliminadas o elimínalas permanentemente</p>
         @elseif ($showCreateAdView)
             <button type="button" wire:click="cancelCreateAd"
                 class="inline-flex items-center gap-2 text-primary hover:text-dark-sage transition-colors mb-8">

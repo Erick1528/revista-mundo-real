@@ -3,9 +3,9 @@
 use App\Http\Controllers\AdController;
 use App\Http\Controllers\AdvertiserController;
 use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\CoverController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LoginController;
-use App\Http\Controllers\CoverController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SuggestedTopicController;
 use App\Http\Controllers\UserController;
@@ -26,6 +26,9 @@ Route::get('portadas', [CoverController::class, 'index'])
 Route::get('portadas/nueva', [CoverController::class, 'manage'])
     ->name('cover.manage')
     ->middleware('auth');
+Route::get('portadas/eliminadas', [CoverController::class, 'trash'])
+    ->name('cover.trash')
+    ->middleware('auth');
 Route::get('portadas/{cover}/editar', [CoverController::class, 'edit'])
     ->name('cover.edit')
     ->middleware('auth');
@@ -45,6 +48,9 @@ Route::get('temas-sugeridos', [SuggestedTopicController::class, 'index'])
     ->middleware('auth');
 Route::get('temas-sugeridos/crear', [SuggestedTopicController::class, 'create'])
     ->name('suggested-topics.create')
+    ->middleware('auth');
+Route::get('temas-sugeridos/eliminados', [SuggestedTopicController::class, 'trash'])
+    ->name('suggested-topics.trash')
     ->middleware('auth');
 Route::get('temas-sugeridos/{topic}', [SuggestedTopicController::class, 'show'])
     ->name('suggested-topics.show')

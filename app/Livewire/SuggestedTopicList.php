@@ -19,15 +19,22 @@ class SuggestedTopicList extends Component
     }
 
     public $statusFilter = '';
+
     public $sectionFilter = '';
+
     public $search = '';
+
     public $assignedToFilter = '';
+
     public $createdByFilter = '';
 
     // Modales de confirmación
     public $showReleaseModal = false;
+
     public $showDeleteModal = false;
+
     public $selectedTopicId = null;
+
     public $selectedTopicTitle = '';
 
     public function updatingSearch()
@@ -65,7 +72,6 @@ class SuggestedTopicList extends Component
         $this->resetPage();
     }
 
-
     public function getFilteredTopics()
     {
         $user = Auth::user();
@@ -75,8 +81,8 @@ class SuggestedTopicList extends Component
         // Búsqueda por título o descripción
         if ($this->search) {
             $query->where(function ($q) {
-                $q->where('title', 'like', '%' . $this->search . '%')
-                    ->orWhere('description', 'like', '%' . $this->search . '%');
+                $q->where('title', 'like', '%'.$this->search.'%')
+                    ->orWhere('description', 'like', '%'.$this->search.'%');
             });
         }
 
@@ -181,14 +187,15 @@ class SuggestedTopicList extends Component
             $user = Auth::user();
 
             // Solo admin/editor o el creador puede eliminar
-            if ($topic->created_by !== $user->id && !in_array($user->rol, ['editor_chief', 'moderator', 'administrator'])) {
+            if ($topic->created_by !== $user->id && ! in_array($user->rol, ['editor_chief', 'moderator', 'administrator'])) {
                 session()->flash('error', 'No tienes permisos para eliminar este tema.');
                 $this->closeDeleteModal();
+
                 return;
             }
 
             $topic->delete();
-            session()->flash('message', 'Tema eliminado exitosamente.');
+            session()->flash('message', 'Tema movido a la papelera.');
         }
 
         $this->closeDeleteModal();
@@ -201,36 +208,36 @@ class SuggestedTopicList extends Component
 
     /**
      * Verificar si el usuario actual puede editar un tema.
-     * 
-     * @param SuggestedTopic $topic
+     *
+     * @param  SuggestedTopic  $topic
      * @return bool
      */
     public function canEdit($topic)
     {
         $user = Auth::user();
-        
+
         // Creador siempre puede editar
         if ($topic->created_by === $user->id) {
             return true;
         }
-        
+
         // Usuario asignado puede editar si está en estado taken o requested
         if ($topic->assigned_to === $user->id && in_array($topic->status, ['taken', 'requested'])) {
             return true;
         }
-        
+
         // Admin/Editor siempre puede editar
         if (in_array($user->rol, ['editor_chief', 'moderator', 'administrator'])) {
             return true;
         }
-        
+
         return false;
     }
 
     public function render()
     {
         $hasActiveFilters = $this->search || $this->statusFilter || $this->sectionFilter || $this->assignedToFilter || $this->createdByFilter;
-        
+
         return view('livewire.suggested-topic-list', [
             'topics' => $this->getFilteredTopics(),
             'users' => $this->users,
