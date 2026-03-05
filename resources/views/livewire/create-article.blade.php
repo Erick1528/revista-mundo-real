@@ -85,11 +85,6 @@
             </button>
             <div id="section-image"
                 class="accordion-content px-6 py-6 space-y-6 border-t border-gray-lighter @if (!$openSections['image']) hidden @endif">
-                @if ($errors->has('image'))
-                    <div class="p-4 bg-red-50 border border-red-200 text-red-800 font-opensans text-sm">
-                        {{ $errors->first('image') }}
-                    </div>
-                @endif
                 <div class="space-y-2 grid grid-cols-1 gap-3">
                     @if ($image)
                         <div class="relative w-full h-auto flex items-center justify-center">
@@ -104,6 +99,10 @@
                                 <x-close-svg width="20px" height="20px" fill="currentColor" />
                             </button>
                         </div>
+
+                        @error('image')
+                            <p class="text-red-500 text-xs font-opensans mt-1">{{ $message }}</p>
+                        @enderror
 
                         <div class="space-y-4 mt-4">
                             <div class="space-y-2 p-4 bg-white border-gray-300 border">

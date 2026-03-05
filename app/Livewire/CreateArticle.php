@@ -83,6 +83,9 @@ class CreateArticle extends Component
     // Flag para controlar el flujo de validación
     public $waitingForContentData = false;
 
+    /** 'draft' = Guardar borrador esperando contenido del editor */
+    public $contentRequestPurpose = null;
+
     // Errores específicos de validación de contenido
     public $contentErrors = [];
 
@@ -408,14 +411,21 @@ class CreateArticle extends Component
 
     public function receiveContentData($data)
     {
-        // Actualizar la propiedad content con los datos recibidos del editor
-        $this->content = $data['blocks'] ?? [];
+        $blocks = $data['blocks'] ?? [];
+        $this->content = is_array($blocks) ? $blocks : [];
 
-        // Si estábamos esperando los datos para proceder con la validación
-        if ($this->waitingForContentData) {
-            $this->waitingForContentData = false;
-            $this->proceedWithValidation();
+        if (! $this->waitingForContentData) {
+            return;
         }
+
+        $this->waitingForContentData = false;
+        $purpose = $this->contentRequestPurpose;
+        $this->contentRequestPurpose = null;
+
+        if ($purpose === 'draft') {
+            return $this->proceedWithSaveDraft();
+        }
+        $this->proceedWithValidation();
     }
 
     private function validateBlocks()
@@ -604,6 +614,8 @@ class CreateArticle extends Component
 
                     return;
                 }
+            } else {
+                $articleData['image_path'] = null;
             }
 
             // Crear el artículo
@@ -656,15 +668,85 @@ class CreateArticle extends Component
         // Marcar que estamos esperando los datos del content editor
         $this->waitingForContentData = true;
 
-        // Solicitar los datos del content editor
-        $this->dispatch('requestContentData');
+        // Solicitar los datos del content editor (enviar explícitamente al hijo ContentEditor)
+        $this->dispatch('requestContentData')->to(ContentEditor::class);
 
         // La validación continuará en receiveContentData()
     }
 
+    /**
+     * Guarda el artículo como borrador. Pide los datos al ContentEditor y continúa en receiveContentData -> proceedWithSaveDraft.
+     */
     public function saveDraft()
     {
-        $this->dispatch('openDevelopModal', 'Guardar Borrador');
+        try {
+            $this->validate([
+                'title' => 'required|string|max:255',
+                'section' => 'required|in:destinations,inspiring_stories,social_events,health_wellness,gastronomy,living_culture',
+            ], [
+                'title.required' => 'El título es obligatorio para guardar el borrador.',
+                'section.required' => 'Debe seleccionar una sección para guardar el borrador.',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $this->handleValidationErrors($e);
+            throw $e;
+        }
+
+        $this->contentRequestPurpose = 'draft';
+        $this->waitingForContentData = true;
+        $this->dispatch('requestContentData')->to(ContentEditor::class);
+    }
+
+    /**
+     * Ejecuta la creación del borrador tras recibir el contenido del ContentEditor.
+     */
+    private function proceedWithSaveDraft()
+    {
+        $title = trim((string) $this->title);
+        $subtitle = trim((string) $this->subtitle);
+
+        $articleData = [
+            'title' => $title,
+            'subtitle' => $subtitle,
+            'slug' => generateUniqueSlug($title, $subtitle),
+            'attribution' => trim((string) $this->attribution) ?: null,
+            'summary' => trim((string) $this->summary) ?: null,
+            'content' => is_array($this->content) ? $this->content : [],
+            'section' => $this->section,
+            'is_announcement' => (bool) $this->is_announcement,
+            'advertiser_id' => $this->is_announcement ? $this->advertiser_id : null,
+            'tags' => is_array($this->tags) ? $this->tags : [],
+            'related_articles' => is_array($this->related_articles) ? array_column($this->related_articles, 'id') : null,
+            'visibility' => 'private',
+            'published_at' => null,
+            'meta_description' => trim((string) $this->meta_description) ?: null,
+            'reading_time' => $this->reading_time ? (int) $this->reading_time : null,
+            'user_id' => Auth::id(),
+            'status' => 'draft',
+            'image_credits' => trim((string) $this->image_credits) ?: null,
+            'image_alt_text' => trim((string) $this->image_alt_text) ?: null,
+            'image_caption' => trim((string) $this->image_caption) ?: null,
+        ];
+
+        if ($this->image) {
+            try {
+                $paths = $this->processImageUpload($this->image);
+                $articleData['image_path'] = '/storage/'.$paths['webp'];
+                $articleData['image_jpg_path'] = '/storage/'.$paths['jpg'];
+            } catch (\Throwable $e) {
+                $this->openSections['image'] = true;
+                $this->addError('image', $e->getMessage());
+
+                return;
+            }
+        } else {
+            $articleData['image_path'] = null;
+        }
+
+        Article::create($articleData);
+        session()->flash('message', 'Borrador guardado correctamente.');
+
+        return $this->redirect(route('dashboard'));
     }
 
     public function cancel($redirectUrl = null)
