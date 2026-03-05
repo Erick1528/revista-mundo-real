@@ -18,15 +18,13 @@
                             @endif
                         </div>
                     @endif
-                    <div class="sm:max-w-[368px] sm:max-h-[368px] overflow-hidden mb-4 mx-auto">
-                        @if($article->image_path)
-                            <img src="{{ asset($article->image_path) }}" alt="{{ $article->image_alt_text ?? $article->title }}"
-                                class="aspect-square object-cover sm:max-w-[368px] max-h-[456px] sm:max-h-[368px] w-full h-full group-hover:scale-105 transition-all duration-200">
-                        @else
-                            <div class="aspect-square bg-gray-lighter flex items-center justify-center">
-                                <span class="text-gray-400 text-sm font-opensans">Sin imagen</span>
-                            </div>
-                        @endif
+                    <div class="sm:max-w-[368px] sm:max-h-[368px] overflow-hidden mb-4 mx-auto aspect-square">
+                        <x-image-with-fallback
+                            :src="!empty(trim((string) ($article->image_path ?? ''))) ? asset($article->image_path) : null"
+                            :alt="$article->image_alt_text ?? $article->title"
+                            class="w-full h-full aspect-square"
+                            img-class="aspect-square object-cover sm:max-w-[368px] max-h-[456px] sm:max-h-[368px] w-full h-full group-hover:scale-105 transition-all duration-200"
+                            fallback-class="w-full h-full aspect-square flex items-center justify-center bg-gray-100 border border-gray-lighter" />
                     </div>
                     <div class="space-y-2">
                         <p class="text-xs font-semibold uppercase font-montserrat text-gray-light tracking-wider">{{ $article->section_name }}</p>

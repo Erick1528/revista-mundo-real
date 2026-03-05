@@ -20,15 +20,13 @@
                             @endif
                         </div>
                     @endif
-                    <div class="max-h-80 h-full w-full overflow-hidden mb-4">
-                        @if($article->image_path)
-                            <img src="{{ asset($article->image_path) }}" alt="{{ $article->image_alt_text ?? $article->title }}"
-                                class="group-hover:scale-105 transition-all duration-200 aspect-video max-h-80 h-full w-full object-cover">
-                        @else
-                            <div class="aspect-video bg-gray-lighter flex items-center justify-center">
-                                <span class="text-gray-400 text-sm font-opensans">Sin imagen</span>
-                            </div>
-                        @endif
+                    <div class="max-h-80 h-full w-full overflow-hidden mb-4 aspect-video">
+                        <x-image-with-fallback
+                            :src="!empty(trim((string) ($article->image_path ?? ''))) ? asset($article->image_path) : null"
+                            :alt="$article->image_alt_text ?? $article->title"
+                            class="w-full h-full aspect-video max-h-80"
+                            img-class="group-hover:scale-105 transition-all duration-200 aspect-video max-h-80 h-full w-full object-cover"
+                            fallback-class="w-full h-full aspect-video flex items-center justify-center bg-gray-100 border border-gray-lighter" />
                     </div>
                     <div class="space-y-2">
                         <p class="text-xs font-semibold uppercase font-montserrat text-gray-light tracking-wider">{{ $article->section_name }}</p>

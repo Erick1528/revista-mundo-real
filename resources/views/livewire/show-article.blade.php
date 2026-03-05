@@ -131,10 +131,15 @@
     </div>
 
     <div class="relative sm:aspect-video mb-6">
-        <img class="w-full h-full object-contain mb-2" src="{{ asset($article->image_path) }}" alt="">
+            <x-image-with-fallback
+                :src="!empty(trim((string) ($article->image_path ?? ''))) ? asset($article->image_path) : null"
+                :alt="$article->image_alt_text ? e($article->image_alt_text) : e($article->title)"
+                class="w-full h-full min-h-[200px] sm:min-h-0"
+                img-class="w-full h-full object-contain"
+                fallback-class="w-full h-full min-h-[200px] sm:min-h-0 flex items-center justify-center bg-gray-100 border border-gray-lighter text-gray-light font-opensans text-sm" />
 
         @if ($article->image_caption || $article->image_credits)
-            <div class="image-caption-content text-xs text-gray-500 font-opensans italic text-center">
+            <div class="image-caption-content text-xs text-gray-500 font-opensans italic text-center mt-2">
                 @if ($article->image_caption)
                     {!! fixStrongSpacing(Str::markdown(markdownLite($article->image_caption))) !!}
                 @endif
@@ -229,10 +234,13 @@
                             : ($relatedArticle->user->name ?? 'Autor desconocido');
                     @endphp
                     <a href="{{ route('article.show', $relatedArticle->slug) }}" class="flex gap-x-4 md:flex-col md:gap-x-0 group cursor-pointer">
-                        <div class="w-32 h-32 md:w-full md:h-auto overflow-hidden shrink-0 md:shrink">
-                            <img src="{{ asset($relatedArticle->image_path) }}" 
-                                 alt="{{ $relatedArticle->title }}"
-                                 class="w-full h-full md:aspect-[3/2] object-cover group-hover:scale-105 transition-all duration-200 aspect-square md:aspect-[3/2]">
+                        <div class="w-32 h-32 md:w-full md:h-auto overflow-hidden shrink-0 md:shrink aspect-square md:aspect-[3/2]">
+                            <x-image-with-fallback
+                                :src="!empty(trim((string) ($relatedArticle->image_path ?? ''))) ? asset($relatedArticle->image_path) : null"
+                                :alt="e($relatedArticle->title)"
+                                class="w-full h-full"
+                                img-class="w-full h-full object-cover group-hover:scale-105 transition-all duration-200"
+                                fallback-class="absolute inset-0 flex items-center justify-center text-gray-400 font-opensans text-xs text-center px-2 bg-gray-100 border border-gray-lighter" />
                         </div>
                         <div class="space-y-2 md:space-y-2 md:mt-3 md:mb-0">
                             <p class="text-[10px] sm:text-xs md:text-xs font-semibold uppercase font-montserrat text-gray-light tracking-wider">

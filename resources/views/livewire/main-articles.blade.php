@@ -20,15 +20,13 @@
                             @endif
                         </div>
                     @endif
-                    <div class="w-full mb-4 overflow-hidden">
-                        @if($article->image_path)
-                            <img src="{{ asset($article->image_path) }}" alt="{{ $article->image_alt_text ?? $article->title }}"
-                                class="w-full h-auto max-h-[456px] md:max-h-[396px] md:h-full object-cover group-hover:scale-105 transition-all duration-200">
-                        @else
-                            <div class="w-full h-64 bg-gray-lighter flex items-center justify-center">
-                                <span class="text-gray-400 text-sm font-opensans">Sin imagen</span>
-                            </div>
-                        @endif
+                    <div class="w-full mb-4 overflow-hidden min-h-[200px]">
+                        <x-image-with-fallback
+                            :src="!empty(trim((string) ($article->image_path ?? ''))) ? asset($article->image_path) : null"
+                            :alt="$article->image_alt_text ?? $article->title"
+                            class="w-full h-full min-h-[200px]"
+                            img-class="w-full h-auto max-h-[456px] md:max-h-[396px] md:h-full object-cover group-hover:scale-105 transition-all duration-200"
+                            fallback-class="w-full min-h-[200px] flex items-center justify-center bg-gray-100 border border-gray-lighter" />
                     </div>
                     <div class="space-y-3">
                         <p class="text-xs font-semibold uppercase font-montserrat text-gray-light tracking-wider">{{ $article->section_name }}</p>
@@ -45,14 +43,12 @@
                         @php $article = $articles[$i]; @endphp
                         <a href="{{ route('article.show', $article->slug) }}" class="flex gap-x-4 group cursor-pointer {{ $article->is_announcement ? 'bg-[rgba(183,182,153,0.1)] p-3' : '' }}">
                             <div class="w-32 h-32 overflow-hidden shrink-0">
-                                @if($article->image_path)
-                                    <img src="{{ asset($article->image_path) }}" alt="{{ $article->image_alt_text ?? $article->title }}"
-                                        class="w-full h-full object-cover group-hover:scale-105 transition-all duration-200 aspect-square">
-                                @else
-                                    <div class="w-full h-full bg-gray-lighter flex items-center justify-center">
-                                        <span class="text-gray-400 text-xs font-opensans">Sin img</span>
-                                    </div>
-                                @endif
+                                <x-image-with-fallback
+                                    :src="!empty(trim((string) ($article->image_path ?? ''))) ? asset($article->image_path) : null"
+                                    :alt="$article->image_alt_text ?? $article->title"
+                                    class="w-full h-full aspect-square"
+                                    img-class="w-full h-full object-cover group-hover:scale-105 transition-all duration-200 aspect-square"
+                                    fallback-class="w-full h-full flex items-center justify-center bg-gray-100 border border-gray-lighter" />
                             </div>
                             <div class="space-y-2">
                                 @if($article->is_announcement)
