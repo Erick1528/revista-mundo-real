@@ -39,6 +39,9 @@ class UpdateArticle extends Component
     // Flag para controlar el flujo de validación
     public $waitingForContentData = false;
 
+    /** 'draft' = Guardar cambios esperando contenido; 'update' = Actualizar esperando contenido */
+    public $contentRequestPurpose = null;
+
     // Errores específicos de validación de contenido
     public $contentErrors = [];
 
@@ -210,11 +213,18 @@ class UpdateArticle extends Component
         // Incluso si está vacío, necesitamos actualizarlo para que la validación funcione
         $this->content = $blocks;
 
-        // Si estábamos esperando los datos para proceder con la validación
-        if ($this->waitingForContentData) {
-            $this->waitingForContentData = false;
-            $this->proceedWithValidation();
+        if (! $this->waitingForContentData) {
+            return;
         }
+
+        $this->waitingForContentData = false;
+        $purpose = $this->contentRequestPurpose;
+        $this->contentRequestPurpose = null;
+
+        if ($purpose === 'draft') {
+            return $this->proceedWithSaveDraft();
+        }
+        $this->proceedWithValidation();
     }
 
     public function mount(Article $article)
@@ -450,16 +460,95 @@ class UpdateArticle extends Component
         // Marcar que estamos esperando los datos del content editor
         $this->waitingForContentData = true;
 
-        // Solicitar los datos del content editor
-        // El evento se propaga a todos los componentes hijos, incluyendo ContentEditor
-        $this->dispatch('requestContentData');
+        // Solicitar los datos del content editor (enviar explícitamente al hijo ContentEditor)
+        $this->dispatch('requestContentData')->to(ContentEditor::class);
 
         // La validación continuará en receiveContentData()
     }
 
+    /**
+     * Guarda los cambios manteniendo el artículo en borrador. Pide los datos al ContentEditor y continúa en receiveContentData -> proceedWithSaveDraft.
+     */
     public function saveDraft()
     {
-        $this->dispatch('openDevelopModal', 'Guardar Cambios');
+        try {
+            $this->validate([
+                'title' => 'required|string|max:255',
+                'section' => 'required|in:destinations,inspiring_stories,social_events,health_wellness,gastronomy,living_culture',
+            ], [
+                'title.required' => 'El título es obligatorio para guardar.',
+                'section.required' => 'Debe seleccionar una sección para guardar.',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $this->handleValidationErrors($e);
+            throw $e;
+        }
+
+        $this->contentRequestPurpose = 'draft';
+        $this->waitingForContentData = true;
+        $this->dispatch('requestContentData')->to(ContentEditor::class);
+    }
+
+    /**
+     * Ejecuta el guardado del borrador tras recibir el contenido del ContentEditor.
+     */
+    private function proceedWithSaveDraft()
+    {
+        $titleChanged = $this->article->title !== $this->title;
+        $subtitleChanged = $this->article->subtitle !== $this->subtitle;
+
+        $articleData = [
+            'title' => $this->title,
+            'subtitle' => $this->subtitle,
+            'attribution' => $this->attribution,
+            'summary' => $this->summary,
+            'content' => $this->content,
+            'section' => $this->section,
+            'is_announcement' => (bool) $this->is_announcement,
+            'advertiser_id' => $this->is_announcement ? $this->advertiser_id : null,
+            'tags' => $this->tags,
+            'related_articles' => array_column($this->related_articles, 'id'),
+            'visibility' => 'private',
+            'published_at' => null,
+            'meta_description' => $this->meta_description,
+            'reading_time' => $this->reading_time,
+            'status' => 'draft',
+            'image_credits' => $this->image_credits,
+            'image_alt_text' => $this->image_alt_text,
+            'image_caption' => $this->image_caption,
+        ];
+
+        if ($titleChanged || $subtitleChanged) {
+            $articleData['slug'] = generateUniqueSlug($this->title, $this->subtitle, $this->article->id);
+        }
+
+        if ($this->image && is_object($this->image)) {
+            try {
+                $paths = $this->processImageUpload($this->image);
+                foreach (['image_path', 'image_jpg_path'] as $pathField) {
+                    $oldPath = $this->article->{$pathField};
+                    if ($oldPath) {
+                        $relativePath = ltrim($oldPath, '/storage/');
+                        $fullPath = storage_path('app/public/'.$relativePath);
+                        if (file_exists($fullPath)) {
+                            unlink($fullPath);
+                        }
+                    }
+                }
+                $articleData['image_path'] = '/storage/'.$paths['webp'];
+                $articleData['image_jpg_path'] = '/storage/'.$paths['jpg'];
+            } catch (\Throwable $e) {
+                $this->openSections['image'] = true;
+                $this->addError('image', $e->getMessage());
+
+                return;
+            }
+        }
+
+        $this->article->update($articleData);
+        session()->flash('message', 'Cambios guardados. El artículo sigue en borrador.');
+
+        return $this->redirect(route('dashboard'));
     }
 
     public function cancel($redirectUrl = null)
@@ -614,42 +703,42 @@ class UpdateArticle extends Component
                 $this->resetErrorBag('content');
             }
 
-            // Validar bloques de contenido antes de la validación general
+            // 1) Validar bloques de contenido (no retornar: acumular errores)
             $blockErrors = $this->validateBlocks();
             if (! empty($blockErrors)) {
-                // Guardar errores en la propiedad específica
                 $this->contentErrors = $blockErrors;
-                // Abrir la sección de contenido para mostrar los errores
                 $this->openSections['content'] = true;
                 session()->flash('error', 'Hay errores en el contenido del artículo. Revisa los bloques vacíos.');
-
-                return;
             }
 
-            // Si hay bloques, validar sin las reglas de content para evitar mensaje duplicado
+            // 2) Actualizar exige imagen: existente o nueva (no retornar: acumular error)
+            $hasExistingImage = ! empty(trim((string) ($this->article->image_path ?? '')));
+            $hasNewImage = $this->image && is_object($this->image);
+            if (! $hasExistingImage && ! $hasNewImage) {
+                $this->openSections['image'] = true;
+                $this->addError('image', 'La imagen principal es obligatoria para enviar a revisión.');
+            }
+
+            // 3) Validar el resto de reglas (título, tags, etc.) para mostrar todos los errores a la vez
             if (! empty($this->content)) {
                 $rules = $this->rules;
                 unset($rules['content']);
-
-                // Si la imagen no es un objeto (archivo nuevo), excluir la validación de imagen
                 if (! is_object($this->image)) {
                     unset($rules['image']);
                 }
-
                 $this->validate($rules);
             } else {
-                // Si content está vacío, validar con todas las reglas (incluyendo content)
-                // Esto hará que Laravel automáticamente agregue el error al error bag
                 $rules = $this->rules;
-
-                // Si la imagen no es un objeto (archivo nuevo), excluir la validación de imagen
                 if (! is_object($this->image)) {
                     unset($rules['image']);
                 }
-
-                // Abrir la sección de contenido para mostrar el error
                 $this->openSections['content'] = true;
                 $this->validate($rules);
+            }
+
+            // Si hay errores de bloques o de imagen, no continuar (las reglas ya habrán lanzado o tenemos error manual)
+            if (! empty($this->contentErrors) || $this->getErrorBag()->has('image')) {
+                return;
             }
 
             // Verificar si el título o subtítulo cambiaron para actualizar el slug
@@ -677,11 +766,9 @@ class UpdateArticle extends Component
                 'image_caption' => $this->image_caption,
             ];
 
-            // Si estaba publicado, al actualizar vuelve a revisión
+            // Al actualizar (botón Actualizar) el artículo pasa a revisión
             $wasPublished = $this->article->status === 'published';
-            if ($wasPublished) {
-                $articleData['status'] = 'review';
-            }
+            $articleData['status'] = 'review';
 
             // Si el título o subtítulo cambiaron, generar nuevo slug
             if ($titleChanged || $subtitleChanged) {
@@ -730,6 +817,9 @@ class UpdateArticle extends Component
             // Redireccionar al dashboard con mensaje de éxito
             return redirect()->route('dashboard')->with('message', 'Artículo actualizado exitosamente.');
         } catch (\Illuminate\Validation\ValidationException $e) {
+            if ($this->getErrorBag()->has('image')) {
+                $e->validator->errors()->add('image', $this->getErrorBag()->first('image'));
+            }
             $this->handleValidationErrors($e);
             throw $e;
         }
