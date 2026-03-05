@@ -33,7 +33,7 @@
     </section>
 
     {{-- Visión --}}
-    <section class="border-l-4 border-primary pl-6 md:pl-8 pr-4 md:pr-6 py-6 md:py-8 bg-gray-100 mb-12 md:mb-16">
+    <section class="border-l-4 border-primary pl-6 md:pl-8 pr-4 md:pr-6 py-6 md:py-8 bg-gray-100">
         <p class="text-xs font-montserrat uppercase tracking-[0.2em] text-primary mb-2">
             Visión
         </p>
