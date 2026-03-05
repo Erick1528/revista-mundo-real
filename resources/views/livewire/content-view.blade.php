@@ -147,16 +147,22 @@
             @case('review')
                 @foreach ($block['reviews'] as $review)
                     <div class="flex items-start gap-4 bg-gray-50 border border-gray-200 p-6 mb-6">
+                        @php
+                            $reviewPhotoSvg = '<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.657 6.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>';
+                        @endphp
                         @if (!empty($review['photo']))
-                            <img src="{{ asset($review['photo']) }}" alt="Foto de {{ $review['name'] }}"
-                                class="w-16 h-16 object-cover bg-gray-200">
+                            <div class="w-16 h-16 shrink-0 relative" x-data="{ imgError: false }">
+                                <img src="{{ asset($review['photo']) }}" alt="Foto de {{ $review['name'] }}"
+                                    class="w-16 h-16 object-cover bg-gray-200"
+                                    x-show="!imgError"
+                                    x-on:error="imgError = true">
+                                <div x-show="imgError" class="absolute inset-0 w-16 h-16 bg-gray-200 flex items-center justify-center" style="display: none;">
+                                    {!! $reviewPhotoSvg !!}
+                                </div>
+                            </div>
                         @else
-                            <div class="w-16 h-16 bg-gray-200 flex items-center justify-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-400" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.657 6.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
+                            <div class="w-16 h-16 bg-gray-200 flex items-center justify-center shrink-0">
+                                {!! $reviewPhotoSvg !!}
                             </div>
                         @endif
                         <div class="flex-1">
@@ -198,22 +204,28 @@
                     <!-- Main Image -->
                     <div class="relative aspect-video">
                         @foreach ($block['images'] as $index => $image)
-                            <img class="carousel-image w-full h-full object-contain absolute inset-0 transition-opacity duration-300 {{ $index === 0 ? 'opacity-100' : 'opacity-0' }}"
-                                src="{{ asset($image['url'] ?? $image) }}"
-                                alt="{{ $image['alt_text'] ?? 'Imagen ' . ($index + 1) }}" data-carousel="{{ $carouselId }}"
-                                data-index="{{ $index }}" data-credit="{{ $image['credits'] ?? '' }}">
+                            @php
+                                $galleryImgUrl = $image['url'] ?? $image;
+                            @endphp
+                            <x-image-with-fallback
+                                :src="!empty($galleryImgUrl) ? asset($galleryImgUrl) : null"
+                                :alt="$image['alt_text'] ?? 'Imagen ' . ($index + 1)"
+                                class="absolute inset-0 z-0 flex items-center justify-center"
+                                :img-class="'carousel-image w-full h-full object-contain absolute inset-0 transition-opacity duration-300 ' . ($index === 0 ? 'opacity-100' : 'opacity-0')"
+                                :img-attributes="['data-carousel' => $carouselId, 'data-index' => $index, 'data-credit' => $image['credits'] ?? '']"
+                                fallback-class="w-full h-full min-h-[200px] flex flex-col items-center justify-center gap-2 bg-gray-50 border border-gray-200 text-gray-500 font-opensans text-sm sm:text-base" />
                         @endforeach
 
                         <!-- Navigation Arrows -->
                         <button onclick="carouselPrev('{{ $carouselId }}')"
-                            class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white flex items-center justify-center transition-colors"
+                            class="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white/90 hover:bg-white flex items-center justify-center transition-colors"
                             aria-label="Anterior">
                             <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                             </svg>
                         </button>
                         <button onclick="carouselNext('{{ $carouselId }}')"
-                            class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white flex items-center justify-center transition-colors"
+                            class="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white/90 hover:bg-white flex items-center justify-center transition-colors"
                             aria-label="Siguiente">
                             <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -221,7 +233,7 @@
                         </button>
 
                         <!-- Counter -->
-                        <div class="absolute bottom-4 right-4 bg-black/75 text-white px-3 py-1 text-sm font-sans">
+                        <div class="absolute bottom-4 right-4 z-10 bg-black/75 text-white px-3 py-1 text-sm font-sans">
                             <span id="{{ $carouselId }}-counter">1</span> / {{ count($block['images']) }}
                         </div>
                     </div>
@@ -229,12 +241,18 @@
                     <!-- Thumbnails (hidden on mobile) -->
                     <div class="hidden md:flex gap-2 mt-4 overflow-x-auto pb-2">
                         @foreach ($block['images'] as $index => $image)
+                            @php
+                                $thumbUrl = $image['url'] ?? $image;
+                            @endphp
                             <button onclick="carouselGoTo('{{ $carouselId }}', {{ $index }})"
-                                class="carousel-thumb shrink-0 w-20 h-20 border-2 transition-all {{ $index === 0 ? 'border-dark-sage' : 'border-transparent' }}"
+                                class="carousel-thumb shrink-0 w-20 h-20 border-2 transition-all overflow-hidden {{ $index === 0 ? 'border-dark-sage' : 'border-transparent' }}"
                                 data-carousel="{{ $carouselId }}" data-index="{{ $index }}">
-                                <img src="{{ asset($image['url'] ?? $image) }}"
-                                    alt="{{ $image['alt_text'] ?? 'Miniatura ' . ($index + 1) }}"
-                                    class="w-full h-full object-cover">
+                                <x-image-with-fallback
+                                    :src="!empty($thumbUrl) ? asset($thumbUrl) : null"
+                                    :alt="$image['alt_text'] ?? 'Miniatura ' . ($index + 1)"
+                                    class="w-full h-full block"
+                                    img-class="w-full h-full object-cover"
+                                    fallback-class="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400 font-opensans text-[10px]" />
                             </button>
                         @endforeach
                     </div>
@@ -315,7 +333,8 @@
                     $imageUrl = $block['url'] ?? '';
                     $layout = $block['layout'] ?? 'full';
                     $size = $block['size'] ?? 'large';
-                    
+                    $imageSizeClass = $size === 'small' ? 'max-w-xs' : ($size === 'medium' ? 'max-w-md' : 'max-w-full');
+
                     // Procesar caption con markdown
                     $captionRaw = $block['caption'] ?? '';
                     if (!empty($captionRaw)) {
@@ -323,7 +342,7 @@
                     } else {
                         $captionFormatted = '';
                     }
-                    
+
                     // Créditos como texto plano (sin markdown)
                     $creditsRaw = $block['credits'] ?? '';
                     $creditsFormatted = !empty($creditsRaw) ? $creditsRaw : '';
@@ -333,8 +352,12 @@
                     @if ($layout === 'full')
                         <!-- Solo imagen -->
                         <div class="mb-6 text-center space-y-2">
-                            <img src="{{ asset($imageUrl) }}" alt="{{ $block['alt_text'] ?? '' }}"
-                                class="@if ($size === 'small') max-w-xs @elseif($size === 'medium') max-w-md @else max-w-full @endif mx-auto h-auto max-h-96 object-contain">
+                            <x-image-with-fallback
+                                :src="asset($imageUrl)"
+                                :alt="$block['alt_text'] ?? ''"
+                                class="min-h-[120px]"
+                                :img-class="'mx-auto h-auto max-h-96 object-contain ' . $imageSizeClass"
+                                fallback-class="min-h-[120px] flex items-center justify-center bg-gray-100 border border-gray-lighter text-gray-400 font-opensans text-sm" />
                             @if (!empty($creditsFormatted))
                                 <div class="text-[10px] md:text-xs text-gray-500 font-opensans text-center">
                                     {{ $creditsFormatted }}
@@ -346,10 +369,13 @@
                             <!-- Imagen izquierda, texto derecha -->
                             <div class="flex flex-col md:flex-row gap-4 md:items-stretch">
                                 <div class="@if ($size === 'small') md:flex-[0_0_25%] @elseif($size === 'medium') md:flex-[0_0_35%] @else md:flex-[0_0_45%] @endif flex flex-col space-y-1 md:space-y-2 min-w-0">
-                                    <div class="flex-1 flex items-center justify-center md:h-auto">
-                                        <img src="{{ asset($imageUrl) }}"
-                                            alt="{{ $block['alt_text'] ?? '' }}"
-                                            class="w-full h-auto md:h-full object-contain @if ($size === 'small') max-w-xs @elseif($size === 'medium') max-w-md @else max-w-full @endif mx-auto md:mx-0">
+                                    <div class="flex-1 flex items-center justify-center md:h-auto min-h-[120px]">
+                                        <x-image-with-fallback
+                                            :src="asset($imageUrl)"
+                                            :alt="$block['alt_text'] ?? ''"
+                                            class="w-full h-full min-h-[120px]"
+                                            :img-class="'w-full h-auto md:h-full object-contain mx-auto md:mx-0 ' . $imageSizeClass"
+                                            fallback-class="min-h-[120px] flex items-center justify-center bg-gray-100 border border-gray-lighter text-gray-400 font-opensans text-sm" />
                                     </div>
                                     @if (!empty($creditsFormatted))
                                         <p class="text-[10px] md:text-xs text-gray-500 font-opensans text-center !mb-0 mt-0">
@@ -364,8 +390,12 @@
                         @else
                             <!-- Sin caption: mostrar como full -->
                             <div class="text-center space-y-1 md:space-y-2">
-                                <img src="{{ asset($imageUrl) }}" alt="{{ $block['alt_text'] ?? '' }}"
-                                    class="@if ($size === 'small') max-w-xs @elseif($size === 'medium') max-w-md @else max-w-full @endif mx-auto h-auto max-h-96 object-contain">
+                                <x-image-with-fallback
+                                    :src="asset($imageUrl)"
+                                    :alt="$block['alt_text'] ?? ''"
+                                    class="min-h-[120px]"
+                                    :img-class="'mx-auto h-auto max-h-96 object-contain ' . $imageSizeClass"
+                                    fallback-class="min-h-[120px] flex items-center justify-center bg-gray-100 border border-gray-lighter text-gray-400 font-opensans text-sm" />
                                 @if (!empty($creditsFormatted))
                                     <p class="text-[10px] md:text-xs text-gray-500 font-opensans text-center !mb-0 mt-0">
                                         {{ $creditsFormatted }}
@@ -381,10 +411,13 @@
                                     {!! $captionFormatted !!}
                                 </div>
                                 <div class="@if ($size === 'small') md:flex-[0_0_25%] @elseif($size === 'medium') md:flex-[0_0_35%] @else md:flex-[0_0_45%] @endif flex flex-col space-y-1 md:space-y-2 min-w-0">
-                                    <div class="flex-1 flex items-center justify-center md:h-auto">
-                                        <img src="{{ asset($imageUrl) }}"
-                                            alt="{{ $block['alt_text'] ?? '' }}"
-                                            class="w-full h-auto md:h-full object-contain @if ($size === 'small') max-w-xs @elseif($size === 'medium') max-w-md @else max-w-full @endif mx-auto md:mx-0">
+                                    <div class="flex-1 flex items-center justify-center md:h-auto min-h-[120px]">
+                                        <x-image-with-fallback
+                                            :src="asset($imageUrl)"
+                                            :alt="$block['alt_text'] ?? ''"
+                                            class="w-full h-full min-h-[120px]"
+                                            :img-class="'w-full h-auto md:h-full object-contain mx-auto md:mx-0 ' . $imageSizeClass"
+                                            fallback-class="min-h-[120px] flex items-center justify-center bg-gray-100 border border-gray-lighter text-gray-400 font-opensans text-sm" />
                                     </div>
                                     @if (!empty($creditsFormatted))
                                         <p class="text-[10px] md:text-xs text-gray-500 font-opensans text-center !mb-0 mt-0">
@@ -395,9 +428,13 @@
                             </div>
                         @else
                             <!-- Sin caption: mostrar como full -->
-                            <div class=" text-center space-y-1 md:space-y-2">
-                                <img src="{{ asset($imageUrl) }}" alt="{{ $block['alt_text'] ?? '' }}"
-                                    class="@if ($size === 'small') max-w-xs @elseif($size === 'medium') max-w-md @else max-w-full @endif mx-auto h-auto max-h-96 object-contain">
+                            <div class="text-center space-y-1 md:space-y-2">
+                                <x-image-with-fallback
+                                    :src="asset($imageUrl)"
+                                    :alt="$block['alt_text'] ?? ''"
+                                    class="min-h-[120px]"
+                                    :img-class="'mx-auto h-auto max-h-96 object-contain ' . $imageSizeClass"
+                                    fallback-class="min-h-[120px] flex items-center justify-center bg-gray-100 border border-gray-lighter text-gray-400 font-opensans text-sm" />
                                 @if (!empty($creditsFormatted))
                                     <p class="text-[10px] md:text-xs text-gray-500 font-opensans text-center !mb-0 mt-0">
                                         {{ $creditsFormatted }}
@@ -409,9 +446,12 @@
                         <!-- Imagen arriba, texto abajo -->
                         <div class="mb-6 space-y-3">
                             <div class="text-center space-y-2">
-                                <img src="{{ asset($imageUrl) }}"
-                                    alt="{{ $block['alt_text'] ?? '' }}"
-                                    class="@if ($size === 'small') max-w-xs @elseif($size === 'medium') max-w-md @else max-w-full @endif mx-auto h-auto max-h-96 object-contain">
+                                <x-image-with-fallback
+                                    :src="asset($imageUrl)"
+                                    :alt="$block['alt_text'] ?? ''"
+                                    class="min-h-[120px]"
+                                    :img-class="'mx-auto h-auto max-h-96 object-contain ' . $imageSizeClass"
+                                    fallback-class="min-h-[120px] flex items-center justify-center bg-gray-100 border border-gray-lighter text-gray-400 font-opensans text-sm" />
                                 @if (!empty($creditsFormatted))
                                     <p class="text-[10px] md:text-xs text-gray-500 font-opensans text-center !mb-0 mt-0">
                                         {{ $creditsFormatted }}
