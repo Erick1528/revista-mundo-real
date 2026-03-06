@@ -435,7 +435,8 @@ class CreateArticle extends Component
         if ($purpose === 'draft') {
             return $this->proceedWithSaveDraft();
         }
-        $this->proceedWithValidation();
+
+        return $this->proceedWithValidation();
     }
 
     private function validateBlocks()

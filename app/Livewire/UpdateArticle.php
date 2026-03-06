@@ -234,7 +234,8 @@ class UpdateArticle extends Component
         if ($purpose === 'draft') {
             return $this->proceedWithSaveDraft();
         }
-        $this->proceedWithValidation();
+
+        return $this->proceedWithValidation();
     }
 
     public function mount(Article $article)
