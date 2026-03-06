@@ -111,8 +111,8 @@ class UpdateArticle extends Component
             }
             $this->resetErrorBag('image');
         } catch (\Throwable $e) {
-            $this->resetErrorBag('image');
             report($e);
+            $this->addError('image', 'No se pudo procesar la imagen. Intenta de nuevo.');
         }
     }
 
