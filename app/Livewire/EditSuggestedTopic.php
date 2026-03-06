@@ -288,7 +288,7 @@ class EditSuggestedTopic extends Component
         $this->cancelRedirectUrl = null;
         session()->flash('message', 'Edición de tema sugerido cancelada');
 
-        return $url ? redirect()->to($url) : redirect()->route('suggested-topics.index');
+        return $url ? $this->redirect($url) : $this->redirect(route('suggested-topics.index'));
     }
 
     public function closeCancelModal()
