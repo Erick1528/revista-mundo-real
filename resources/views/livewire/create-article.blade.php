@@ -86,7 +86,7 @@
             <div id="section-image"
                 class="accordion-content px-6 py-6 space-y-6 border-t border-gray-lighter @if (!$openSections['image']) hidden @endif">
                 <div class="space-y-2 grid grid-cols-1 gap-3">
-                    @if ($image)
+                    @if ($image && is_object($image) && method_exists($image, 'temporaryUrl'))
                         <div class="relative w-full h-auto flex items-center justify-center">
                             <img src="{{ $image->temporaryUrl() }}" alt=""
                                 class="max-h-[380px] h-full object-contain">

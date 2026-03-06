@@ -87,23 +87,33 @@ class UpdateArticle extends Component
         'metrics' => false,
     ];
 
-    public function updatedImage()
+    public function updatedImage(): void
     {
-        // Validar extensión inmediatamente cuando se selecciona archivo
-        if ($this->image && is_object($this->image)) {
-            $extension = strtolower($this->image->getClientOriginalExtension());
-            $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+        try {
+            if (! $this->image) {
+                $this->resetErrorBag('image');
 
+                return;
+            }
+            $file = $this->image;
+            if (! is_object($file) || ! method_exists($file, 'getClientOriginalExtension')) {
+                $this->resetErrorBag('image');
+
+                return;
+            }
+            $extension = strtolower($file->getClientOriginalExtension());
+            $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
             if (! in_array($extension, $allowedExtensions)) {
                 $this->image = $this->article->image_path ?? null;
                 $this->addError('image', 'Extensión no soportada. Solo se permiten: JPG, PNG, GIF, WebP');
 
                 return;
             }
+            $this->resetErrorBag('image');
+        } catch (\Throwable $e) {
+            $this->resetErrorBag('image');
+            report($e);
         }
-
-        // Limpiar errores previos si la extensión es válida
-        $this->resetErrorBag('image');
     }
 
     protected $listeners = [
