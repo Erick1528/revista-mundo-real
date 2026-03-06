@@ -18,8 +18,8 @@
         <h3 class="font-montserrat font-medium text-primary text-base sm:text-lg">Bloques del Artículo</h3>
         <div class="flex items-center gap-1 sm:gap-2">
             <span class="text-xs sm:text-sm text-gray-500 font-opensans">{{ count($blocks) }} bloque(s)</span>
-            <button type="button"
-                class="px-2 sm:px-3 py-1 text-xs bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors font-opensans">
+            <button type="button" wire:click="$set('showPreviewModal', true)"
+                class="hidden md:inline-block px-2 sm:px-3 py-1 text-xs bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors font-opensans">
                 Vista previa
             </button>
         </div>
@@ -1621,7 +1621,34 @@
         @endif
 
     </div>
-    
+
+    {{-- Modal Vista previa --}}
+    @if($showPreviewModal)
+        <div class="fixed inset-0 bg-[rgba(0,0,0,0.5)] z-[70] flex items-center justify-center p-5"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Vista previa"
+            x-data
+            x-effect="if ($wire.get('showPreviewModal')) { document.body.style.overflow = 'hidden'; document.body.style.paddingRight = (window.innerWidth - document.documentElement.clientWidth) + 'px'; } else { document.body.style.overflow = ''; document.body.style.paddingRight = ''; }"
+            @click.self="document.body.style.overflow = ''; document.body.style.paddingRight = ''; $wire.set('showPreviewModal', false)">
+            <div class="relative w-full h-full max-w-[calc(100vw-40px)] max-h-[calc(100vh-40px)] bg-white border border-gray-200 flex flex-col overflow-hidden shadow-xl">
+                <div class="shrink-0 flex items-center justify-end h-12 px-2 border-b border-gray-200 bg-gray-50">
+                    <button type="button"
+                        aria-label="Cerrar"
+                        @click="document.body.style.overflow = ''; document.body.style.paddingRight = ''; $wire.set('showPreviewModal', false)"
+                        class="text-black transition-all h-9 w-9 shrink-0 duration-200 hover:bg-red-light hover:text-white flex items-center justify-center">
+                        <x-close-svg height="36px" width="36px" />
+                    </button>
+                </div>
+                <div class="flex-1 min-h-0 overflow-auto p-6 bg-white">
+                    <div class="max-w-4xl mx-auto">
+                        {!! $this->previewContentHtml !!}
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
 </div>
 
 <script>
