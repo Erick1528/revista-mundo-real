@@ -569,7 +569,7 @@ class UpdateArticle extends Component
         $this->cancelRedirectUrl = null;
         session()->flash('message', 'Actualización de artículo cancelada');
 
-        return $url ? redirect()->to($url) : redirect()->route('dashboard');
+        return $url ? $this->redirect($url) : $this->redirect(route('dashboard'));
     }
 
     public function closeCancelModal()
@@ -815,7 +815,9 @@ class UpdateArticle extends Component
             }
 
             // Redireccionar al dashboard con mensaje de éxito
-            return redirect()->route('dashboard')->with('message', 'Artículo actualizado exitosamente.');
+            session()->flash('message', 'Artículo actualizado exitosamente.');
+
+            return $this->redirect(route('dashboard'));
         } catch (\Illuminate\Validation\ValidationException $e) {
             if ($this->getErrorBag()->has('image')) {
                 $e->validator->errors()->add('image', $this->getErrorBag()->first('image'));

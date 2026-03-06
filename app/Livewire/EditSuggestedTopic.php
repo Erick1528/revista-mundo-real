@@ -13,12 +13,13 @@ class EditSuggestedTopic extends Component
 
     // Basic information
     public $title;
+
     public $section;
+
     public $description;
 
     // Resources (ContentEditor blocks)
     public $resources = [];
-
 
     // Accordion state
     public $openSections = [
@@ -74,12 +75,12 @@ class EditSuggestedTopic extends Component
         $isAssigned = $topic->assigned_to === $user->id && in_array($topic->status, ['taken', 'requested']);
         $isAdmin = in_array($user->rol, ['editor_chief', 'moderator', 'administrator']);
 
-        if (!$isCreator && !$isAssigned && !$isAdmin) {
+        if (! $isCreator && ! $isAssigned && ! $isAdmin) {
             abort(403, 'No tienes permisos para editar este tema.');
         }
 
         $this->topic = $topic;
-        
+
         // Cargar relaciones necesarias
         $this->topic->load(['creator', 'assignedUser', 'requester']);
 
@@ -89,14 +90,14 @@ class EditSuggestedTopic extends Component
 
         // Cargar recursos en ContentEditor
         $this->resources = $topic->resources ?? [];
-        if (!empty($this->resources)) {
+        if (! empty($this->resources)) {
             $this->dispatch('setContentBlocks', $this->resources);
         }
     }
 
     public function toggleSection($section)
     {
-        $this->openSections[$section] = !$this->openSections[$section];
+        $this->openSections[$section] = ! $this->openSections[$section];
     }
 
     public function receiveContentData($data)
@@ -115,7 +116,7 @@ class EditSuggestedTopic extends Component
     {
         $errors = [];
 
-        if (empty($this->resources) || !is_array($this->resources)) {
+        if (empty($this->resources) || ! is_array($this->resources)) {
             return $errors; // Los recursos son opcionales
         }
 
@@ -123,8 +124,9 @@ class EditSuggestedTopic extends Component
             $block = $this->resources[$i];
             $blockNumber = $i + 1;
 
-            if (!isset($block['type'])) {
+            if (! isset($block['type'])) {
                 $errors[] = "Bloque #$blockNumber: Tipo de bloque no válido";
+
                 continue;
             }
 
@@ -134,22 +136,22 @@ class EditSuggestedTopic extends Component
                 case 'heading':
                 case 'quote':
                     if (empty(trim($block['content'] ?? ''))) {
-                        $errors[] = "Bloque #$blockNumber (" . ucfirst($block['type']) . "): No puede estar vacío";
+                        $errors[] = "Bloque #$blockNumber (".ucfirst($block['type']).'): No puede estar vacío';
                     }
                     break;
 
                 case 'list':
-                    if (empty($block['items']) || !is_array($block['items'])) {
+                    if (empty($block['items']) || ! is_array($block['items'])) {
                         $errors[] = "Bloque #$blockNumber (Lista): Debe tener al menos un elemento";
                     } else {
                         $hasContent = false;
                         foreach ($block['items'] as $item) {
-                            if (!empty(trim($item))) {
+                            if (! empty(trim($item))) {
                                 $hasContent = true;
                                 break;
                             }
                         }
-                        if (!$hasContent) {
+                        if (! $hasContent) {
                             $errors[] = "Bloque #$blockNumber (Lista): Debe tener al menos un elemento con contenido";
                         }
                     }
@@ -168,13 +170,13 @@ class EditSuggestedTopic extends Component
                     break;
 
                 case 'gallery':
-                    if (empty($block['images']) || !is_array($block['images']) || count($block['images']) === 0) {
+                    if (empty($block['images']) || ! is_array($block['images']) || count($block['images']) === 0) {
                         $errors[] = "Bloque #$blockNumber (Galería): Debe tener al menos una imagen";
                     }
                     break;
 
                 case 'review':
-                    if (empty($block['reviews']) || !is_array($block['reviews'])) {
+                    if (empty($block['reviews']) || ! is_array($block['reviews'])) {
                         $errors[] = "Bloque #$blockNumber (Reseña): Debe tener al menos una reseña";
                     } else {
                         foreach ($block['reviews'] as $idx => $review) {
@@ -202,10 +204,11 @@ class EditSuggestedTopic extends Component
 
             // Validar bloques de recursos antes de la validación general
             $blockErrors = $this->validateBlocks();
-            if (!empty($blockErrors)) {
+            if (! empty($blockErrors)) {
                 $this->contentErrors = $blockErrors;
                 $this->openSections['resources'] = true;
                 session()->flash('error', 'Hay errores en los recursos. Revisa los bloques vacíos.');
+
                 return;
             }
 
@@ -229,7 +232,8 @@ class EditSuggestedTopic extends Component
 
             // Redireccionar al listado con mensaje de éxito
             session()->flash('message', 'Tema sugerido actualizado exitosamente.');
-            return redirect()->route('suggested-topics.index');
+
+            return $this->redirect(route('suggested-topics.index'));
         } catch (\Illuminate\Validation\ValidationException $e) {
             $this->handleValidationErrors($e);
             throw $e;
@@ -283,6 +287,7 @@ class EditSuggestedTopic extends Component
         $url = $this->cancelRedirectUrl;
         $this->cancelRedirectUrl = null;
         session()->flash('message', 'Edición de tema sugerido cancelada');
+
         return $url ? redirect()->to($url) : redirect()->route('suggested-topics.index');
     }
 
@@ -295,7 +300,6 @@ class EditSuggestedTopic extends Component
     {
         return User::orderBy('name')->get();
     }
-
 
     public function openDeleteModal()
     {
@@ -315,17 +319,20 @@ class EditSuggestedTopic extends Component
         if ($this->topic->created_by !== $user->id && ! in_array($user->rol, ['editor_chief', 'moderator', 'administrator'])) {
             session()->flash('error', 'No tienes permisos para eliminar este tema.');
             $this->closeDeleteModal();
+
             return;
         }
 
         $this->topic->delete();
         session()->flash('message', 'Tema eliminado exitosamente.');
-        return redirect()->route('suggested-topics.index');
+
+        return $this->redirect(route('suggested-topics.index'));
     }
 
     public function getIsOwnerProperty()
     {
         $user = Auth::user();
+
         return $this->topic->created_by === $user->id;
     }
 
@@ -333,6 +340,7 @@ class EditSuggestedTopic extends Component
     public function getCanDeleteProperty()
     {
         $user = Auth::user();
+
         return $this->topic->created_by === $user->id || in_array($user->rol, ['editor_chief', 'moderator', 'administrator']);
     }
 

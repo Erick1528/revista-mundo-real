@@ -11,7 +11,9 @@ class CreateSuggestedTopic extends Component
 {
     // Basic information
     public $title;
+
     public $section;
+
     public $description;
 
     // Resources (ContentEditor blocks)
@@ -19,6 +21,7 @@ class CreateSuggestedTopic extends Component
 
     // Assignment options
     public $assignmentType = 'none'; // 'none', 'take_myself', 'assign_to_user'
+
     public $assignedToUserId = null;
 
     // Accordion state
@@ -84,7 +87,7 @@ class CreateSuggestedTopic extends Component
 
     public function toggleSection($section)
     {
-        $this->openSections[$section] = !$this->openSections[$section];
+        $this->openSections[$section] = ! $this->openSections[$section];
     }
 
     public function updatedAssignmentType($value)
@@ -111,7 +114,7 @@ class CreateSuggestedTopic extends Component
     {
         $errors = [];
 
-        if (empty($this->resources) || !is_array($this->resources)) {
+        if (empty($this->resources) || ! is_array($this->resources)) {
             return $errors; // Los recursos son opcionales
         }
 
@@ -120,8 +123,9 @@ class CreateSuggestedTopic extends Component
             $blockNumber = $i + 1;
 
             // Verificar que el bloque tenga tipo
-            if (!isset($block['type'])) {
+            if (! isset($block['type'])) {
                 $errors[] = "Bloque #$blockNumber: Tipo de bloque no válido";
+
                 continue;
             }
 
@@ -131,22 +135,22 @@ class CreateSuggestedTopic extends Component
                 case 'heading':
                 case 'quote':
                     if (empty(trim($block['content'] ?? ''))) {
-                        $errors[] = "Bloque #$blockNumber (" . ucfirst($block['type']) . "): No puede estar vacío";
+                        $errors[] = "Bloque #$blockNumber (".ucfirst($block['type']).'): No puede estar vacío';
                     }
                     break;
 
                 case 'list':
-                    if (empty($block['items']) || !is_array($block['items'])) {
+                    if (empty($block['items']) || ! is_array($block['items'])) {
                         $errors[] = "Bloque #$blockNumber (Lista): Debe tener al menos un elemento";
                     } else {
                         $hasContent = false;
                         foreach ($block['items'] as $item) {
-                            if (!empty(trim($item))) {
+                            if (! empty(trim($item))) {
                                 $hasContent = true;
                                 break;
                             }
                         }
-                        if (!$hasContent) {
+                        if (! $hasContent) {
                             $errors[] = "Bloque #$blockNumber (Lista): Debe tener al menos un elemento con contenido";
                         }
                     }
@@ -165,13 +169,13 @@ class CreateSuggestedTopic extends Component
                     break;
 
                 case 'gallery':
-                    if (empty($block['images']) || !is_array($block['images']) || count($block['images']) === 0) {
+                    if (empty($block['images']) || ! is_array($block['images']) || count($block['images']) === 0) {
                         $errors[] = "Bloque #$blockNumber (Galería): Debe tener al menos una imagen";
                     }
                     break;
 
                 case 'review':
-                    if (empty($block['reviews']) || !is_array($block['reviews'])) {
+                    if (empty($block['reviews']) || ! is_array($block['reviews'])) {
                         $errors[] = "Bloque #$blockNumber (Reseña): Debe tener al menos una reseña";
                     } else {
                         foreach ($block['reviews'] as $idx => $review) {
@@ -199,10 +203,11 @@ class CreateSuggestedTopic extends Component
 
             // Validar bloques de recursos antes de la validación general
             $blockErrors = $this->validateBlocks();
-            if (!empty($blockErrors)) {
+            if (! empty($blockErrors)) {
                 $this->contentErrors = $blockErrors;
                 $this->openSections['resources'] = true;
                 session()->flash('error', 'Hay errores en los recursos. Revisa los bloques vacíos.');
+
                 return;
             }
 
@@ -253,7 +258,7 @@ class CreateSuggestedTopic extends Component
                 $message = 'Tema sugerido creado y tomado exitosamente.';
             } elseif ($this->assignmentType === 'assign_to_user' && $assignedTo) {
                 $assignedUser = User::find($assignedTo);
-                $message = 'Tema sugerido creado y asignado a ' . $assignedUser->name . ' exitosamente.';
+                $message = 'Tema sugerido creado y asignado a '.$assignedUser->name.' exitosamente.';
             }
 
             // Resetear formulario
@@ -261,7 +266,8 @@ class CreateSuggestedTopic extends Component
 
             // Redireccionar al listado con mensaje de éxito
             session()->flash('message', $message);
-            return redirect()->route('suggested-topics.index');
+
+            return $this->redirect(route('suggested-topics.index'));
         } catch (\Illuminate\Validation\ValidationException $e) {
             $this->handleValidationErrors($e);
             throw $e;
@@ -316,7 +322,8 @@ class CreateSuggestedTopic extends Component
         $url = $this->cancelRedirectUrl;
         $this->cancelRedirectUrl = null;
         session()->flash('message', 'Creación de tema sugerido cancelada');
-        return $url ? redirect()->to($url) : redirect()->route('suggested-topics.index');
+
+        return $url ? $this->redirect($url) : $this->redirect(route('suggested-topics.index'));
     }
 
     public function closeCancelModal()
@@ -354,6 +361,7 @@ class CreateSuggestedTopic extends Component
     public function getCanAssignProperty()
     {
         $user = Auth::user();
+
         return in_array($user->rol, ['editor_chief', 'moderator', 'administrator']);
     }
 

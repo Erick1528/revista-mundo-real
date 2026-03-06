@@ -71,22 +71,22 @@ class Hero extends Component
 
     public function cancelArticleTrash()
     {
-        return redirect()->route('dashboard');
+        return $this->redirect(route('dashboard'));
     }
 
     public function cancelAdvertiserTrash()
     {
-        return redirect()->route('advertisers.index');
+        return $this->redirect(route('advertisers.index'));
     }
 
     public function cancelSuggestedTopicTrash()
     {
-        return redirect()->route('suggested-topics.index');
+        return $this->redirect(route('suggested-topics.index'));
     }
 
     public function cancelCoverTrash()
     {
-        return redirect()->route('cover.index');
+        return $this->redirect(route('cover.index'));
     }
 
     public function cancelCreateArticle()
@@ -111,37 +111,37 @@ class Hero extends Component
 
     public function cancelViewTopic()
     {
-        return redirect()->route('suggested-topics.index');
+        return $this->redirect(route('suggested-topics.index'));
     }
 
     public function cancelViewUser()
     {
-        return redirect()->route('users.index');
+        return $this->redirect(route('users.index'));
     }
 
     public function cancelEditUser()
     {
-        return redirect()->route('users.index');
+        return $this->redirect(route('users.index'));
     }
 
     public function cancelUserTrash()
     {
-        return redirect()->route('users.index');
+        return $this->redirect(route('users.index'));
     }
 
     public function cancelCreateUser()
     {
-        return redirect()->route('users.index');
+        return $this->redirect(route('users.index'));
     }
 
     public function cancelCreateAdvertiser()
     {
-        return redirect()->route('advertisers.index');
+        return $this->redirect(route('advertisers.index'));
     }
 
     public function cancelEditAdvertiser()
     {
-        return redirect()->route('advertisers.index');
+        return $this->redirect(route('advertisers.index'));
     }
 
     public function cancelCreateAd()
@@ -156,7 +156,7 @@ class Hero extends Component
 
     public function cancelAdTrash()
     {
-        return redirect()->route('ads.index');
+        return $this->redirect(route('ads.index'));
     }
 
     public function render()

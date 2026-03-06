@@ -630,7 +630,7 @@ class CreateArticle extends Component
             // Redireccionar al dashboard con mensaje de éxito
             session()->flash('message', 'Artículo creado exitosamente.');
 
-            return redirect()->route('dashboard');
+            return $this->redirect(route('dashboard'));
         } catch (\Illuminate\Validation\ValidationException $e) {
             $this->handleValidationErrors($e);
             throw $e;
@@ -770,7 +770,7 @@ class CreateArticle extends Component
         $url = $this->cancelRedirectUrl;
         $this->cancelRedirectUrl = null;
 
-        return $url ? redirect()->to($url) : redirect()->route('dashboard');
+        return $url ? $this->redirect($url) : $this->redirect(route('dashboard'));
     }
 
     public function closeCancelModal()
