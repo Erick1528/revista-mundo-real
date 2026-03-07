@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class Article extends Model
 {
@@ -55,6 +56,46 @@ class Article extends Model
     public function advertiser()
     {
         return $this->belongsTo(Advertiser::class);
+    }
+
+    /**
+     * Genera un slug único para un artículo a partir del título y subtítulo.
+     * La longitud se limita para no exceder la columna slug (500 caracteres).
+     */
+    public static function generateUniqueSlug(string $title, ?string $subtitle = null, ?int $excludeArticleId = null): string
+    {
+        $baseText = trim($title);
+        if ($subtitle !== null && $subtitle !== '') {
+            $baseText = trim($title.' '.$subtitle);
+        }
+
+        $baseSlug = Str::slug($baseText);
+
+        $maxSlugLength = 480;
+        if (mb_strlen($baseSlug) > $maxSlugLength) {
+            $baseSlug = mb_substr($baseSlug, 0, $maxSlugLength);
+        }
+
+        if ($baseSlug === '') {
+            $baseSlug = 'articulo';
+        }
+
+        $slug = $baseSlug;
+        $counter = 1;
+
+        while (true) {
+            $query = static::query()->where('slug', $slug);
+            if ($excludeArticleId !== null) {
+                $query->where('id', '!=', $excludeArticleId);
+            }
+            if (! $query->exists()) {
+                break;
+            }
+            $slug = $baseSlug.'-'.$counter;
+            $counter++;
+        }
+
+        return $slug;
     }
 
     // Helper methods

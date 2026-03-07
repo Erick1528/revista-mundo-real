@@ -593,7 +593,7 @@ class CreateArticle extends Component
             $articleData = [
                 'title' => $this->title,
                 'subtitle' => $this->subtitle,
-                'slug' => generateUniqueSlug($this->title, $this->subtitle),
+                'slug' => Article::generateUniqueSlug($this->title, $this->subtitle),
                 'attribution' => $this->attribution,
                 'summary' => $this->summary,
                 'content' => $this->content,
@@ -719,7 +719,7 @@ class CreateArticle extends Component
         $articleData = [
             'title' => $title,
             'subtitle' => $subtitle,
-            'slug' => generateUniqueSlug($title, $subtitle),
+            'slug' => Article::generateUniqueSlug($title, $subtitle),
             'attribution' => trim((string) $this->attribution) ?: null,
             'summary' => trim((string) $this->summary) ?: null,
             'content' => is_array($this->content) ? $this->content : [],

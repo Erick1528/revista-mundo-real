@@ -530,7 +530,7 @@ class UpdateArticle extends Component
         ];
 
         if ($titleChanged || $subtitleChanged) {
-            $articleData['slug'] = generateUniqueSlug($this->title, $this->subtitle, $this->article->id);
+            $articleData['slug'] = Article::generateUniqueSlug($this->title, $this->subtitle, $this->article->id);
         }
 
         if ($this->image && is_object($this->image)) {
@@ -783,7 +783,7 @@ class UpdateArticle extends Component
 
             // Si el título o subtítulo cambiaron, generar nuevo slug
             if ($titleChanged || $subtitleChanged) {
-                $articleData['slug'] = generateUniqueSlug($this->title, $this->subtitle, $this->article->id);
+                $articleData['slug'] = Article::generateUniqueSlug($this->title, $this->subtitle, $this->article->id);
             }
 
             // Procesar imagen si existe y es nueva
